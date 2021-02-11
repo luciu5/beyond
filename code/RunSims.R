@@ -1,0 +1,447 @@
+try(stopCluster(cl),silent=TRUE)
+library(bayesm)
+library(dplyr)
+library(ggplot2)
+library(scales)
+library(ggthemes)
+library(parallel)
+rm(list=ls())
+library(xtable)
+library(tidyr)
+library(tables)
+#library(grid)
+#library(gridExtra)
+
+
+library(compiler)
+cmpfile("./code/MonteCarlo.R")
+loadcmp("./code/MonteCarlo.Rc")
+
+simpath <- "./data"
+
+#profiler <- profvis(prof_output="barg_calibrate.Rprof",{
+#profiler <- microbenchmark::microbenchmark(times=1,{
+#Rprof(filename = "Rprof.out", append = FALSE, interval = 2, line.profiling=TRUE)
+
+cl <- makeCluster(mc <- getOption("cl.cores", 5))
+## to make this reproducible
+clusterSetRNGStream(cl, 3141519)
+
+clusterEvalQ(cl,{
+             if(require(RevoUtilsMath)) setMKLthreads(1)
+})
+
+samples <- 2.5e1
+ndfirms <- c(2,4,6,8)
+nufirms <- ndfirms
+nestParm <- c(0)
+type=c("1st")
+merger=c("up","down", "vertical")
+bargparm <- seq(.1,.9,.1)
+relleveragePre <-  (1-bargparm)/bargparm
+
+
+
+genMkts <- function(x,y,t,m,n, b, large=TRUE, bargpreset="none"){
+
+
+
+
+
+  thismkt <- try(market(supply.down=t,
+                                                      nfirms.down = y,
+                                                      nfirms.up = x,
+                                                      #outMargin = runif(1,2,9),
+                                                      outMargin=5,
+                                                      nestParm = n,
+                                                      shareOutDown = .15 ,
+                                                      mcshare.up =rep(.25,x*y),
+                                                      mcshare.down = rep(.1,x*y),
+                                                      bargparm = rep(b,x*y),
+                                                      ownerPost = m,
+                                                      M=5,
+                                                      largeMerger = large,
+                                                      bargpreset= bargpreset)
+                 ,silent=TRUE)
+
+
+  if(class(thismkt)=="try-error"){return(list(
+    summary=thismkt,
+    res=thismkt))}
+
+shareOutDown <- thismkt$down$shareOut
+M <- thismkt$down$M
+outMargin <- thismkt$down$outMargin
+#thismkt <- calcSlopes(thismkt,constrain="global");
+
+thissum <-try( summary(thismkt),silent=TRUE)
+if(class(thissum)=="try-error"){return(list(
+  summary=thissum,
+  res=thissum))}
+isMarket=try(HypoMonTest(thismkt),silent=TRUE)
+if(class(isMarket)=="try-error") isMarket=NA
+thissum$idVert <- thissum$idDown
+thissum$idVert[thissum$idUp == 1] <- 1
+
+sumshares.pre <- sum(thissum$shares.pre,na.rm=TRUE)
+sumshares.post <- sum(thissum$shares.post,na.rm=TRUE)
+
+mktrev.pre = sum(thissum$downPricePre*thissum$shares.pre,na.rm=TRUE)
+
+thisres <- with(thissum,data.frame(
+  type =t,
+  down=y,
+  up=x,
+  nestParm=n,
+  merger=m,
+  barg=b,
+  M=M,
+  outMargin=outMargin,
+  mktElast = mktElastPre[1],
+  cv       =  cv[1],
+  cv.part       =  cv.part[1],
+  isMarket=isMarket,
+  mktrev.pre = mktrev.pre,
+  relmarginPre=relmarginPre[1],
+  relmarginPartyPre=relmarginPartyPre[1],
+  upPSPost.part=upPSPost.part[1],
+  downPSPost.part=downPSPost.part[1],
+  upPSPre=sum(upPSPre,na.rm=TRUE),
+  upPSPost=sum(upPSPost,na.rm=TRUE),
+  downPSPre=sum(downPSPre, na.rm=TRUE),
+  downPSPost=sum(downPSPost,na.rm=TRUE),
+  isProfitable.up=sum( upPSPost[idUp %in% 1:2],  - upPSPre[ idUp %in% 1:2],na.rm=TRUE) >0,
+  isProfitable.down=sum( downPSPost[idDown %in% 1:2],  - downPSPre[ idDown %in% 1:2],na.rm=TRUE) >0,
+  isProfitable.vert=sum( downPSPost[idDown==1], upPSPost[idUp==1],  - downPSPre[idDown==1] , - upPSPre[idUp==1],na.rm=TRUE) >0,
+  avgpricepre.up = sum(thissum$upPricePre*shares.pre/sumshares.pre,na.rm=TRUE),
+  avgpricepre.down = sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE),
+  #avgpricedelta = sum(thissum$downPricePost*shares.post,na.rm=TRUE) + outMargin*(1-sumshares.post ) - sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE) - outMargin*(1-sumshares.pre ),
+  avgpricedelta = sum(thissum$downPricePost*shares.post/sumshares.post,na.rm=TRUE) - sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE) ,
+  avguppricedelta.part = unique(upPriceDelta.part),
+  avgdownpricedelta.part = unique(downPriceDelta.part),
+  hhidelta.down = 2 * prod(tapply(shares.pre/sumshares.pre * 100,idDown, sum,na.rm=TRUE)[1:2]),
+  hhipre.down = sum(tapply(shares.pre/sumshares.pre * 100,idDown, sum)^2,na.rm=TRUE),
+  hhidelta.up = 2 * prod(tapply(shares.pre/sumshares.pre * 100,idUp, sum,na.rm=TRUE)[1:2]),
+  hhipre.up = sum(tapply(shares.pre/sumshares.pre * 100,idUp, sum)^2,na.rm=TRUE),
+  hhipost.vert = sum(tapply(shares.pre/sumshares.pre * 100,idVert, sum)^2,na.rm=TRUE),
+  nsDown=unique(nsDown)
+))
+
+thisres$hhidelta <- with(thisres, ifelse(merger == "up", hhidelta.up,
+                                         ifelse(merger == "vertical", hhipost.vert - hhipre.down,hhidelta.down)))
+thisres$hhipre <- with(thisres, ifelse(merger != "up", hhipre.down,hhipre.up))
+thisres$hhipost <- with(thisres, ifelse(merger == "vertical", hhipost.vert, hhipre + hhidelta))
+thisres$hhipost.vert <-thisres$hhidelta.up <- thisres$hhidelta.down <- thisres$hhipre.up <- thisres$hhipre.down <- NULL
+
+return(list(
+  #mkt=thismkt,
+  summary=thissum,
+  res=thisres))}
+
+repMkts <- function(x,y,t,m,n,b,large=TRUE){replicate(samples, genMkts(x,y,t,m,n,b,large),simplify = "list")}
+
+clusterExport(cl,varlist = setdiff(ls(),c("cl")))
+
+
+#
+#
+#
+#
+# ## Monte Carlo simulates changing the numbers of wholesalers and retailers
+# res.firms <- expand.grid(up=nufirms,
+#                          down = ndfirms,
+#                          nestParm=0,
+#                          barg = .5,
+#                          type=type,
+#                          merger=merger)
+#
+# res.firms <- mutate(res.firms, type=as.character(type),
+#                     merger=as.character(merger)
+# ) #%>% filter(!(merger == "down" & type == "1st" & down == 2))
+#
+#
+#
+# mkts.firms <- clusterMap(cl, repMkts,
+#                res.firms$up,res.firms$down, res.firms$type,res.firms$merger,res.firms$nestParm,
+#                res.firms$barg, SIMPLIFY = FALSE
+#                )
+#
+# names(mkts.firms) <- with(res.firms,as.character(interaction(up,down,type,merger)))
+#
+# res.firms <-  lapply(mkts.firms, function(x){ do.call("rbind.data.frame",x["res",])})
+# res.firms <- do.call("rbind.data.frame", res.firms)
+# res.firms <- mutate(res.firms, up=factor(up), down=factor(down),
+#                     relleveragePre = factor(round((1- barg)/barg,1)),barg=factor(barg),
+#                     type= ifelse(type == "1st", "Bertrand","2nd"),type=factor(type, levels=c("Bertrand","2nd")),
+#                     Retailers = down)
+#
+# save(mkts.firms, file=file.path(simpath,"SimsFirms.RData"))
+#
+#
+# rm(mkts.firms)
+# res.firms <- ungroup(res.firms) %>% group_by(merger,up,down,type) %>%
+# mutate(upPSDelta=(upPSPost-upPSPre),
+#        downPSDelta=(downPSPost -downPSPre),
+#        avgpricedelta=avgpricedelta,
+#        relmarginPreCut=cut(relmarginPre,quantile(relmarginPre, probs=seq(0,1,.1), na.rm=TRUE), dig.lab=1, include.lowest = TRUE),
+#   cv001=quantile(cv,.05,na.rm=TRUE),
+#        cv999=quantile(cv,.95,na.rm=TRUE),
+#        cvtrun =ifelse(cv< cv001,cv001,cv))
+# res.firms$cvtrun <- with(res.firms, ifelse(cvtrun>cv999,cv999,cvtrun))
+#
+#
+
+
+
+## Monte Carlos fixing the number of wholesalers and retailers, but changing the bargaining parameters
+
+res.nests <- expand.grid(up=ndfirms,
+                         down =nufirms ,
+                         nestParm=nestParm,
+                         barg = bargparm,
+                         type=type,
+                         merger=merger)
+
+#res.nests <- (filter(res.nests, down==1))
+res.nests <- mutate(res.nests, type=as.character(type),
+                    merger=as.character(merger)) %>%
+  filter(!(merger %in% c("up") & (up ==1))) %>%
+  filter(!(merger %in% c("down") & (down ==1))) %>%
+  filter(!(merger %in% c("vertical") & (down == 1 & up ==1)))
+
+
+mkts.nests <- clusterMap(cl, repMkts,
+                         res.nests$up,res.nests$down, res.nests$type,res.nests$merger,res.nests$nestParm,
+                         res.nests$barg, SIMPLIFY = FALSE,
+                         .scheduling = "dynamic"
+)
+
+names(mkts.nests) <- with(res.nests,as.character(interaction(up,down,type,merger,nestParm)))
+
+
+res.nests <-  lapply(mkts.nests, function(x){
+  x <- x["res",sapply(x["res",],class) != "try-error"]
+  if(length(x)>0) data.table::rbindlist(x)})
+
+
+res.nests <- data.table::rbindlist(res.nests)
+res.nests <- mutate(res.nests, up=factor(up), down=factor(down), nestParm=factor(nestParm),
+                    relleveragePre = (1- barg)/barg,barg=factor(barg),
+                    type= ifelse(type == "1st", "Bertrand","2nd"),type=factor(type, levels=c("Bertrand","2nd")),
+                    Retailers = down)
+
+save(mkts.nests, file=file.path(simpath,"SimsNests.RData"))
+
+
+rm(mkts.nests)
+
+
+res.nests <- ungroup(res.nests) %>% group_by(merger,up,down,type,nestParm) %>%
+  mutate(upPSDelta=(upPSPost- upPSPre),
+         downPSDelta=(downPSPost - downPSPre),
+         cv= -cv,
+         totalDelta= cv + upPSDelta + downPSDelta,
+         avgpricedelta=avgpricedelta,
+         isProfitable=ifelse(merger=="up", isProfitable.up,
+                             ifelse(merger=="down",isProfitable.down,isProfitable.vert)),
+         relmarginPreCut=cut(relmarginPre,quantile(relmarginPre, probs=seq(0,1,.1),na.rm=TRUE), dig.lab=1, include.lowest = TRUE),
+         cv001=quantile(cv,.05,na.rm=TRUE),
+         cv999=quantile(cv,.95,na.rm=TRUE),
+         cvtrun =ifelse(cv< cv001,cv001,cv))
+res.nests$cvtrun <- with(res.nests, ifelse(cvtrun>cv999,cv999,cvtrun))
+
+##eliminate markets where the hhipre is 0, isMarket==0
+sink("isMarketSummary.txt")
+print(table(res.nests$isMarket,useNA="ifany"))
+print(table(res.nests$isMarket,res.nests$type,useNA="ifany"))
+print(table(res.nests$isProfitable,res.nests$merger,useNA="ifany"))
+print(with(res.nests[is.na(res.nests$isMarket) |! res.nests$isMarket,], table(up,down,useNA="ifany")))
+sink()
+
+## correlation between relmargin and relative bargaining by nest
+#group_by(res.nests,nestParm) %>% mutate(barg=as.character(barg),relabarg=(1-as.numeric(barg))/as.numeric(barg)) %>%
+#dplyr::summarize(rho=cor(relmarginPre,as.numeric(relabarg)))
+
+
+
+res.nests <- filter(as.data.frame(res.nests),hhipre>0 #& as.logical(isMarket)
+                    ) %>%
+  filter(#nestParm =="0"  &
+         #barg != "0.1" &
+         isProfitable &
+         avgpricepre.up>0 & up!="1" & down !="1"
+         ) %>%
+  mutate_if(is.factor,droplevels)
+
+res.nest_all <- res.nests
+
+res.nests <- filter(res.nests,nestParm =="0")
+
+res.nests.long <- select(res.nests,type,down,up,merger,barg,nestParm,cv,upPSDelta,downPSDelta,totalDelta,relleveragePre,relmarginPreCut,
+                        avgpricedelta,mktrev.pre) %>%
+  rename(Consumer=cv, `Wholesaler`=upPSDelta, `Retailer`=downPSDelta,`Total`=totalDelta,  Wholesalers=up,
+         Retailers=down) %>%
+  gather(key="Outcome",value="Outcome_value",Consumer,`Wholesaler`,`Retailer`,`Total`) %>%
+  mutate(Outcome=factor(Outcome,levels=c("Consumer","Retailer","Wholesaler","Total")))
+
+res.nest_all.long <- select(res.nest_all,type,down,up,merger,barg,nestParm,cv,upPSDelta,downPSDelta,totalDelta,relleveragePre,relmarginPreCut,
+                            avgpricedelta,mktrev.pre) %>%
+  rename(Consumer=cv, `Wholesaler`=upPSDelta, `Retailer`=downPSDelta,`Total`=totalDelta,  Wholesalers=up,
+         Retailers=down) %>%
+  gather(key="Outcome",value="Outcome_value",Consumer,`Wholesaler`,`Retailer`,`Total`) %>%
+  mutate(Outcome=factor(Outcome,levels=c("Consumer","Retailer","Wholesaler","Total")))
+
+
+
+## Monte Carlo simulations fixing th number of wholesalers at 3, varying the number of retailers
+## as well as the bargaining parameters
+
+## generate bargaining paramters so that the relative bargaining power
+## ranges from favoring wholesales 1/4 to favoring retailers 4/1
+
+
+  #c(1/18, 1/9, 3/9, 6/9, 1, 9/6,3#, 9
+                    # )
+#
+#
+# res.barg                <-expand.grid(up=3,
+#                                       down = ndfirms,
+#                                       barg =  bargparm,#relleveragePre/(relleveragePre + 1),
+#                                       nestParm=0,
+#                                       type= type,
+#                                       merger=merger)
+#
+# res.barg <- mutate(res.barg, type=as.character(type),
+#                     merger=as.character(merger)
+# ) #%>% filter(!(merger == "down" & type == "1st" & down == 2))
+#
+#
+# mkts.barg <- clusterMap(cl, repMkts,
+#                          res.barg$up,res.barg$down, res.barg$type,res.barg$merger, res.barg$nestParm,
+#                          res.barg$barg, SIMPLIFY = FALSE
+# )
+#
+# names(mkts.barg) <- with(res.barg,as.character(interaction(up,down,type,merger)))
+#
+# res.barg <-  lapply(mkts.barg, function(x){ do.call("rbind.data.frame",x["res",])})
+# res.barg <- do.call("rbind.data.frame", res.barg)
+# res.barg <-  ungroup(res.barg) %>% mutate(
+#    up=factor(up), down=factor(down),
+#    relleveragePre = factor(round((1- barg)/barg,1)),
+#    relmarginPreCut=cut(relmarginPre,quantile(relmarginPre, probs=seq(0,1,.1),na.rm=TRUE), dig.lab=1, include.lowest = TRUE),
+#    upPSDelta=(upPSPost-upPSPre),
+#    downPSDelta=(downPSPost -downPSPre),
+#    avgpricedelta=avgpricedelta,
+#   barg=factor(barg),
+#   type= ifelse(type == "1st", "Bertrand","2nd"),type=factor(type, levels=c("Bertrand","2nd")), Retailers = down) %>%
+#   group_by(up,down,barg,type,merger) %>%
+#   mutate(cv001=quantile(cv,.05,na.rm=TRUE),
+#   cv999=quantile(cv,.95,na.rm=TRUE),
+#   cvtrun =ifelse(cv< cv001,cv001,cv))
+# res.barg$cvtrun <- with(res.barg, ifelse(cvtrun>cv999,cv999,cvtrun))
+#
+# res.barg.long <- select(res.barg,type,down,up,merger,barg,cv,upPSDelta,downPSDelta,relleveragePre,relmarginPreCut,
+#                         avgpricedelta,mktrev.pre) %>%
+#                   rename(CV=cv, `Wholesaler PS Change`=upPSDelta, `Retailer PS Change`=downPSDelta, Wholesalers=up,
+#                          Retailers=down) %>%
+#                   gather(key="Outcome",value="Outcome_value",CV,`Wholesaler PS Change`,`Retailer PS Change`)
+#
+# save(mkts.barg, file=file.path(simpath,"SimsBarg.RData"))
+#
+#
+# rm(mkts.barg)
+
+
+#sumtable <- rbind(data.frame(res.barg,set="bargaining"),data.frame(res.firms,set="firm"))
+sumtable <- data.frame(res.nests)
+
+## data for partial analysis
+partdata <- filter(sumtable,merger !="vertical") %>%
+  mutate(
+
+    cv.part=-cv.part,
+    cvdiff= cv - cv.part,
+         upPSDiff= upPSPost -upPSPost.part,
+         downPSDiff= downPSPost - downPSPost.part,
+         totalDiff = cvdiff + downPSDiff + upPSDiff,
+         cvdiff= cvdiff/cv,
+         upPSDiff=upPSDiff/upPSDelta,
+         downPSDiff=downPSDiff/downPSDelta
+         ) %>%
+  select(merger,up, down, barg, nestParm, model=type,mktrev.pre,avguppricedelta.part,avgdownpricedelta.part,cvdiff,
+         upPSDiff,downPSDiff,totalDiff ) %>%
+  gather(part,diff,avguppricedelta.part,avgdownpricedelta.part, cvdiff,
+         upPSDiff,downPSDiff,totalDiff) %>%
+  mutate(part=factor(part),
+         Model=model,
+         up=relevel(up,"2"),
+         Merger=factor(merger,levels=c("down","up"),labels=c("Downstream","Upstream")))
+
+
+
+
+sumtable <- select(sumtable,merger,down, up,barg,nestParm, hhipre, hhipost, hhidelta,  avgpricepre.up, avgpricepre.down, avgpricedelta,
+                    mktElast) %>% distinct()  %>% mutate(
+                                                                                         #mktCnt=length(up),
+                                                                                         up = as.numeric(as.character(up)),
+                                                                                         down=as.numeric(as.character(down)),
+                                                                                         barg=as.numeric(as.character(barg)),
+                                                                                         nestParm=as.numeric(as.character(nestParm)))#%>% select(-up,-down)
+
+
+sumall <- select(sumtable,down, up,barg,nestParm, avgpricepre.up, avgpricepre.down,mktElast) %>%
+  gather(variable, value, factor_key = TRUE) %>% group_by(variable)%>%
+  summarise(Min=quantile(value,probs=0,na.rm=TRUE),
+            p25=quantile(value,probs=.25,na.rm=TRUE),
+            p50=quantile(value,probs=.5,na.rm=TRUE),
+            p75=quantile(value,probs=.75,na.rm=TRUE),
+            Max=quantile(value,probs=1,na.rm=TRUE),
+            Markets=length(value)) %>%
+  mutate(merger="all")
+
+
+sumtable <- select(sumtable , hhipre,hhipost, hhidelta, merger) %>%
+  gather(variable, value, -merger, factor_key = TRUE) %>%
+  group_by(merger,variable) %>%
+  summarise(Min=quantile(value,probs=0,na.rm=TRUE),
+                                                       p25=quantile(value,probs=.25,na.rm=TRUE),
+                                                       p50=quantile(value,probs=.5,na.rm=TRUE),
+                                                       p75=quantile(value,probs=.75,na.rm=TRUE),
+                                                       Max=quantile(value,probs=1,na.rm=TRUE),
+                                                       Markets=length(value)) %>% ungroup()
+
+sumtable <- dplyr::bind_rows(sumall,sumtable)
+sumtable <- gather(sumtable, quant, val, Min:Markets)
+sumtable <- mutate(sumtable, val = ifelse(!variable %in% c("mktElast","barg","nestParm","avgpricepre.up","avgpricepre.down","cv","avgpricedelta", "upPSDelta","downPSDelta", "totalDelta"),round(val),round(val,2)))
+sumtable <- spread(sumtable, quant, val) %>% select(-Max,Max) %>% mutate_all(funs(prettyNum(., digits=2,big.mark=","))) %>%
+            #filter(merger!= "vertical") %>%
+            ungroup(sumtable) %>%
+            mutate(
+              #set=factor(set,levels=c("firm","bargaining"),labels=c("Firm Count","Bargaining Power")),
+              merger=factor(merger, labels=c("All","Upstream","Downstream","Vertical")),
+              variable = factor(variable, levels=c("up","down","barg","nestParm",
+                                                   "avgpricepre.up","avgpricepre.down","mktElast",
+                                                    "hhipre","hhipost","hhidelta"),
+                                     labels = c("\\# Wholesalers","\\# Retailers","Bargaining Power","Nesting Parameter","Avg. Upstream Price ()","Avg. Downstream Price ()","Market Elasticity",
+                                                "Pre-Merger HHI",
+                                                "Post-Merger HHI","Delta HHI"
+                                                )
+                                     ),
+              Markets=factor(Markets)
+                   )
+
+#sumtable <- filter(sumtable, quant == "p50") %>% spread( merger, val) %>% mutate_all(funs(prettyNum(., digits=2,big.mark=",")))
+
+sumout <- tabular(merger*Markets*variable*AllObs(sumtable)~p50+Min+p25+p75+Max, data=sumtable)
+#sumout <- tabular(AllObs(sumtable)~ variable+up+down+vertical, data=sumtable)
+latex(sumout)
+
+
+
+#witholdfreq <- with(res.barg[merger=="vertical",],table(type,nsDown,useNA = "always"))
+#colnames(witholdfreq) <- c("noUp","NoDown","All")
+
+
+try(stopCluster(cl),silent=TRUE)
+save.image(file.path(simpath,"AllSims.RData"))
+
