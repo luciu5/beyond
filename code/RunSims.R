@@ -55,11 +55,11 @@ genMkts <- function(x,y,t,m,n, b, large=TRUE, bargpreset="none"){
                                                       outMargin=5,
                                                       nestParm = n,
                                                       shareOutDown = .15 ,
-                                                      mcshare.up =rep(.25,x*y),
-                                                      mcshare.down = rep(.1,x*y),
+                                                      mcshare.up =rep(.5,x*y),
+                                                      mcshare.down = rep(.15,x*y),
                                                       bargparm = rep(b,x*y),
                                                       ownerPost = m,
-                                                      M=5,
+                                                      M=2,
                                                       largeMerger = large,
                                                       bargpreset= bargpreset)
                  ,silent=TRUE)
@@ -73,6 +73,9 @@ shareOutDown <- thismkt$down$shareOut
 M <- thismkt$down$M
 outMargin <- thismkt$down$outMargin
 #thismkt <- calcSlopes(thismkt,constrain="global");
+
+mcParmUp <- thismkt$up$mcParm
+mcParmDown <- thismkt$down$mcParm
 
 thissum <-try( summary(thismkt),silent=TRUE)
 if(class(thissum)=="try-error"){return(list(
@@ -115,6 +118,10 @@ thisres <- with(thissum,data.frame(
   isProfitable.vert=sum( downPSPost[idDown==1], upPSPost[idUp==1],  - downPSPre[idDown==1] , - upPSPre[idUp==1],na.rm=TRUE) >0,
   avgpricepre.up = sum(thissum$upPricePre*shares.pre/sumshares.pre,na.rm=TRUE),
   avgpricepre.down = sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE),
+  avgPartyCostParmUp.up = weighted.mean(mcParmUp[idUp %in% 1:2],shares.pre[idUp %in% 1:2] ),
+  avgPartyCostParmDown.down = weighted.mean(mcParmDown[idDown %in% 1:2],shares.pre[idDown %in% 1:2]),
+  avgPartyCostParmUp.vert = weighted.mean(mcParmUp[idUp ==1],shares.pre[idUp == 1]),
+  avgPartyCostParmDown.vert = weighted.mean(mcParmDown[idDown ==1],shares.pre[idDown == 1]),
   #avgpricedelta = sum(thissum$downPricePost*shares.post,na.rm=TRUE) + outMargin*(1-sumshares.post ) - sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE) - outMargin*(1-sumshares.pre ),
   avgpricedelta = sum(thissum$downPricePost*shares.post/sumshares.post,na.rm=TRUE) - sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE) ,
   avguppricedelta.part = unique(upPriceDelta.part),
