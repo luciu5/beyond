@@ -1,10 +1,57 @@
 
 ## load classes and methods from bargaining_calibrate
-source("../bargaining_calibrate/MonteCarlo.R")
+source("../bargaining_calibrate/code/MonteCarlo.R")
+
+calcMC <- function (mkt,...)  {
+  UseMethod("calcMC", mkt)
+}
+
+calcMC.default <- function (mkt,...)  {
+
+
+  # return constant marginal cost
+
+  up <- mkt$up$mcParm
+  down <- mkt$down$mcParm
+
+  return(list(up=up,down=down))
+
+
+}
+
+calcMC.linprod <- function (mkt,share)  {
+
+  # return linear marginal costs, product level
+  M <- mkt$down$M
+  up <- mkt$up$mcParm
+  down <- mkt$down$mcParm
+
+  return(list(up=share*M/up,down=share*M/down))
+
+}
+
+calcMC.linfirm <- function (mkt,share)  {
+
+
+  M <- mkt$down$M
+  up <- mkt$up$mcParm
+  down <- mkt$down$mcParm
+  ownerUpPre <- mkt$up$ownerPre
+  ownerDownPre<- mkt$down$ownerPre
+
+
+    return(list(up=as.vector(ownerUpPre%*%share)*M/up,down=as.vector(ownerDownPre%*%share)*M/down))
+
+
+}
+
+
+
 
 ## modify methods and functions to allow for upstream and downstream linear marginal costs
-simMarket.1st <- function(mkt,...){
+simMarket.1st <- function(mkt,cost_type=c("linprod","linfirm","constant"),...){
 
+  cost_type <- match.arg(cost_type)
 
   nprod.down <- mkt$down$nproducts
   nprod.up   <- mkt$up$nproducts
@@ -55,14 +102,19 @@ simMarket.1st <- function(mkt,...){
   ##compute downstream mean valuations (outside good has mc of 0)
   meanvalDown=(1-nestParm[nests])*(log(sharesDown)-log(shareOutDown))-alpha*(downPrices - outMargin) + nestParm[nests]*(log(sharesBetween.down) - log(shareOutDown))
 
+
+  if(cost_type=="constant"){mcParm <- list(up=upMC,down=downMC)}
+  else if (cost_type=="linprod"){{mcParm <- list(up= sharesDown*M/upMC,down=sharesDown*M/downMC)}}
+  else if (cost_type=="linfirm"){{mcParm <- list(up= as.vector(ownerPre.up%*%sharesDown)*M/upMC,down=as.vector(ownerPre.down%*%sharesDown)*M/downMC)}}
+
   ## create a container to store upstream and downstream data
-  mkt<-list(up=c(mkt$up,list(price=upPrices,margin=1-upMC/upPrices, mcParm = sharesDown*M/upMC)),
+  mkt<-list(up=c(mkt$up,list(price=upPrices,margin=1-upMC/upPrices, mcParm = mcParm$up)),
             down=c(mkt$down,list(alpha=alpha,price=downPrices,
-                                 margin=1-(upPrices + downMC)/downPrices, mcParm =sharesDown*M/downMC, meanval=meanvalDown)),
+                                 margin=1-(upPrices + downMC)/downPrices, mcParm =mcParm$down, meanval=meanvalDown)),
             vertical = mkt$vertical
   )
 
-  class(mkt)<-"1st"
+  class(mkt)<-c("1st",cost_type)
   return(mkt)
 
 
@@ -85,8 +137,6 @@ FOC.1st<-function(priceCand,mkt,preMerger=TRUE,  subset=rep(TRUE,length(mkt$down
     alpha <- mkt$down$alpha
     meanval <- mkt$down$meanval[subset]
     bargparm <- mkt$up$bargparm[subset]
-    mcParmUp <- mkt$up$mcParm[subset]
-    mcParmDown <- mkt$down$mcParm[subset]
     nestParm <- mkt$down$nestParm
   }
 
@@ -134,8 +184,10 @@ FOC.1st<-function(priceCand,mkt,preMerger=TRUE,  subset=rep(TRUE,length(mkt$down
   shareCandWithin.down <- shareCandDown/shareCandBetween.down
 
 
-  mcUp <- shareCandDown*M/mcParmUp
-  mcDown <- shareCandDown*M/mcParmDown
+  mc <- calcMC(mkt,share = shareCandDown)
+
+  mc$up <- mc$up[subset]
+  mc$down <- mc$down[subset]
 
   elastDiff.down <- -alpha*tcrossprod(shareCandDown)
   elastSame.down <- -alpha*tcrossprod(shareCandDown*(1 + nestParm[nests] /( 1-nestParm[nests] )*(1/shareCandBetween.down)),shareCandDown)
@@ -151,20 +203,20 @@ FOC.1st<-function(priceCand,mkt,preMerger=TRUE,  subset=rep(TRUE,length(mkt$down
   div <- diversions(shareCandDown, nests, nestParm,nestMat)
 
   if(length(v) > 0 && !preMerger){
-    marginsDownCand <-  marginsDownCand - elast.inv %*% ( (v$ownerPost.down * elast) %*% (priceCandUp-mcUp) )
+    marginsDownCand <-  marginsDownCand - elast.inv %*% ( (v$ownerPost.down * elast) %*% (priceCandUp-mc$up) )
     #upFOC <- (ownerUp * div) %*% (priceCandUp-mcUp) - (v$ownerPostLambda.down * div) %*% marginsDownCand
     #marginsUpCand <- as.vector((v$ownerPostLambda.down * div) %*% marginsDownCand)
     marginsUpCand <- as.vector(solve(ownerUp * div) %*% (v$ownerPostLambda.down * div) %*% marginsDownCand)
 
     #upFOC <- as.vector((ownerUp * div) %*% (priceCandUp-mcUp)) - marginsUpCand
-    upFOC <-  priceCandUp-mcUp - marginsUpCand
+    upFOC <-  priceCandUp-mc$up - marginsUpCand
 }
   else{
 
     #marginsUpCand <-    as.vector(solve(ownerUp * div) %*% ((1-bargparm)/bargparm *(( ownerDown * div) %*% marginsDownCand)))
     marginsUpCand <-    as.vector((( ownerDown * div) %*% marginsDownCand))
 
-    upFOC<- as.vector(bargparm *((ownerUp * div) %*% (priceCandUp-mcUp))  -  (1-bargparm) * marginsUpCand)
+    upFOC<- as.vector(bargparm *((ownerUp * div) %*% (priceCandUp-mc$up))  -  (1-bargparm) * marginsUpCand)
 
 
   }
@@ -172,7 +224,7 @@ FOC.1st<-function(priceCand,mkt,preMerger=TRUE,  subset=rep(TRUE,length(mkt$down
 
   #upFOC <-  priceCandUp-mcUp - marginsUpCand
   #upFOC <-  as.vector(bargparm *((ownerUp * div) %*% (priceCandUp-mcUp))) - (1-bargparm) * marginsUpCand
-  downFOC <- priceCandDown - priceCandUp - mcDown - marginsDownCand
+  downFOC <- priceCandDown - priceCandUp - mc$down - marginsDownCand
 
 
   if(level == "all"){thisFOC= c(downFOC,upFOC)}
@@ -184,66 +236,16 @@ return(thisFOC)
 
 
 
-## Define calcPrices method for 2nd, 1st
-
-calcPrices.default <- function(mkt,preMerger=TRUE,priceStartUp=mkt$up$price,
-                           priceStartDown=mkt$down$price,
-                           subset=rep(TRUE,nrow(mkt$down$ids)),
-                           useEst = FALSE,level = c("all","up","down")){
-
-  level <- match.arg(level)
-  ## compute equlibrium prices given model parameters
-  require(nleqslv,quietly=TRUE)
-
-  ## Find price changes that set FOCs equal to 0
-  if(level == "all"){
-    priceStart <- c(priceStartUp[subset],priceStartDown[subset])
-  }
-  else if (level =="up"){
-    priceStart <- c(priceStartUp[subset])
-}
-  else if (level =="down"){
-    priceStart <- c(priceStartDown[subset])
-  }
-    minResult   <- try(nleqslv(priceStart,FOC,mkt=mkt,preMerger=preMerger, subset=subset, useEst=useEst, level = level)$x,silent=TRUE)
-
-    minResultUp <- rep(NA, length(priceStartUp))
-    minResultDown <- rep(NA, length(priceStartDown))
-
-  if(class(minResult) != "try-error"){
-
-    if(level == "all"){
-      minResultUp[subset] <- minResult[1:length(priceStartUp[subset])]
-      minResultDown[subset] <- minResult[-(1:length(priceStartUp[subset]))]
-    }
-    else if (level == "up"){
-      minResultUp[subset] <- minResult
-      minResultDown[subset] <- mkt$down$price[subset]
-    }
-    else if (level == "down"){
-      minResultUp[subset] <- mkt$up$price[subset]
-      minResultDown[subset] <- minResult
-    }
-
-  }
-  return(list(up=minResultUp,down=minResultDown))
-
-}
-
-
 
 PS.default <- function(mkt,upPrices,downPrices, useEst = FALSE,market=FALSE,ratio=FALSE,party=FALSE){
 
 
   if(useEst){
     stop("not implemented")
-    mcDown = mkt$est$mcDown
-    mcUp = mkt$est$mcUp
+
   }
-  else{
-    mcParmDown = mkt$down$mcParm
-    mcParmUp = mkt$up$mcParm
-  }
+
+
 
 
   nestParm  <- mkt$down$nestParm
@@ -251,9 +253,10 @@ PS.default <- function(mkt,upPrices,downPrices, useEst = FALSE,market=FALSE,rati
 
   quantities<-calcQuantities(mkt,downPrices- mkt$down$outMargin)
 
+  mc <- calcMC(mkt,quantities/mkt$down$M)
 
-  mcDown <- quantities/mcParmDown
-  mcUp <- quantities/mcParmUp
+  mcDown <- mc$down
+  mcUp <- mc$up
 
   psDown <- (downPrices-upPrices - mcDown)*quantities
   psUP <- (upPrices - mcUp) * quantities
@@ -291,7 +294,7 @@ calcPricesHypoMon.default <-
     function(mkt,prodIndex=1:nrow(mkt$down$ids)){
 
 
-    mcParm       <- mkt$down$mcParm[prodIndex]
+
     priceFixed <- mkt$down$price
     mkt$down$M
 
@@ -301,7 +304,7 @@ calcPricesHypoMon.default <-
 
       sharesCand          <- calcShares(mkt,priceFixed -  mkt$down$outMargin)
 
-      mc <- sharesCand*M/mcParm
+      mc <- calcMC(mkt,sharesCand)$down[prodIndex]
 
       surplus             <- (priceCand-mc)*sharesCand[prodIndex]
 
@@ -336,10 +339,7 @@ summary.1st <-function(mkt, market =FALSE, vertical = ifelse(length(mkt$vertical
     mcDown = mkt$est$mcDown
     mcUp = mkt$est$mcUp
   }
-  else{
-    mcParmDown = mkt$down$mcParm
-    mcParmUp = mkt$up$mcParm
-  }
+
 
   M <- mkt$down$M
   nestParm <- mkt$down$nestParm
@@ -369,14 +369,19 @@ summary.1st <-function(mkt, market =FALSE, vertical = ifelse(length(mkt$vertical
     isVup <- mkt$down$ids$up.firm==1
     isVDown <- mkt$down$ids$down.firm==1
 
-    mcUp.ns.up <- shares.post.ns.up*M/mcParmUp
-    mcDown.ns.up <- shares.post.ns.up*M/mcParmDown
+    mc.ns.up <- calcMC(mkt,shares.post.ns.up)
+    mcUp.ns.up <- mc.ns.up$up
+    mcDown.ns.up <- mc.ns.up$down
 
-    mcUp.ns.down <- shares.post.ns.down*M/mcParmUp
-    mcDown.ns.down <- shares.post.ns.down*M/mcParmDown
+    mc.ns.down <- calcMC(mkt,shares.post.ns.down)
+    mcUp.ns.down <- mc.ns.down$up
+    mcDown.ns.down <- mc.ns.down$down
 
-    mcUp <- shares.post*M/mcParmUp
-    mcDown <- shares.post*M/mcParmDown
+
+    mc <- calcMC(mkt,shares.post)
+    mcUp <- mc$up
+    mcDown <- mc$down
+
 
 
     surplus.ns.up <- sum(((post.ns.up$up - mcUp.ns.up )*shares.post.ns.up)[isVup],na.rm=TRUE) +
