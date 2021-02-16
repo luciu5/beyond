@@ -1,0 +1,17 @@
+
+FALSE  TRUE 
+ 3667 14333 
+       
+        Bertrand   2nd
+  FALSE     3667     0
+  TRUE     14333     0
+       
+        down   up vertical
+  FALSE  150 1397      620
+  TRUE  5850 4603     5380
+   down
+up    2   4   6   8
+  2  77  58  52  95
+  4 197 218 309 248
+  6 271 314 250 375
+  8 324 254 375 250

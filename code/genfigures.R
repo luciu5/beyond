@@ -19,7 +19,10 @@ load(file.path(simpath,"AllSims.RData"))
 
 relleverage=sort(unique(res.nests$relleveragePre),decreasing = TRUE)
 
-res.nests.logit <- res.nests.long <- mutate(ungroup(res.nests.long),Merger=factor(merger,levels=c("down","up","vertical"),labels=c("Downstream","Upstream","Vertical")))
+res.nests.logit <- res.nests.long <- mutate(ungroup(res.nests.long),
+                                            Merger=factor(merger,levels=c("down","up","vertical"),labels=c("Downstream","Upstream","Vertical")),
+                                            Cost=factor(mc,labels=c("Constant","Linear","Quadratic","Linear/Quadratic","Quadratic/Linear")))
+
 #res.nests.logit <- filter(as.data.frame(res.nests.logit),nestParm == "0" & Retailers !="1" & Wholesalers !="1") %>%
 #  mutate_if(is.factor,droplevels)
 #partdata <- filter(partdata,up!="1" & down !="1" )%>%
@@ -40,7 +43,7 @@ boxfun <- function(x,probs=c(.05,.25,.5,.75,.95)){
 
 psummary.bw <-  ggplot(res.nests.logit, aes(y=Outcome_value/mktrev.pre*100,
                                            #avgpricedelta/mktrev.pre*100,
-                                           x=Merger,color=type
+                                           x=Merger,color=Cost
                                            )
                                            ) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
@@ -59,7 +62,7 @@ psummary.bw <-  ggplot(res.nests.logit, aes(y=Outcome_value/mktrev.pre*100,
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Retail Game:")+
+  #labs(colour="Retail Game:")+
   labs(title =  "The Distributions  of Merger Outcomes",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",

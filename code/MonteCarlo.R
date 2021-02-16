@@ -30,6 +30,40 @@ calcMC.linprod <- function (mkt,share)  {
 
 }
 
+calcMC.quadprod <- function (mkt,share)  {
+
+  # return linear marginal costs, product level
+  M <- mkt$down$M
+  up <- mkt$up$mcParm
+  down <- mkt$down$mcParm
+
+  return(list(up=(share*M)^2/up,down=(share*M)^2/down))
+
+}
+
+calcMC.quadlin <- function (mkt,share)  {
+
+  # return linear marginal costs, product level
+  M <- mkt$down$M
+  up <- mkt$up$mcParm
+  down <- mkt$down$mcParm
+
+  return(list(up=(share*M)^2/up,down=(share*M)/down))
+
+}
+
+
+calcMC.linquad <- function (mkt,share)  {
+
+  # return linear marginal costs, product level
+  M <- mkt$down$M
+  up <- mkt$up$mcParm
+  down <- mkt$down$mcParm
+
+  return(list(up=(share*M)/up,down=(share*M)^2/down))
+
+}
+
 calcMC.linfirm <- function (mkt,share)  {
 
 
@@ -49,7 +83,7 @@ calcMC.linfirm <- function (mkt,share)  {
 
 
 ## modify methods and functions to allow for upstream and downstream linear marginal costs
-simMarket.1st <- function(mkt,cost_type=c("linprod","linfirm","constant"),...){
+simMarket.1st <- function(mkt,cost_type=c("linprod","quadprod","linquad","quadlin","constant","linfirm"),...){
 
   cost_type <- match.arg(cost_type)
 
@@ -105,6 +139,9 @@ simMarket.1st <- function(mkt,cost_type=c("linprod","linfirm","constant"),...){
 
   if(cost_type=="constant"){mcParm <- list(up=upMC,down=downMC)}
   else if (cost_type=="linprod"){{mcParm <- list(up= sharesDown*M/upMC,down=sharesDown*M/downMC)}}
+  else if (cost_type=="quadprod"){{mcParm <- list(up= (sharesDown*M)^2/upMC,down=(sharesDown*M)^2/downMC)}}
+  else if (cost_type=="linquad"){{mcParm <- list(up= (sharesDown*M)/upMC,down=(sharesDown*M)^2/downMC)}}
+  else if (cost_type=="quadlin"){{mcParm <- list(up= (sharesDown*M)^2/upMC,down=(sharesDown*M)/downMC)}}
   else if (cost_type=="linfirm"){{mcParm <- list(up= as.vector(ownerPre.up%*%sharesDown)*M/upMC,down=as.vector(ownerPre.down%*%sharesDown)*M/downMC)}}
 
   ## create a container to store upstream and downstream data
