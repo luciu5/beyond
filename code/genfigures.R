@@ -62,7 +62,7 @@ psummary.bw <-  ggplot(res.nests.logit, aes(y=Outcome_value/mktrev.pre*100,
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  #labs(colour="Retail Game:")+
+  #labs(colour="Cost:")+
   labs(title =  "The Distributions  of Merger Outcomes",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -92,7 +92,7 @@ pnests.bw <-  ggplot(filter(ungroup(res.nest_all.long),Outcome %in% c("Consumer"
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =  "How Changing the Nesting Parameter Affects Merger Outcomes",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -123,7 +123,7 @@ pfirmsup_all.bw <- ggplot(filter(res.nests.logit,#Wholesalers != "2" &
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =  "How Changing the Number of Wholesalers Affects Surplus\n in a Merger Among Wholesalers",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -157,7 +157,7 @@ pfirmsdown_all.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="down") , a
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =  "How Changing the Number of Retailers Affects Surplus\n in a Merger Among Retailers",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -186,7 +186,7 @@ pfirmsvert_all.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="vertical" 
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =  "How Changing the Number of Wholesalers and Retailers Affects Surplus\n in a Vertical Merger",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -217,7 +217,7 @@ pfirmsvert_wholesalers.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="ve
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =  "How Changing the Number of Wholesalers Affects Surplus\n in a Vertical Merger",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -248,7 +248,7 @@ pfirmsvert_retailers.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="vert
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =  "How Changing the Number of Retailers Affects Surplus\n in a Vertical Merger",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -276,7 +276,7 @@ pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up"), aes(y=Outcome_va
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =  "How Changing Bargaining Strength Affects Surplus\n in a Merger Among Wholesalers",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -318,7 +318,7 @@ pbargdown_all.bw <- ggplot(filter(res.nests.logit,merger =="down"), aes(y=Outcom
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =  "How Changing Bargaining Strength Affects Outcomes\n in a Merger Among Retailers",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -363,7 +363,7 @@ pbargvert_all.bw <- ggplot(filter(res.nests.logit,merger =="vertical" ), aes(y=O
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =  "How Changing Bargaining Strength Affects Surplus\n in a Vertical Merger",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -416,7 +416,7 @@ coord_cartesian(ylim=c(-100,160)) +
   xlab("Change in Surplus")+
   ylab("Outcome Difference (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =   "Difference Between Outcomes in the Full Model vs. the Partial Model",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle="Differences are reported as a percentage of the full model outcomes."
@@ -455,7 +455,7 @@ ppartial_up.bw <- ggplot(filter(partdata,
   xlab("Change in Surplus")+
   ylab("Outcome Difference (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =   "Difference Between Outcomes in Upstream Mergers:\n Full Model vs. the Partial Model",
        #subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        subtitle="Differences are reported as a percentage of the full model outcomes."
@@ -491,7 +491,7 @@ ppartial_down.bw <- ggplot(filter(partdata,
   xlab("Change in Surplus")+
   ylab("Outcome Difference (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =   "Difference Between Outcomes in Downstream Mergers:\nFull Model vs. the Partial Model",
        #subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        subtitle="Differences are reported as a percentage of the full model outcomes."
@@ -521,7 +521,7 @@ ppartial_price.bw <- ggplot(filter(partdata,
   xlab("Change in Surplus")+
   ylab("Outcome Difference (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
-  labs(colour="Retail Game:")+
+  labs(colour="Cost:")+
   labs(title =   "Difference Between Outcomes in the Full Model vs. the Partial Model",
        #subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        subtitle="Differences are reported as a percentage of the full model outcomes."
