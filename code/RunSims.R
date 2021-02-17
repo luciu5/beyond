@@ -23,7 +23,7 @@ simpath <- "./data"
 #profiler <- microbenchmark::microbenchmark(times=1,{
 #Rprof(filename = "Rprof.out", append = FALSE, interval = 2, line.profiling=TRUE)
 
-cl <- makeCluster(mc <- getOption("cl.cores", 5))
+cl <- makeCluster(mc <- getOption("cl.cores", 45))
 ## to make this reproducible
 clusterSetRNGStream(cl, 3141519)
 
@@ -37,7 +37,7 @@ nufirms <- ndfirms
 nestParm <- c(0)
 type=c("1st")
 merger=c("up","down", "vertical")
-bargparm <- seq(.1,.9,.3)
+bargparm <- seq(.1,.9,.1)
 mc=c("constant","linprod", "quadprod","linquad","quadlin"#,"linfirm"
      )
 relleveragePre <-  (1-bargparm)/bargparm
@@ -57,8 +57,8 @@ genMkts <- function(x,y,t,m,n, b,c, large=TRUE, bargpreset="none"){
                                                       outMargin=5,
                                                       nestParm = n,
                                                       shareOutDown = .15 ,
-                                                      mcshare.up =rep(.5,x*y),
-                                                      mcshare.down = rep(.15,x*y),
+                                                      mcshare.up =rep(.25,x*y),
+                                                      mcshare.down = rep(.1,x*y),
                                                       bargparm = rep(b,x*y),
                                                       ownerPost = m,
                                                       M=2,cost_type=as.character(c),
