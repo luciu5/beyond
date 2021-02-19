@@ -38,13 +38,13 @@ nestParm <- c(0)
 type=c("1st")
 merger=c("up","down", "vertical")
 bargparm <- seq(.1,.9,.1)
-mc=c("constant","linprod", "quadprod","linquad","quadlin"#,"linfirm"
+mc=c("constant","linprod", "quadprod","linquad","quadlin","lincons","conslin"#,"linfirm"
      )
 relleveragePre <-  (1-bargparm)/bargparm
 
 
 
-genMkts <- function(x,y,t,m,n, b,c, large=TRUE, bargpreset="none"){
+genMkts <- function(x,y,t,m,n, b,c, large=FALSE, bargpreset="none"){
 
 
 
@@ -61,7 +61,7 @@ genMkts <- function(x,y,t,m,n, b,c, large=TRUE, bargpreset="none"){
                                                       mcshare.down = rep(.1,x*y),
                                                       bargparm = rep(b,x*y),
                                                       ownerPost = m,
-                                                      M=2,cost_type=as.character(c),
+                                                      M=100,cost_type=as.character(c),
                                                       largeMerger = large,
                                                       bargpreset= bargpreset)
                  ,silent=TRUE)
@@ -91,7 +91,7 @@ thissum$idVert[thissum$idUp == 1] <- 1
 sumshares.pre <- sum(thissum$shares.pre,na.rm=TRUE)
 sumshares.post <- sum(thissum$shares.post,na.rm=TRUE)
 
-mktrev.pre = sum(thissum$downPricePre*thissum$shares.pre,na.rm=TRUE)
+mktrev.pre = sum(thissum$downPricePre*thissum$shares.pre,na.rm=TRUE)*M
 
 thisres <- with(thissum,data.frame(
   type =t,

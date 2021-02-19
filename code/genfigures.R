@@ -21,7 +21,8 @@ relleverage=sort(unique(res.nests$relleveragePre),decreasing = TRUE)
 
 res.nests.logit <- res.nests.long <- mutate(ungroup(res.nests.long),
                                             Merger=factor(merger,levels=c("down","up","vertical"),labels=c("Downstream","Upstream","Vertical")),
-                                            Cost=factor(mc,labels=c("Constant","Linear","Quadratic","Linear/Quadratic","Quadratic/Linear")))
+                                            Cost=factor(mc,labels=c("Constant","Linear","Quadratic","Linear/Quadratic","Quadratic/Linear","Linear/Constant","Constant/Linear")),
+                                            Cost=reorder(Cost,-Outcome_value/mktrev.pre,median,na.rm=TRUE))
 
 #res.nests.logit <- filter(as.data.frame(res.nests.logit),nestParm == "0" & Retailers !="1" & Wholesalers !="1") %>%
 #  mutate_if(is.factor,droplevels)
@@ -75,7 +76,7 @@ pnests.bw <-  ggplot(filter(ungroup(res.nest_all.long),Outcome %in% c("Consumer"
                                             labels=c("Upstream","Downstream","Vertical"))),
                      aes(y=Outcome_value/mktrev.pre*100,
                                   #avgpricedelta/mktrev.pre*100,
-                                  x=nestParm,color=type)) +
+                                  x=nestParm,color=Cost)) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   #coord_cartesian(ylim=c(-100,20))+
   #scale_y_continuous(breaks=seq(-100,20,10))+
@@ -105,7 +106,7 @@ pnests.bw <-  ggplot(filter(ungroup(res.nest_all.long),Outcome %in% c("Consumer"
 pfirmsup_all.bw <- ggplot(filter(res.nests.logit,#Wholesalers != "2" &
                                  merger =="up"), aes(y=Outcome_value/mktrev.pre*100,
                                                                   #avgpricedelta/mktrev.pre*100,
-                                                                  x=Wholesalers,color=type)) +
+                                                                  x=Wholesalers,color=Cost)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   coord_cartesian(ylim=c(-45,20))+
@@ -139,7 +140,7 @@ pfirmsup_all.bw <- ggplot(filter(res.nests.logit,#Wholesalers != "2" &
 
 pfirmsdown_all.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="down") , aes(y=Outcome_value/mktrev.pre*100,
                                                  #avgpricedelta/mktrev.pre*100,
-                                                 x=Retailers,color=type)) +
+                                                 x=Retailers,color=Cost)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   coord_cartesian(ylim=c(-45,20))+
@@ -169,7 +170,7 @@ pfirmsdown_all.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="down") , a
 pfirmsvert_all.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="vertical" & Wholesalers != "1")%>%
                               mutate(Retailers=factor(Retailers, labels=paste0("Retailers: ", levels(Retailers)))), aes(y=Outcome_value/mktrev.pre*100,
                                                                      #avgpricedelta/mktrev.pre*100,
-                                                                     x=Wholesalers,color=type)) +
+                                                                     x=Wholesalers,color=Cost)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   coord_cartesian(ylim=c(-25,25))+
@@ -199,7 +200,7 @@ pfirmsvert_wholesalers.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="ve
                                       mutate_if(is.factor,droplevels)%>%
                               mutate(Retailers=factor(Retailers, labels=paste0("Retailers: ", levels(Retailers)))), aes(y=Outcome_value/mktrev.pre*100,
                                                                                                                         #avgpricedelta/mktrev.pre*100,
-                                                                                                                        x=Wholesalers,color=type)) +
+                                                                                                                        x=Wholesalers,color=Cost)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   coord_cartesian(ylim=c(-62.5,60))+
@@ -230,7 +231,7 @@ pfirmsvert_retailers.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="vert
                                       #mutate(Retailers=factor(Retailers, labels=paste0("Retailers: ", levels(Retailers))))
                                   , aes(y=Outcome_value/mktrev.pre*100,
                                                                                                                                 #avgpricedelta/mktrev.pre*100,
-                                                                                                                                x=Retailers,color=type)) +
+                                                                                                                                x=Retailers,color=Cost)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   coord_cartesian(ylim=c(-62.5,60))+
@@ -257,7 +258,7 @@ pfirmsvert_retailers.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="vert
 
 pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up"), aes(y=Outcome_value/mktrev.pre*100,
                                                          #avgpricedelta/mktrev.pre*100,
-                                                         x=factor(barg,labels=MASS::fractions(relleverage)),color=type)) +
+                                                         x=factor(barg,labels=MASS::fractions(relleverage)),color=Cost)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   coord_cartesian(ylim=c(-45,20))+
@@ -299,7 +300,7 @@ pbargup_all.bw <- pbargup_all.bw + geom_segment(
 
 pbargdown_all.bw <- ggplot(filter(res.nests.logit,merger =="down"), aes(y=Outcome_value/mktrev.pre*100,
                                                                   #avgpricedelta/mktrev.pre*100,
-                                                                  x=factor(barg,labels=MASS::fractions(relleverage)),color=type)) +
+                                                                  x=factor(barg,labels=MASS::fractions(relleverage)),color=Cost)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   coord_cartesian(ylim=c(-47.5,22.5))+
@@ -344,7 +345,7 @@ pbargdown_all.bw <- pbargdown_all.bw + geom_segment(
 
 pbargvert_all.bw <- ggplot(filter(res.nests.logit,merger =="vertical" ), aes(y=Outcome_value/mktrev.pre*100,
                                                                       #avgpricedelta/mktrev.pre*100,
-                                                                      x=factor(barg,labels=MASS::fractions(relleverage)),color=type)) +
+                                                                      x=factor(barg,labels=MASS::fractions(relleverage)),color=Cost)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   scale_y_continuous(breaks=seq(-40,35,5))+
@@ -552,9 +553,9 @@ png("output/surplussum.png",width = 10, height = 7, units = "in", res=300)
 print(psummary.bw)
 dev.off()
 
-png("output/CVnestsBW.png",width = 7, height = 10, units = "in", res=300)
-print(pnests.bw)
-dev.off()
+#png("output/CVnestsBW.png",width = 7, height = 10, units = "in", res=300)
+#print(pnests.bw)
+#dev.off()
 
 ## Output results
 
@@ -593,3 +594,4 @@ dev.off()
 png("output/CVbargvertBW.png",width = 10, height = 7, units = "in", res=300)
 print(pbargvert_all.bw)
 dev.off()
+
