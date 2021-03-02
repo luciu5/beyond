@@ -14,6 +14,7 @@ market<-function(nfirms.down=3, # # of downstream firms
                  M=1, # market size
                  nfirms.up=nfirms.down, # # of upstream firms
                  nprods.up=nprods.down, # # of upstream products
+                 nfirms.vert=0, # number of integrated firms pre-merger
                  bargparm=runif(nfirms.down*nfirms.up, .25,.75), # bargaining parameters for each upstream/downstream firm pair
                  bargpreset=c("none","party","rival"), # fix some bargaining parameters
                  # none: do not modify bargparm
@@ -23,7 +24,6 @@ market<-function(nfirms.down=3, # # of downstream firms
                  mcshare.down=runif(nfirms.down*nprods.down), # share of wholesale price
                  ownerPost = c("up","down","vertical"), # simulate an upstream horizontal merger, downstream horizontal merger,
                  # or a vertical merger
-                 nfirms.vert=min(nfirms.up,nfirms.down) - 1, # number of integrated firms pre-merger
                  nests, # specify nesting structure. default is merging parties in same nest
                  nestParm = 0, # single nesting parameter. Default is flat Logit
                  isNestedTogether=TRUE, # specify if parties are in the same nest (TRUE) or different nests (FALSE)
@@ -106,9 +106,11 @@ market<-function(nfirms.down=3, # # of downstream firms
 
   ## when OwnerPost equals "vertical"
   ## simulate a vertical merger between U1 and D1
-  if(ownerPost  %in%  c("vertical") ){
+  if(ownerPost  %in%  c("vertical") || nfirms.vert>0){
     if (nfirms.vert>0) vertFirms <-2:(nfirms.vert + 1)
     else{vertFirms=NULL}
+
+    if(!ownerPost  %in%  c("vertical") && min(nfirms.down,nfirms.up) >2 ) vertFirms <- vertFirms+1
 
     for (v in vertFirms){
 
@@ -116,8 +118,10 @@ market<-function(nfirms.down=3, # # of downstream firms
     }
 
     bargparmPost <- bargparm
-    bargparmPost[1] <- 1 # all bargaining power resides with the retailer in a vertical  merger
-  }
+    if(ownerPost  %in%  c("vertical")){ bargparmPost[1] <- 1 }# all bargaining power resides with the retailer in a vertical  merger
+
+
+    }
 
   sharesDown  <- as.vector(rdirichlet(shareParm)) # generate inside shares
 
@@ -144,46 +148,74 @@ market<-function(nfirms.down=3, # # of downstream firms
   ownerPost.up <- ownerPre.up
 
 
-  if(ownerPost  %in%  c("vertical") ){
+  ## when ownerPost equals either "up" or "both",
+  ## simulate a merger between  upstream firms 1 and 2
+  if(ownerPost  %in%  c("up","both") ){
 
-    #b[owner.up == owner.down] <- 1
+    ownerPost.up[ids$up.firm == 1 , ids$up.firm == 2] <- 1
+    ownerPost.up[ids$up.firm == 2 , ids$up.firm == 1] <- 1
+
+  }
+
+
+  ## when ownerPost equals either "down" or "both",
+  ## simulate a merger between  downstream firms 1 and 2
+  if(ownerPost %in%  c("down","both") ){
+
+    ownerPost.down[ids$down.firm == 1 , ids$down.firm == 2] <- 1
+    ownerPost.down[ids$down.firm == 2 , ids$down.firm == 1] <- 1
+  }
+
+
+
+  ##ownership matrices for vertical mergers
+  if(ownerPost  %in%  c("vertical") || nfirms.vert >0){
+
+
 
     ownerDownMatVerticalPre <- matrix(0,nrow=nprods,ncol=nprods)
-    ownerBargUpVertPre<- ownerPre.up
-
-    #for( v in vertFirms){
-
-
-    #  vertrows <-ids$up.firm  != v  & ids$down.firm  == v
-    #  ownerBargUpVertPre[vertrows, ids$up.firm  == v] <- -(1-bargparm[vertrows])/bargparm[vertrows]
-    #}
-
-
-    ownerBargDownVertPre  <-  ownerPre.down  * (1-bargparm)/bargparm
-    ownerBargDownVertPost  <-  ownerPost.down  * (1-bargparmPost)/bargparmPost
+    #ownerBargUpVertPre<- ownerPre.up
 
     for( v in vertFirms){
 
-      vertrows <-  ids$up.firm == v  & ids$down.firm != v
+      ## integrated retailer bargains with other wholesalers
+      vertrowsDown <-ids$up.firm  != v  & ids$down.firm  == v
 
-      ## only change downstream matrix when firms are playing Bertrand
-      if(supply.down=="1st"){ownerDownMatVerticalPre[ids$down.firm  == v, vertrows] <- 1}
-      #ownerDownMatVertical[owner.down == v, !vertrows] <- 0
+      ownerPre.up[vertrowsDown, ids$up.firm == v] <- -(1-bargparm[vertrowsDown])/bargparm[vertrowsDown]
+      ownerPost.up[vertrowsDown, ids$up.firm == v] <- -(1-bargparmPost[vertrowsDown])/bargparmPost[vertrowsDown]
 
-
-      ownerBargDownVertPre [vertrows, ids$down.firm  == v] <- -1
-
+      #ownerBargUpVertPre[vertrowsDown, ids$up.firm  == v] <- -(1-bargparm[vertrowsDown])/bargparm[vertrowsDown]
     }
 
 
-    ownerBargDownVertPost <- ownerBargDownVertPre
+
+    ownerVertPre.down  <-  ownerPre.down  * (1-bargparm)/bargparm
+    ownerVertPost.down  <-  ownerPost.down  * (1-bargparmPost)/bargparmPost
+
+    for( v in vertFirms){
+
+      vertrowsUp <-  ids$up.firm == v  & ids$down.firm != v
+
+      ## only change downstream matrix when firms are playing Bertrand
+      #if(supply.down=="1st"){ownerDownMatVerticalPre[ids$down.firm  == v, vertrows] <- 1}
+      ownerDownMatVerticalPre[ids$down.firm  == v, vertrowsUp] <- 1
+      #ownerDownMatVertical[owner.down == v, !vertrows] <- 0
+
+
+      ownerVertPre.down [vertrowsUp, ids$down.firm  == v] <- -1
+      ownerVertPost.down[vertrowsUp, ids$down.firm  == v] <- -1
+    }
+
+
+
     ownerDownMatVerticalPost <- ownerDownMatVerticalPre
     #ownerBargUpVertPost <-  ownerBargUpVertPre
 
-    vertrowsDown <- ids$up.firm != 1  & ids$down.firm == 1
+    if(ownerPost  %in%  c("vertical")){
+      vertrowsDown <- ids$up.firm != 1  & ids$down.firm == 1
 
     ## integrated retailer bargains with other wholesalers
-    #ownerBargUpVertPost[vertrowsDown, ids$up.firm == 1] <- -(1-bargparmPost[vertrowsDown])/bargparmPost[vertrowsDown]
+    ownerPost.up[vertrowsDown, ids$up.firm == 1] <- -(1-bargparmPost[vertrowsDown])/bargparmPost[vertrowsDown]
 
     vertrowsUp <-  ids$up.firm == 1  & ids$down.firm != 1
 
@@ -193,7 +225,10 @@ market<-function(nfirms.down=3, # # of downstream firms
     #ownerPostLambda.down <- ownerPost.down * (1-bargparmPost)/bargparmPost
 
     ## integrated wholesaler bargains with other retailers
-    ownerBargDownVertPost[vertrowsUp, ids$down.firm == 1] <- -1
+    ownerVertPost.down[vertrowsUp, ids$down.firm == 1] <- -1
+
+    vertical$vertFirms <- c(1,vertFirms)
+    }
 
     #vertical$bargparmPre <- bargparm
     vertical$bargparmPost <- bargparmPost
@@ -207,10 +242,10 @@ market<-function(nfirms.down=3, # # of downstream firms
     #vertical$ownerBargUpPre <- ownerBargUpVertPre
     #vertical$ownerBargUpPost <- ownerBargUpVertPost
 
-    vertical$ownerBargDownPre <- ownerBargDownVertPre
-    vertical$ownerBargDownPost <- ownerBargDownVertPost
+    vertical$ownerVertPre.down <- ownerVertPre.down
+    vertical$ownerVertPost.down <- ownerVertPost.down
 
-    vertical$vertFirms <- c(1,vertFirms)
+
 
     #vertical$ownerPostNoSupply.up <-  ids$up.firm == 1  & ids$down.firm != 1
     #vertical$ownerPostNoSupply.down <- ids$up.firm == 1  & ids$down.firm == 1
@@ -223,22 +258,6 @@ market<-function(nfirms.down=3, # # of downstream firms
 
 
 
-  ## when ownerPost equals either "up" or "both",
-  ## simulate a merger between  upstream firms 1 and 2
-  if(ownerPost  %in%  c("up","both") ){
-
-    ownerPost.up[ids$up.firm == 1 , ids$up.firm == 2] <- 1
-    ownerPost.up[ids$up.firm == 2 , ids$up.firm == 1] <- 1
-  }
-
-
-  ## when ownerPost equals either "down" or "both",
-  ## simulate a merger between  downstream firms 1 and 2
-  if(ownerPost %in%  c("down","both") ){
-
-    ownerPost.down[ids$down.firm == 1 , ids$down.firm == 2] <- 1
-    ownerPost.down[ids$down.firm == 2 , ids$down.firm == 1] <- 1
-  }
 
   ## create a container to store upstream and downstream data
   mkt<-list(up=list(nfirms=nfirms.up,nproducts=nprods.up,ownerPre=ownerPre.up, ownerPost=ownerPost.up,
@@ -411,18 +430,21 @@ simMarket.1st <- function(mkt,cost_type=c("constant","linprod","quadprod","linqu
     div <- diversions(sharesDown,nests, nestParm,nestMat)
 
 
-    if(length(v) > 0){
+    if(length(v) > 0 ){
 
-      upMarginPart <-  solve(ownerPre.up * div) %*% (v$ownerBargDownPre * div)
+      upMarginPart <-  solve(ownerPre.up * div) %*% (v$ownerVertPre.down * div)
       upMargin <- solve(diag(nprods) + (upMarginPart %*% elast.inv %*%  (v$ownerDownMatPre * elast.down)))
       upMargin <- drop(upMargin %*% upMarginPart %*% downMargin)
 
+      #print(upMargin)
       downMargin <-  drop(downMargin  - elast.inv %*% ( (v$ownerDownMatPre * elast.down) %*% upMargin ))
     }
 
     else{
       upMargin <-   drop(solve(ownerPre.up * div) %*% ( (1-bargparm)/bargparm *((ownerPre.down * div) %*% downMargin)))
-}
+
+       #print(upMargin)
+      }
 
   upMC <- mcshare.up*upMargin
   upPrices <- upMargin + upMC
@@ -496,12 +518,14 @@ FOC.1st<-function(priceCand,mkt,preMerger=TRUE,  subset=rep(TRUE,length(mkt$down
 
     if(length(v)>0){
 
-     ownerBargUp <- v$ownerBargUpPre[subset,subset]
-     ownerBargDown <- v$ownerBargDownPre[subset,subset]
+
+     ownerBargDown <- v$ownerVertPre.down[subset,subset]
      ownerDownMat <- v$ownerDownMatPre[subset,subset]
 
     }
   }
+
+
   else{
 
     ownerUp <- mkt$up$ownerPost[subset,subset]
@@ -509,9 +533,10 @@ FOC.1st<-function(priceCand,mkt,preMerger=TRUE,  subset=rep(TRUE,length(mkt$down
 
     if(length(v)>0){
 
-      ownerBargUp <- v$ownerBargUpPost[subset,subset]
-      ownerBargDown <- v$ownerBargDownPost[subset,subset]
+
+      ownerBargDown <- v$ownerVertPre.down[subset,subset]
       ownerDownMat <- v$ownerDownMatPost[subset,subset]
+      bargparm <-  mkt$vertical$bargparmPost[subset]
 
     }
   }
@@ -557,11 +582,19 @@ FOC.1st<-function(priceCand,mkt,preMerger=TRUE,  subset=rep(TRUE,length(mkt$down
 
 
 
-  if(length(v) > 0){
-    marginsDownCand <-  marginsDownCand - elast.inv %*% ( (ownerDownMat * elast) %*% (priceCandUp-mc$up) )
+  if(length(v) > 0) {
+
+    upMarginPart <-  solve(ownerUp * div) %*% (ownerBargDown * div)
+    marginsUpCand <- solve(diag(nprods) + (upMarginPart %*% elast.inv %*%  (ownerDownMat * elast)))
+    marginsUpCand <- drop(marginsUpCand %*% upMarginPart %*% marginsDownCand)
+
+
+    marginsDownCand <-  drop(marginsDownCand - elast.inv %*% ( (ownerDownMat * elast) %*% marginsUpCand ))
     #upFOC <- (ownerUp * div) %*% (priceCandUp-mcUp) - (v$ownerPostLambda.down * div) %*% marginsDownCand
     #marginsUpCand <- as.vector((v$ownerPostLambda.down * div) %*% marginsDownCand)
-    marginsUpCand <- as.vector(solve(ownerUp  * div) %*% (ownerBargDown * div) %*% marginsDownCand)
+    #marginsUpCand <- as.vector(solve(ownerUp  * div) %*% (ownerBargDown * div) %*% marginsDownCand)
+
+
 
     #upFOC <- as.vector((ownerUp * div) %*% (priceCandUp-mcUp)) - marginsUpCand
     upFOC <-  priceCandUp-mc$up - marginsUpCand
@@ -571,7 +604,7 @@ FOC.1st<-function(priceCand,mkt,preMerger=TRUE,  subset=rep(TRUE,length(mkt$down
     #marginsUpCand <-    as.vector(solve(ownerUp * div) %*% ((1-bargparm)/bargparm *(( ownerDown * div) %*% marginsDownCand)))
     marginsUpCand <-    as.vector((( ownerDown * div) %*% marginsDownCand))
 
-    upFOC<- as.vector(bargparm *((ownerUp * div) %*% (priceCandUp-mc$up))  -  (1-bargparm) * marginsUpCand)
+    upFOC<- as.vector(((ownerUp * div) %*% (priceCandUp-mc$up))  -  (1-bargparm)/bargparm * marginsUpCand)
 
 
   }
@@ -687,7 +720,7 @@ calcPricesHypoMon.default <-
 
 
 
-summary.1st <-function(mkt, market =FALSE, vertical = ifelse(length(mkt$vertical)>0, TRUE,FALSE), useEst = FALSE,level = c("all","up","down")){
+summary.1st <-function(mkt, market =FALSE, vertical = ifelse(length(mkt$vertical)>0 & mkt$vertical$vertFirms==1, TRUE,FALSE), useEst = FALSE,level = c("all","up","down")){
 
 
   if(useEst){
