@@ -32,9 +32,9 @@ clusterEvalQ(cl,{
 })
 
 samples <- 1e2
-ndfirms <- c(2,4,6,8)
-nvfirms <- nufirms <- ndfirms
-nvfirms <- 0#c(0,nvfirms)
+ndfirms <- 2:5
+nufirms <- ndfirms
+nvfirms <- 0:4
 nestParm <- c(0)
 type=c("1st")
 merger=c("up","down", "vertical")
@@ -150,53 +150,6 @@ repMkts <- function(x,y,z,t,m,n,b,c,large=TRUE){replicate(samples, genMkts(x,y,z
 clusterExport(cl,varlist = setdiff(ls(),c("cl")))
 
 
-#
-#
-#
-#
-# ## Monte Carlo simulates changing the numbers of wholesalers and retailers
-# res.firms <- expand.grid(up=nufirms,
-#                          down = ndfirms,
-#                          nestParm=0,
-#                          barg = .5,
-#                          type=type,
-#                          merger=merger)
-#
-# res.firms <- mutate(res.firms, type=as.character(type),
-#                     merger=as.character(merger)
-# ) #%>% filter(!(merger == "down" & type == "1st" & down == 2))
-#
-#
-#
-# mkts.firms <- clusterMap(cl, repMkts,
-#                res.firms$up,res.firms$down, res.firms$type,res.firms$merger,res.firms$nestParm,
-#                res.firms$barg, SIMPLIFY = FALSE
-#                )
-#
-# names(mkts.firms) <- with(res.firms,as.character(interaction(up,down,type,merger)))
-#
-# res.firms <-  lapply(mkts.firms, function(x){ do.call("rbind.data.frame",x["res",])})
-# res.firms <- do.call("rbind.data.frame", res.firms)
-# res.firms <- mutate(res.firms, up=factor(up), down=factor(down),
-#                     relleveragePre = factor(round((1- barg)/barg,1)),barg=factor(barg),
-#                     type= ifelse(type == "1st", "Bertrand","2nd"),type=factor(type, levels=c("Bertrand","2nd")),
-#                     Retailers = down)
-#
-# save(mkts.firms, file=file.path(simpath,"SimsFirms.RData"))
-#
-#
-# rm(mkts.firms)
-# res.firms <- ungroup(res.firms) %>% group_by(merger,up,down,type) %>%
-# mutate(upPSDelta=(upPSPost-upPSPre),
-#        downPSDelta=(downPSPost -downPSPre),
-#        avgpricedelta=avgpricedelta,
-#        relmarginPreCut=cut(relmarginPre,quantile(relmarginPre, probs=seq(0,1,.1), na.rm=TRUE), dig.lab=1, include.lowest = TRUE),
-#   cv001=quantile(cv,.05,na.rm=TRUE),
-#        cv999=quantile(cv,.95,na.rm=TRUE),
-#        cvtrun =ifelse(cv< cv001,cv001,cv))
-# res.firms$cvtrun <- with(res.firms, ifelse(cvtrun>cv999,cv999,cvtrun))
-#
-#
 
 
 
@@ -303,66 +256,6 @@ res.nest_all.long <- select(res.nest_all,type,down,up,merger,barg,nestParm,mc,cv
 
 
 
-## Monte Carlo simulations fixing th number of wholesalers at 3, varying the number of retailers
-## as well as the bargaining parameters
-
-## generate bargaining paramters so that the relative bargaining power
-## ranges from favoring wholesales 1/4 to favoring retailers 4/1
-
-
-  #c(1/18, 1/9, 3/9, 6/9, 1, 9/6,3#, 9
-                    # )
-#
-#
-# res.barg                <-expand.grid(up=3,
-#                                       down = ndfirms,
-#                                       barg =  bargparm,#relleveragePre/(relleveragePre + 1),
-#                                       nestParm=0,
-#                                       type= type,
-#                                       merger=merger)
-#
-# res.barg <- mutate(res.barg, type=as.character(type),
-#                     merger=as.character(merger)
-# ) #%>% filter(!(merger == "down" & type == "1st" & down == 2))
-#
-#
-# mkts.barg <- clusterMap(cl, repMkts,
-#                          res.barg$up,res.barg$down, res.barg$type,res.barg$merger, res.barg$nestParm,
-#                          res.barg$barg, SIMPLIFY = FALSE
-# )
-#
-# names(mkts.barg) <- with(res.barg,as.character(interaction(up,down,type,merger)))
-#
-# res.barg <-  lapply(mkts.barg, function(x){ do.call("rbind.data.frame",x["res",])})
-# res.barg <- do.call("rbind.data.frame", res.barg)
-# res.barg <-  ungroup(res.barg) %>% mutate(
-#    up=factor(up), down=factor(down),
-#    relleveragePre = factor(round((1- barg)/barg,1)),
-#    relmarginPreCut=cut(relmarginPre,quantile(relmarginPre, probs=seq(0,1,.1),na.rm=TRUE), dig.lab=1, include.lowest = TRUE),
-#    upPSDelta=(upPSPost-upPSPre),
-#    downPSDelta=(downPSPost -downPSPre),
-#    avgpricedelta=avgpricedelta,
-#   barg=factor(barg),
-#   type= ifelse(type == "1st", "Bertrand","2nd"),type=factor(type, levels=c("Bertrand","2nd")), Retailers = down) %>%
-#   group_by(up,down,barg,type,merger) %>%
-#   mutate(cv001=quantile(cv,.05,na.rm=TRUE),
-#   cv999=quantile(cv,.95,na.rm=TRUE),
-#   cvtrun =ifelse(cv< cv001,cv001,cv))
-# res.barg$cvtrun <- with(res.barg, ifelse(cvtrun>cv999,cv999,cvtrun))
-#
-# res.barg.long <- select(res.barg,type,down,up,merger,barg,cv,upPSDelta,downPSDelta,relleveragePre,relmarginPreCut,
-#                         avgpricedelta,mktrev.pre) %>%
-#                   rename(CV=cv, `Wholesaler PS Change`=upPSDelta, `Retailer PS Change`=downPSDelta, Wholesalers=up,
-#                          Retailers=down) %>%
-#                   gather(key="Outcome",value="Outcome_value",CV,`Wholesaler PS Change`,`Retailer PS Change`)
-#
-# save(mkts.barg, file=file.path(simpath,"SimsBarg.RData"))
-#
-#
-# rm(mkts.barg)
-
-
-#sumtable <- rbind(data.frame(res.barg,set="bargaining"),data.frame(res.firms,set="firm"))
 sumtable <- data.frame(res.nests)
 
 

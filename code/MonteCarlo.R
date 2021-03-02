@@ -50,7 +50,8 @@ market<-function(nfirms.down=3, # # of downstream firms
   require(bayesm,quietly=TRUE)
 
   ids <- expand.grid(up.firm=as.character(1:nfirms.up),up.products=as.character(1:nprods.up),
-                     down.firm=as.character(1:nfirms.down),down.products=as.character(1:nprods.down))
+                     down.firm=as.character(1:nfirms.down),down.products=as.character(1:nprods.down),
+                     stringsAsFactors = TRUE)
 
   nprods <- nrow(ids)
 
@@ -107,10 +108,11 @@ market<-function(nfirms.down=3, # # of downstream firms
   ## when OwnerPost equals "vertical"
   ## simulate a vertical merger between U1 and D1
   if(ownerPost  %in%  c("vertical") || nfirms.vert>0){
+
     if (nfirms.vert>0) vertFirms <-2:(nfirms.vert + 1)
     else{vertFirms=NULL}
 
-    if(!ownerPost  %in%  c("vertical") && min(nfirms.down,nfirms.up) >2 ) vertFirms <- vertFirms+1
+    #if(!(ownerPost  %in%  c("vertical")) && min(nfirms.down,nfirms.up) >2 ) vertFirms <- vertFirms+1
 
     for (v in vertFirms){
 
@@ -119,7 +121,8 @@ market<-function(nfirms.down=3, # # of downstream firms
 
     bargparmPost <- bargparm
     if(ownerPost  %in%  c("vertical")){ bargparmPost[1] <- 1 }# all bargaining power resides with the retailer in a vertical  merger
-
+    else if(ownerPost  %in%  c("up")){ bargparmPost[ids$up.firm == 1 & ids$down.firm == 2] <- 1 } # post-merger, u1 gives d1 a discount
+    else if(ownerPost  %in%  c("down")){ bargparmPost[ids$up.firm == 2 & ids$down.firm == 1] <- 1 } #post-merger u2 gives d1 a discount
 
     }
 
@@ -227,8 +230,44 @@ market<-function(nfirms.down=3, # # of downstream firms
     ## integrated wholesaler bargains with other retailers
     ownerVertPost.down[vertrowsUp, ids$down.firm == 1] <- -1
 
-    vertical$vertFirms <- c(1,vertFirms)
+    vertFirms <- c(1,vertFirms)
     }
+    else if(ownerPost  %in%  c("up")){
+
+    vertrowsDown <- ids$up.firm != 1  & ids$down.firm == 2
+
+    ## integrated retailer bargains with other wholesalers
+    ownerPost.up[vertrowsDown, ids$up.firm == 1] <- -(1-bargparmPost[vertrowsDown])/bargparmPost[vertrowsDown]
+
+    vertrowsUp <-  ids$up.firm == 1  & ids$down.firm != 2
+
+    #ownerPostVertical.down <- matrix(0,nrow= nrow(ids),ncol = nrow(ids))
+    ownerDownMatVerticalPost[ids$down.firm ==2, vertrowsUp] <- 1
+
+    #ownerPostLambda.down <- ownerPost.down * (1-bargparmPost)/bargparmPost
+
+    ## integrated wholesaler bargains with other retailers
+    ownerVertPost.down[vertrowsUp, ids$down.firm == 2] <- -1
+    }
+
+    else if(ownerPost  %in%  c("down")){
+
+    vertrowsDown <- ids$up.firm != 2  & ids$down.firm == 1
+
+    ## integrated retailer bargains with other wholesalers
+    ownerPost.up[vertrowsDown, ids$up.firm == 2] <- -(1-bargparmPost[vertrowsDown])/bargparmPost[vertrowsDown]
+
+    vertrowsUp <-  ids$up.firm == 2  & ids$down.firm != 1
+
+    #ownerPostVertical.down <- matrix(0,nrow= nrow(ids),ncol = nrow(ids))
+    ownerDownMatVerticalPost[ids$down.firm ==1, vertrowsUp] <- 1
+
+    #ownerPostLambda.down <- ownerPost.down * (1-bargparmPost)/bargparmPost
+
+    ## integrated wholesaler bargains with other retailers
+    ownerVertPost.down[vertrowsUp, ids$down.firm == 1] <- -1
+    }
+
 
     #vertical$bargparmPre <- bargparm
     vertical$bargparmPost <- bargparmPost
@@ -251,7 +290,7 @@ market<-function(nfirms.down=3, # # of downstream firms
     #vertical$ownerPostNoSupply.down <- ids$up.firm == 1  & ids$down.firm == 1
 
 
-
+    vertical$vertFirms <- vertFirms
 
 
   }
@@ -534,7 +573,7 @@ FOC.1st<-function(priceCand,mkt,preMerger=TRUE,  subset=rep(TRUE,length(mkt$down
     if(length(v)>0){
 
 
-      ownerBargDown <- v$ownerVertPre.down[subset,subset]
+      ownerBargDown <- v$ownerVertPost.down[subset,subset]
       ownerDownMat <- v$ownerDownMatPost[subset,subset]
       bargparm <-  mkt$vertical$bargparmPost[subset]
 
@@ -743,7 +782,12 @@ summary.1st <-function(mkt, market =FALSE, vertical = ifelse(length(mkt$vertical
 
   thislevel <- ifelse(!isTRUE(all.equal(mkt$up$ownerPre,mkt$up$ownerPost)),"up","down")
 
-  res <- data.frame(isVert=mkt$down$ids$down.firm %in% vertFirms & mkt$down$ids$down.firm==mkt$down$ids$up.firm,
+  isVert <- mkt$down$ids$down.firm %in% vertFirms &
+    as.numeric(mkt$down$ids$down.firm)==as.numeric(mkt$down$ids$up.firm)
+
+
+
+  res <- data.frame(isVert=isVert,
                     upPricePre= pre$up,
                     upPricePost=post$up,
                     downPricePre= pre$down,
