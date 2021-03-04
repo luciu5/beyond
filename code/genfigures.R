@@ -378,7 +378,7 @@ pfirmsvert_retailers.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="vert
 
 pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up"), aes(y=Outcome_value/mktrev.pre*100,
                                                          #avgpricedelta/mktrev.pre*100,
-                                                         x=factor(barg,labels=MASS::fractions(relleverage)),color=Cost)) +
+                                                         x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   coord_cartesian(ylim=c(-45,20))+
@@ -397,7 +397,7 @@ pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up"), aes(y=Outcome_va
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Cost:")+
+  labs(colour="# Integrated Firms:")+
   labs(title =  "How Changing Bargaining Strength Affects Surplus\n in a Merger Among Wholesalers",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -420,7 +420,7 @@ pbargup_all.bw <- pbargup_all.bw + geom_segment(
 
 pbargdown_all.bw <- ggplot(filter(res.nests.logit,merger =="down"), aes(y=Outcome_value/mktrev.pre*100,
                                                                   #avgpricedelta/mktrev.pre*100,
-                                                                  x=factor(barg,labels=MASS::fractions(relleverage)),color=Cost)) +
+                                                                  x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   coord_cartesian(ylim=c(-47.5,22.5))+
@@ -439,7 +439,7 @@ pbargdown_all.bw <- ggplot(filter(res.nests.logit,merger =="down"), aes(y=Outcom
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Cost:")+
+  labs(colour="# Integrated Firms:")+
   labs(title =  "How Changing Bargaining Strength Affects Outcomes\n in a Merger Among Retailers",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -465,7 +465,7 @@ pbargdown_all.bw <- pbargdown_all.bw + geom_segment(
 
 pbargvert_all.bw <- ggplot(filter(res.nests.logit,merger =="vertical" ), aes(y=Outcome_value/mktrev.pre*100,
                                                                       #avgpricedelta/mktrev.pre*100,
-                                                                      x=factor(barg,labels=MASS::fractions(relleverage)),color=Cost)) +
+                                                                      x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   scale_y_continuous(breaks=seq(-40,35,5))+
@@ -484,7 +484,7 @@ pbargvert_all.bw <- ggplot(filter(res.nests.logit,merger =="vertical" ), aes(y=O
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Cost:")+
+  labs(colour="# Integrated Firms:")+
   labs(title =  "How Changing Bargaining Strength Affects Surplus\n in a Vertical Merger",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",

@@ -31,7 +31,7 @@ clusterEvalQ(cl,{
              if(require(RevoUtilsMath)) setMKLthreads(1)
 })
 
-samples <- 1e2
+samples <- 1e3
 ndfirms <- 2:5
 nufirms <- ndfirms
 nvfirms <- 0:4
@@ -270,7 +270,7 @@ sumtable <- select(sumtable,merger,down, up,vert,barg,nestParm, hhipre, hhipost,
 
 
 sumall <- select(sumtable,down, up,vert,barg,nestParm, avgpricepre.up, avgpricepre.down,mktElast) %>%
-  gather(variable, value, factor_key = TRUE) %>% group_by(variable)%>%
+  gather(variable, value, factor_key = TRUE) %>% mutate(value=as.numeric(value)) %>% group_by(variable)%>%
   summarise(Min=quantile(value,probs=0,na.rm=TRUE),
             p25=quantile(value,probs=.25,na.rm=TRUE),
             p50=quantile(value,probs=.5,na.rm=TRUE),
@@ -293,22 +293,20 @@ sumtable <- select(sumtable , hhipre,hhipost, hhidelta, merger) %>%
 sumtable <- dplyr::bind_rows(sumall,sumtable)
 sumtable <- gather(sumtable, quant, val, Min:Markets)
 sumtable <- mutate(sumtable, val = ifelse(!variable %in% c("mktElast","barg","nestParm","avgpricepre.up","avgpricepre.down","cv","avgpricedelta", "upPSDelta","downPSDelta", "totalDelta"),round(val),round(val,2)))
-sumtable <- spread(sumtable, quant, val) %>% select(-Max,Max) %>% mutate_all(funs(prettyNum(., digits=2,big.mark=","))) %>%
-            #filter(merger!= "vertical") %>%
-            ungroup(sumtable) %>%
-            mutate(
-              #set=factor(set,levels=c("firm","bargaining"),labels=c("Firm Count","Bargaining Power")),
-              merger=factor(merger, labels=c("All","Upstream","Downstream","Vertical")),
-              variable = factor(variable, levels=c("up","down","barg","nestParm",
-                                                   "avgpricepre.up","avgpricepre.down","mktElast",
-                                                    "hhipre","hhipost","hhidelta"),
-                                     labels = c("\\# Wholesalers","\\# Retailers","Bargaining Power","Nesting Parameter","Avg. Upstream Price ()","Avg. Downstream Price ()","Market Elasticity",
-                                                "Pre-Merger HHI",
-                                                "Post-Merger HHI","Delta HHI"
-                                                )
-                                     ),
-              Markets=factor(Markets)
-                   )
+sumtable <- spread(sumtable, quant, val) %>% select(-Max,Max) %>%
+  mutate(
+    #set=factor(set,levels=c("firm","bargaining"),labels=c("Firm Count","Bargaining Power")),
+    merger=factor(merger, labels=c("All","Upstream","Downstream","Vertical")),
+    variable = factor(variable, levels=c("up","down","barg","nestParm",
+                                         "avgpricepre.up","avgpricepre.down","mktElast",
+                                         "hhipre","hhipost","hhidelta"),
+                      labels = c("\\# Wholesalers","\\# Retailers","Bargaining Power","Nesting Parameter","Avg. Upstream Price ()","Avg. Downstream Price ()","Market Elasticity",
+                                 "Pre-Merger HHI",
+                                 "Post-Merger HHI","Delta HHI"
+                      )
+    )) %>%
+  mutate(across(.fns=prettyNum, digits=2,big.mark=","))
+
 
 #sumtable <- filter(sumtable, quant == "p50") %>% spread( merger, val) %>% mutate_all(funs(prettyNum(., digits=2,big.mark=",")))
 
