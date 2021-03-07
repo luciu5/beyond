@@ -22,7 +22,7 @@ market<-function(nfirms.down=3, # # of downstream firms
                  # rival: set non-parties to 0.5, allow others to vary
                  mcshare.up=runif(nfirms.up*nprods.up), # share of upstream costs
                  mcshare.down=runif(nfirms.down*nprods.down), # share of wholesale price
-                 ownerPost = c("up","down","vertical"), # simulate an upstream horizontal merger, downstream horizontal merger,
+                 ownerPost = c("up","down","vertical","both"), # simulate an upstream horizontal merger, downstream horizontal merger,
                  # or a vertical merger
                  nests, # specify nesting structure. default is merging parties in same nest
                  nestParm = 0, # single nesting parameter. Default is flat Logit
@@ -110,6 +110,7 @@ market<-function(nfirms.down=3, # # of downstream firms
   if(ownerPost  %in%  c("vertical") || nfirms.vert>0){
 
     if (nfirms.vert>0) vertFirms <-2:(nfirms.vert + 1)
+    else if (ownerPost=="both") vertFirms <- c(1,vertFirms)
     else{vertFirms=NULL}
 
     #if(!(ownerPost  %in%  c("vertical")) && min(nfirms.down,nfirms.up) >2 ) vertFirms <- vertFirms+1
@@ -121,8 +122,8 @@ market<-function(nfirms.down=3, # # of downstream firms
 
     bargparmPost <- bargparm
     if(ownerPost  %in%  c("vertical")){ bargparmPost[1] <- 1 }# all bargaining power resides with the retailer in a vertical  merger
-    else if(ownerPost  %in%  c("up")){ bargparmPost[ids$up.firm == 1 & ids$down.firm == 2] <- 1 } # post-merger, u1 gives d1 a discount
-    else if(ownerPost  %in%  c("down")){ bargparmPost[ids$up.firm == 2 & ids$down.firm == 1] <- 1 } #post-merger u2 gives d1 a discount
+    if(ownerPost  %in%  c("up","both")){ bargparmPost[ids$up.firm == 1 & ids$down.firm == 2] <- 1 } # post-merger, u1 gives d1 a discount
+    if(ownerPost  %in%  c("down","both")){ bargparmPost[ids$up.firm == 2 & ids$down.firm == 1] <- 1 } #post-merger u2 gives d1 a discount
 
     }
 
@@ -172,7 +173,7 @@ market<-function(nfirms.down=3, # # of downstream firms
 
 
   ##ownership matrices for vertical mergers
-  if(ownerPost  %in%  c("vertical") || nfirms.vert >0){
+  if(ownerPost  %in%  c("vertical","both") || nfirms.vert >0){
 
 
 
@@ -232,7 +233,7 @@ market<-function(nfirms.down=3, # # of downstream firms
 
     vertFirms <- c(1,vertFirms)
     }
-    else if(ownerPost  %in%  c("up")){
+    if(ownerPost  %in%  c("up","both")){
 
     vertrowsDown <- ids$up.firm != 1  & ids$down.firm == 2
 
@@ -250,7 +251,7 @@ market<-function(nfirms.down=3, # # of downstream firms
     ownerVertPost.down[vertrowsUp, ids$down.firm == 2] <- -1
     }
 
-    else if(ownerPost  %in%  c("down")){
+    if(ownerPost  %in%  c("down","both")){
 
     vertrowsDown <- ids$up.firm != 2  & ids$down.firm == 1
 

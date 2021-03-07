@@ -37,7 +37,7 @@ nufirms <- ndfirms
 nvfirms <- 0:4
 nestParm <- c(0)
 type=c("1st")
-merger=c("up","down", "vertical")
+merger=c("up","down", "vertical","both")
 bargparm <- seq(.1,.9,.1)
 mc=c("constant"#,"linprod", "quadprod","linquad","quadlin","lincons","conslin"#,"linfirm"
      )
@@ -296,7 +296,7 @@ sumtable <- mutate(sumtable, val = ifelse(!variable %in% c("mktElast","barg","ne
 sumtable <- spread(sumtable, quant, val) %>% select(-Max,Max) %>%
   mutate(
     #set=factor(set,levels=c("firm","bargaining"),labels=c("Firm Count","Bargaining Power")),
-    merger=factor(merger, labels=c("All","Upstream","Downstream","Vertical")),
+    merger=factor(merger, labels=c("All","Both","Upstream","Downstream","Vertical")),
     variable = factor(variable, levels=c("up","down","barg","nestParm",
                                          "avgpricepre.up","avgpricepre.down","mktElast",
                                          "hhipre","hhipost","hhidelta"),
