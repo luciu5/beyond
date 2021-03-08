@@ -531,182 +531,58 @@ pbargvert_all.bw <- pbargvert_all.bw + geom_segment(
             data=data.frame(x=6.5,y=-20,Outcome=factor( "Wholesaler" ,levels=unique(res.nests.logit$Outcome))),size=3)
 
 
-##Create plots for partial  analysis
 
 
-#filter(partdata,part %in% c("cvdiff","totalDiff")) %>% group_by(Merger,Model,part) %>%
-#dplyr::summarise(p25=quantile(diff,.25),p50=quantile(diff,.5),p75=quantile(diff,.75),p05=quantile(diff,.05),p95=quantile(diff,.95))
 
-ppartial.bw <- ggplot(filter(partdata,
-
-                             part %in% c("cvdiff" ,
-                                         #"downPSDiff",
-                                         "totalDiff"
-                                         #, "upPSDiff"
-                                         )) %>%
-                        mutate(part=factor(part,levels=c("cvdiff" ,#"downPSDiff", "upPSDiff",
-                                                         "totalDiff" ),
-                                           labels=c("Consumer",#"Retailer","Wholesaler",
-                                                    "Total"))
-                               ),
-  #aes(y=diff/mktrev.pre*100,x=part,color=Model)) +
-  aes(y=diff*100,x=part,color=Model)) +
+pbargboth_all.bw <- ggplot(filter(res.nests.logit,merger =="both" ), aes(y=Outcome_value/mktrev.pre*100,
+                                                                             #avgpricedelta/mktrev.pre*100,
+                                                                             x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
-coord_cartesian(ylim=c(-100,160)) +
-  scale_y_continuous(breaks=seq(-100, 160, by=20) ) +
-  #scale_y_continuous(breaks=seq(-5, 30, by=5) ) +
+  scale_y_continuous(breaks=seq(-40,35,5))+
+  coord_cartesian(ylim=c(-40,35))+
   geom_hline(yintercept=0,linetype="dashed",color="black")+
-  theme_bw()+scale_colour_tableau('Color Blind')+ theme(
-    #axis.text.x = element_text(angle = 0, hjust = 1),
-    legend.position="bottom")+
+  geom_vline(xintercept=5,linetype="dotted")+
+  theme_bw()+scale_colour_tableau('Color Blind')+ theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
   #theme_tufte(ticks=FALSE) +
   #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
-  facet_grid(~Merger,scales="free",labeller = "label_both")+
-  xlab("Change in Surplus")+
-  ylab("Outcome Difference (%)")+
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(~Outcome,scales="free",labeller = "label_context")+
+  xlab("Relative Bargaining Power")+
+  ylab("Outcome (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
-  labs(colour="Cost:")+
-  labs(title =   "Difference Between Outcomes in the Full Model vs. the Partial Model",
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="# Integrated Firms:")+
+  labs(title =  "How Changing Bargaining Strength Affects Surplus\n in a Vertical Merger",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
-       #subtitle="Differences are reported as a percentage of the full model outcomes."
-       #subtitle = "1st and 2nd score auctions yields radically different predictions for vertical mergers,\n but similar predictions for upstream mergers",
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
 
 
-
-ppartial_up.bw <- ggplot(filter(partdata,
-                             Merger=="Upstream" &
-                             part %in% c("cvdiff" ,
-                                         #"downPSDiff",
-                                         "totalDiff"
-                                         #, "upPSDiff"
-                             )) %>%
-                        mutate(part=factor(part,levels=c("cvdiff" ,#"downPSDiff", "upPSDiff",
-                                                         "totalDiff" ),
-                                           labels=c("Consumer",#"Retailer","Wholesaler",
-                                                    "Total"))
-                        ),
-                      #aes(y=diff/mktrev.pre*100,x=part,color=Model)) +
-                      aes(y=diff*100,x=part,color=Model)) +
-  #geom_boxplot(outlier.alpha = 0.1) +
-  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
-  coord_cartesian(ylim=c(-100,160)) +
-  scale_y_continuous(breaks=seq(-100, 160, by=20) ) +
-  #scale_y_continuous(breaks=seq(-5, 30, by=5) ) +
-  geom_hline(yintercept=0,linetype="dashed",color="black")+
-  theme_bw()+scale_colour_tableau('Color Blind')+ theme(
-    #axis.text.x = element_text(angle = 0, hjust = 1),
-    legend.position="bottom")+
-  #theme_tufte(ticks=FALSE) +
-  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
-  #facet_grid(~Merger,scales="free",labeller = "label_both")+
-  xlab("Change in Surplus")+
-  ylab("Outcome Difference (%)")+
-  #ylab("Share-Weighted Downstream Price Change")+
-  labs(colour="Cost:")+
-  labs(title =   "Difference Between Outcomes in Upstream Mergers:\n Full Model vs. the Partial Model",
-       #subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
-       subtitle="Differences are reported as a percentage of the full model outcomes."
-       #subtitle = "1st and 2nd score auctions yields radically different predictions for vertical mergers,\n but similar predictions for upstream mergers",
-       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
-  )
-ppartial_down.bw <- ggplot(filter(partdata,
-                                  Merger=="Downstream" &
-                                    part %in% c("cvdiff" ,
-                                                #"downPSDiff",
-                                                "totalDiff"
-                                                #, "upPSDiff"
-                                    )) %>%
-                             mutate(part=factor(part,levels=c("cvdiff" ,#"downPSDiff", "upPSDiff",
-                                                              "totalDiff" ),
-                                                labels=c("Consumer",#"Retailer","Wholesaler",
-                                                         "Total"))
-                             ),
-                           #aes(y=diff/mktrev.pre*100,x=part,color=Model)) +
-                           aes(y=diff*100,x=part,color=Model)) +
-  #geom_boxplot(outlier.alpha = 0.1) +
-  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
-  coord_cartesian(ylim=c(-100,160)) +
-  scale_y_continuous(breaks=seq(-100, 160, by=20) ) +
-  #scale_y_continuous(breaks=seq(-5, 30, by=5) ) +
-  geom_hline(yintercept=0,linetype="dashed",color="black")+
-  theme_bw()+scale_colour_tableau('Color Blind')+ theme(
-    #axis.text.x = element_text(angle = 0, hjust = 1),
-    legend.position="bottom")+
-  #theme_tufte(ticks=FALSE) +
-  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
-  #facet_grid(~Merger,scales="free",labeller = "label_both")+
-  xlab("Change in Surplus")+
-  ylab("Outcome Difference (%)")+
-  #ylab("Share-Weighted Downstream Price Change")+
-  labs(colour="Cost:")+
-  labs(title =   "Difference Between Outcomes in Downstream Mergers:\nFull Model vs. the Partial Model",
-       #subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
-       subtitle="Differences are reported as a percentage of the full model outcomes."
-       #subtitle = "1st and 2nd score auctions yields radically different predictions for vertical mergers,\n but similar predictions for upstream mergers",
-       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
-  )
-
-ppartial_price.bw <- ggplot(filter(partdata,
-
-                             part %in% c("avgdownpricedelta.part","avguppricedelta.part"
-                             )) %>%
-                        mutate(part=factor(part ,levels=c("avgdownpricedelta.part","avguppricedelta.part"),
-                                           labels=c("Retail Price","Wholesale Price"))
-                        ),
-                      aes(y=diff*100,x=part,color=Model)) +
-  #geom_boxplot(outlier.alpha = 0.1) +
-  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
-  #coord_cartesian(ylim=c(-100,160)) +
-  #scale_y_continuous(breaks=seq(-100, 160, by=20) ) +
-  geom_hline(yintercept=0,linetype="dashed",color="black")+
-  theme_bw()+scale_colour_tableau('Color Blind')+ theme(
-    #axis.text.x = element_text(angle = 0, hjust = 1),
-    legend.position="bottom")+
-  #theme_tufte(ticks=FALSE) +
-  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
-  facet_grid(~Merger,scales="free",labeller = "label_both")+
-  xlab("Change in Surplus")+
-  ylab("Outcome Difference (%)")+
-  #ylab("Share-Weighted Downstream Price Change")+
-  labs(colour="Cost:")+
-  labs(title =   "Difference Between Outcomes in the Full Model vs. the Partial Model",
-       #subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
-       subtitle="Differences are reported as a percentage of the full model outcomes."
-       #subtitle = "1st and 2nd score auctions yields radically different predictions for vertical mergers,\n but similar predictions for upstream mergers",
-       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
-  )
+pbargboth_all.bw <- pbargboth_all.bw + geom_segment(
+  aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
+  data=data.frame(x=5.1,y=-25,xend=7.5
+                  ,Outcome=factor( "Wholesaler" ,levels=unique(res.nests.logit$Outcome)))) +
+  geom_text(aes(x=x,y=y),color="black",label="equal power",angle=90,
+            data=data.frame(x=4.7,y=15,Outcome=factor( "Wholesaler" ,levels=unique(res.nests.logit$Outcome))),size=3.5) +
+  geom_text(aes(x=x,y=y),color="black",label="more\n retailer\n power",
+            data=data.frame(x=6.5,y=-20,Outcome=factor( "Wholesaler" ,levels=unique(res.nests.logit$Outcome))),size=3)
 
 
-
-
-
-## res =300 is 300 dots per inch. this should be high resolution!
-png("output/ppartial.png",width = 10, height = 7, units = "in", res=300)
-print(ppartial.bw)
-dev.off()
-png("output/ppartial_up.png",width = 6, height = 6, units = "in", res=300)
-print(ppartial_up.bw)
-dev.off()
-png("output/ppartial_down.png",width = 6, height = 6, units = "in", res=300)
-print(ppartial_down.bw)
-dev.off()
-             #
-# png("output/ppartial_firm.png",width = 10, height = 7, units = "in", res=300)
-# print(ppartial_firm.bw)
-# dev.off()
+## Output results
 
 png("output/surplussum.png",width = 10, height = 7, units = "in", res=300)
 print(psummary.bw)
 dev.off()
 
-#png("output/CVnestsBW.png",width = 7, height = 10, units = "in", res=300)
-#print(pnests.bw)
-#dev.off()
 
-## Output results
+png("output/CVvertincumbBW.png",width = 10, height = 7, units = "in", res=300)
+print(pvertincumb.bw)
+dev.off()
 
 png("output/CVfirmsupBW.png",width = 10, height = 7, units = "in", res=300)
 print(pfirmsup_all.bw)
@@ -726,13 +602,7 @@ dev.off()
 png("output/CVfirmsvert_wholeBW.png",width = 10, height = 7, units = "in", res=300)
 print(pfirmsvert_wholesalers.bw)
 dev.off()
-#
-# pdf("output/CVnestsBW.pdf",width = 10, height = 7)
-# print(pnestsup.bw)
-# print(pnestsdown.bw)
-# print(pnestsvert.bw)
-# dev.off()
-#
+
 
 png("output/CVbargupBW.png",width = 10, height = 7, units = "in", res=300)
 print(pbargup_all.bw)
@@ -742,5 +612,8 @@ print(pbargdown_all.bw)
 dev.off()
 png("output/CVbargvertBW.png",width = 10, height = 7, units = "in", res=300)
 print(pbargvert_all.bw)
+dev.off()
+png("output/CVbargbothBW.png",width = 10, height = 7, units = "in", res=300)
+print(pbargboth_all.bw)
 dev.off()
 

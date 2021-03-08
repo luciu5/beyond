@@ -1,0 +1,109 @@
+\documentclass[12pt]{article}
+\usepackage{chicago}    % bibliography package
+\usepackage{graphicx}   % insert PostScript figures
+\usepackage{setspace}   % controls line spacing
+\usepackage{amsmath,amsthm,amssymb,amstext} % controls equation entry and symbols
+\usepackage{rotating}   % rotates graphics
+\usepackage{soul}       % controls hyphenation
+\usepackage{epsfig}     % helps with including graphics
+\usepackage{pdflscape}  % helps with displaying rotated graphics in PDFs
+\usepackage{lscape}     % helps with rotating pages
+\usepackage{setspace}   % controls line spacing
+\usepackage{caption}    % controls  captions
+\usepackage{adjustbox}  % shrink tables
+\usepackage[margin=1in]{geometry} % margins
+\usepackage{hyperref}   % displays URLs        
+
+\parskip     2.0mm       % space between paragraphs
+
+\alph{footnote}         % make title footnotes alpha-numeric
+
+\captionsetup[figure]{labelsep=space,labelfont=bf} % remove colon from figure name
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Title Page
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{The Effects of Vertical Arrangements\\in a Vertical Supply Chain\footnote{The analysis and conclusions set forth are those of the authors and do not indicate concurrence by other members of the Board research staff, by the Federal Reserve Board of Governors, by the Federal Trade Commission, or by its Commissioners.  }}
+
+\newcommand*\samethanks[1][\value{footnote}]{\footnotemark[#1]}
+\author{Gloria Sheu\footnote{Board of Governors of the Federal Reserve System, gloria.sheu@frb.gov. } \\ Federal Reserve Board \and  Charles Taragin\footnote{Federal Trade Commission, ctaragin@ftc.gov}  \\  Federal Trade Commission}
+
+\date{March 2021}
+
+\begin{document}
+
+\pagenumbering{roman}       % Roman numerals from abstract to text
+\maketitle                  % print title information
+\thispagestyle{empty}       % no page number on THIS page
+
+
+\begin{abstract}
+\noindent
+\end{abstract}
+
+\bigbreak Keywords: bargaining models; merger simulation; vertical markets
+
+JEL classification: L13; L40; L41; L42
+
+\newpage                    % start a new page
+\pagenumbering{arabic}      % Arabic page numbers from now on
+\doublespacing
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Body of Paper
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+
+
+\begin{sidewaysfigure}
+\centering
+\includegraphics[scale=0.85]{../output/surplussum.png}
+\caption{The figure displays box and whisker plots summarizing the extent to which mergers affect consumer, retailer, wholesaler, and total surplus. Each blue box depicts the effects assuming that retailers are playing a Bertrand pricing game. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median. }
+\label{fig:surplus}
+\end{sidewaysfigure}
+
+
+\begin{sidewaysfigure}
+\centering
+\includegraphics[scale=0.85]{../output/CVvertincumbBW.png}
+\caption{The figure displays box and whisker plots summarizing the extent to which mergers affect consumer, retailer, wholesaler, and total surplus as the number of vertically integrrated firms present in a market change. Each blue box depicts the effects assuming that retailers are playing a Bertrand pricing game. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median. }
+\label{fig:CVvertincumbBW}
+\end{sidewaysfigure}
+
+
+\begin{sidewaysfigure}
+\centering
+\includegraphics[scale=0.9]{../output/CVbargupBW.png}
+\caption{The figure displays box and whisker plots summarizing the extent to which mergers among an integrated and unintegrated wholesaler affect consumer, retailer, wholesaler, and total surplus as the bargaining power of wholesalers relative to retailers changes. Each blue box (on the left in each pair) depicts the effects assuming that retailers are playing a Bertrand pricing game, and each orange box (on the right in each pair) depicts the effects assuming that retailers are playing a second score auction game. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median.}
+\label{fig:CVbargupBW}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}
+\centering
+\includegraphics[scale=0.9]{../output/CVbargdownBW.png}
+\caption{The figure displays box and whisker plots summarizing the extent to which mergers among an integrated and unintegrated retailer affect consumer, retailer, wholesaler, and total surplus as the bargaining power of wholesalers relative to retailers changes. Each blue box (on the left in each pair) depicts the effects assuming that retailers are playing a Bertrand pricing game, and each orange box (on the right in each pair) depicts the effects assuming that retailers are playing a second score auction game. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median.}
+\label{fig:CVbargdownBW}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}
+\centering
+\includegraphics[scale=0.9]{../output/CVbargvertBW.png}
+\caption{The figure displays box and whisker plots summarizing the extent to which mergers among an unintegrated wholesaler and unintegrated retailer affect consumer, retailer, wholesaler, and total surplus as the bargaining power of wholesalers relative to retailers changes. Each blue box (on the left in each pair) depicts the effects assuming that retailers are playing a Bertrand pricing game, and each orange box (on the right in each pair) depicts the effects assuming that retailers are playing a second score auction game. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median.}
+\label{fig:CVbargvertBW}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}
+\centering
+\includegraphics[scale=0.9]{../output/CVbargbothBW.png}
+\caption{The figure displays box and whisker plots summarizing the extent to which mergers among two integrated wholesalers and retailers affect consumer, retailer, wholesaler, and total surplus as the bargaining power of wholesalers relative to retailers changes. Each blue box (on the left in each pair) depicts the effects assuming that retailers are playing a Bertrand pricing game, and each orange box (on the right in each pair) depicts the effects assuming that retailers are playing a second score auction game. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median.}
+\label{fig:CVbargbothBW}
+\end{sidewaysfigure}
+
+\end{document}
