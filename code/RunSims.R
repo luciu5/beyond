@@ -31,7 +31,7 @@ clusterEvalQ(cl,{
              if(require(RevoUtilsMath)) setMKLthreads(1)
 })
 
-samples <- 1e3
+samples <- 1e2
 ndfirms <- 2:5
 nufirms <- ndfirms
 nvfirms <- 0:4
@@ -39,7 +39,7 @@ nestParm <- c(0)
 type=c("1st")
 merger=c("up","down", "vertical","both")
 bargparm <- seq(.1,.9,.1)
-mc=c("constant"#,"linprod", "quadprod","linquad","quadlin","lincons","conslin"#,"linfirm"
+mc=c("constant","linprod"#, "quadprod","linquad","quadlin","lincons","conslin"#,"linfirm"
      )
 relleveragePre <-  (1-bargparm)/bargparm
 
