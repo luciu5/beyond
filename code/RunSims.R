@@ -31,7 +31,7 @@ clusterEvalQ(cl,{
              if(require(RevoUtilsMath)) setMKLthreads(1)
 })
 
-samples <- 1e2
+samples <- 1e3
 ndfirms <- 2:5
 nufirms <- ndfirms
 nvfirms <- 0:4

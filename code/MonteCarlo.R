@@ -59,7 +59,7 @@ market<-function(nfirms.down=3, # # of downstream firms
                                 up = ids$up.firm == 1 | ids$up.firm == 2,
                                 down = ids$down.firm == 1 | ids$down.firm == 2,
                                 vertical= ids$up.firm == 1 | ids$down.firm == 1,
-                                both=ids$up.firm == 1 | ids$up.firm == 2)
+                                both=ids$up.firm == 1 | ids$up.firm == 2 | ids$up.firm == 2 | ids$up.firm == 1)
 
   if(ownerPost=="vertical"){isJoint <-  ids$up.firm == 1 & ids$down.firm == 1}
 
