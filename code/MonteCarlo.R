@@ -61,6 +61,20 @@ market<-function(nfirms.down=3, # # of downstream firms
                                 vertical= ids$up.firm == 1 | ids$down.firm == 1,
                                 both=ids$up.firm == 1 | ids$up.firm == 2 | ids$up.firm == 2 | ids$up.firm == 1)
 
+
+
+
+  if(nfirms.vert>0){
+    isJoint <-  isParty <- switch(ownerPost,
+                                 up = isParty | ids$down.firm==2,
+                                 down = isParty | ids$up.firm==2,
+                                 vertical= isParty,
+                                 both=isParty)
+
+
+  }
+
+
   if(ownerPost=="vertical"){isJoint <-  ids$up.firm == 1 & ids$down.firm == 1}
 
   ## create nesting structures for different merger types

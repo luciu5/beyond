@@ -73,10 +73,14 @@ genMkts <- function(x,y,z,t,m,n, b,c, large=TRUE, bargpreset="none"){
     summary=thismkt,
     res=thismkt))}
 
+isVert <- length(thismkt$vertical)>0
+
+
 shareOutDown <- thismkt$down$shareOut
 M <- thismkt$down$M
 outMargin <- thismkt$down$outMargin
 #thismkt <- calcSlopes(thismkt,constrain="global");
+
 
 mcParmUp <- thismkt$up$mcParm
 mcParmDown <- thismkt$down$mcParm
@@ -116,15 +120,20 @@ thisres <- with(thissum,data.frame(
   upPSPost=sum(upPSPost,na.rm=TRUE),
   downPSPre=sum(downPSPre, na.rm=TRUE),
   downPSPost=sum(downPSPost,na.rm=TRUE),
-  isProfitable.up=sum( upPSPost[idUp %in% 1:2],  - upPSPre[ idUp %in% 1:2],na.rm=TRUE) >0,
-  isProfitable.down=sum( downPSPost[idDown %in% 1:2],  - downPSPre[ idDown %in% 1:2],na.rm=TRUE) >0,
+  isProfitable.up=ifelse(isVert,
+                         sum( upPSPost[idUp %in% 1:2], downPSPost[idDown %in% 2],  - upPSPre[ idUp %in% 1:2],- downPSPre[idDown %in% 2],na.rm=TRUE) >0,
+                         sum( upPSPost[idUp %in% 1:2],  - upPSPre[ idUp %in% 1:2],na.rm=TRUE) >0),
+  isProfitable.down=ifelse(isVert,
+                           sum( upPSPost[idUp %in% 2],downPSPost[idDown %in% 1:2],  -upPSPre[idUp %in% 2],- downPSPre[ idDown %in% 1:2],na.rm=TRUE) >0,
+                           sum( downPSPost[idDown %in% 1:2],  - downPSPre[ idDown %in% 1:2],na.rm=TRUE) >0),
   isProfitable.vert=sum( downPSPost[idDown==1], upPSPost[idUp==1],  - downPSPre[idDown==1] , - upPSPre[idUp==1],na.rm=TRUE) >0,
+  isProfitable.both=sum( downPSPost[idDown%in% 1:2], upPSPost[idUp%in% 1:2],  - downPSPre[idDown%in% 1:2] , - upPSPre[idUp%in% 1:2],na.rm=TRUE) >0,
   avgpricepre.up = sum(thissum$upPricePre*shares.pre/sumshares.pre,na.rm=TRUE),
   avgpricepre.down = sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE),
-  avgPartyCostParmUp.up = weighted.mean(mcParmUp[idUp %in% 1:2],shares.pre[idUp %in% 1:2] ),
-  avgPartyCostParmDown.down = weighted.mean(mcParmDown[idDown %in% 1:2],shares.pre[idDown %in% 1:2]),
-  avgPartyCostParmUp.vert = weighted.mean(mcParmUp[idUp ==1],shares.pre[idUp == 1]),
-  avgPartyCostParmDown.vert = weighted.mean(mcParmDown[idDown ==1],shares.pre[idDown == 1]),
+  # avgPartyCostParmUp.up = weighted.mean(mcParmUp[idUp %in% 1:2],shares.pre[idUp %in% 1:2] ),
+  # avgPartyCostParmDown.down = weighted.mean(mcParmDown[idDown %in% 1:2],shares.pre[idDown %in% 1:2]),
+  # avgPartyCostParmUp.vert = weighted.mean(mcParmUp[idUp ==1],shares.pre[idUp == 1]),
+  # avgPartyCostParmDown.vert = weighted.mean(mcParmDown[idDown ==1],shares.pre[idDown == 1]),
   #avgpricedelta = sum(thissum$downPricePost*shares.post,na.rm=TRUE) + outMargin*(1-sumshares.post ) - sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE) - outMargin*(1-sumshares.pre ),
   avgpricedelta = sum(thissum$downPricePost*shares.post/sumshares.post,na.rm=TRUE) - sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE) ,
   hhidelta.down = 2 * prod(tapply(shares.pre/sumshares.pre * 100,idDown, sum,na.rm=TRUE)[1:2]),
@@ -206,7 +215,8 @@ res.nests <- ungroup(res.nests) %>% group_by(merger,up,down,vert,type,nestParm,m
          totalDelta= cv + upPSDelta + downPSDelta,
          avgpricedelta=avgpricedelta,
          isProfitable=ifelse(merger=="up", isProfitable.up,
-                             ifelse(merger=="down",isProfitable.down,isProfitable.vert)),
+                             ifelse(merger=="down",isProfitable.down,
+                                    ifelse(merger=="vert",isProfitable.vert,isProfitable.both))),
          relmarginPreCut=cut(relmarginPre,quantile(relmarginPre, probs=seq(0,1,.1),na.rm=TRUE), dig.lab=1, include.lowest = TRUE),
          cv001=quantile(cv,.05,na.rm=TRUE),
          cv999=quantile(cv,.95,na.rm=TRUE),
