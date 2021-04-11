@@ -6,9 +6,8 @@ library(scales)
 library(ggthemes)
 library(parallel)
 rm(list=ls())
-library(xtable)
 library(tidyr)
-library(tables)
+library(kableExtra)
 #library(grid)
 #library(gridExtra)
 
@@ -237,7 +236,7 @@ sink()
 
 
 
-res.nests <- filter(as.data.frame(res.nests),hhipre>0 #& as.logical(isMarket)
+res.nests <- filter(as.data.frame(res.nests),hhipre>0 & as.logical(isMarket)
                     ) %>%
   filter(#nestParm =="0"  &
          #barg != "0.1" &
@@ -303,28 +302,27 @@ sumtable <- select(sumtable , hhipre,hhipost, hhidelta, merger) %>%
 sumtable <- dplyr::bind_rows(sumall,sumtable)
 sumtable <- gather(sumtable, quant, val, Min:Markets)
 sumtable <- mutate(sumtable, val = ifelse(!variable %in% c("mktElast","barg","nestParm","avgpricepre.up","avgpricepre.down","cv","avgpricedelta", "upPSDelta","downPSDelta", "totalDelta"),round(val),round(val,2)))
+
+options(scipen = 999)
 sumtable <- spread(sumtable, quant, val) %>% select(-Max,Max) %>%
   mutate(
     #set=factor(set,levels=c("firm","bargaining"),labels=c("Firm Count","Bargaining Power")),
-    merger=factor(merger, labels=c("All","Both","Upstream","Downstream","Vertical")),
-    variable = factor(variable, levels=c("up","down","barg","nestParm",
+    merger=factor(merger, labels=c("All","Integrated","Upstream","Downstream","Vertical")),
+    variable = factor(variable, levels=c("up","down","vert","barg","nestParm",
                                          "avgpricepre.up","avgpricepre.down","mktElast",
                                          "hhipre","hhipost","hhidelta"),
-                      labels = c("\\# Wholesalers","\\# Retailers","Bargaining Power","Nesting Parameter","Avg. Upstream Price ()","Avg. Downstream Price ()","Market Elasticity",
+                      labels = c("\\# Wholesalers","\\# Retailers","\\# Integrated","Bargaining Power","Nesting Parameter","Avg. Upstream Price ()","Avg. Downstream Price ()","Market Elasticity",
                                  "Pre-Merger HHI",
                                  "Post-Merger HHI","Delta HHI"
                       )
-    )) %>%
-  mutate(across(.fns=prettyNum, digits=2,big.mark=","))
+    ),
+    Markets=as.numeric(Markets)) %>%
+  mutate(across(where(is.numeric),.fns=prettyNum, digits=2,big.mark=",")) %>%
+  rename(Variable=variable,Merger=merger,`50th`=p50,`25th`=p25,`75th`=p75)
 
-
-#sumtable <- filter(sumtable, quant == "p50") %>% spread( merger, val) %>% mutate_all(funs(prettyNum(., digits=2,big.mark=",")))
-
-sumout <- tabular(merger*Markets*variable*AllObs(sumtable)~p50+Min+p25+p75+Max, data=sumtable)
-#sumout <- tabular(AllObs(sumtable)~ variable+up+down+vertical, data=sumtable)
-latex(sumout)
-
-
+sink("./doc/sumtable.tex")
+kable(sumtable,format="latex",digits=0) %>% collapse_rows(columns = 1:2, latex_hline = "major", valign = "middle")
+sink()
 
 #witholdfreq <- with(res.barg[merger=="vertical",],table(type,nsDown,useNA = "always"))
 #colnames(witholdfreq) <- c("noUp","NoDown","All")
