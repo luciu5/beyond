@@ -1,246 +1,46 @@
 
-\begin{tabular}{l|l|l|r}
+\begin{tabular}{l|l|l|l|l|l|l|l}
 \hline
-variable & merger & quant & val\\
+Variable & Merger & Markets & Min & 25th & 50th & 75th & Max\\
 \hline
-down &  & Min & 2\\
+\textbackslash{}\# Retailers &  & 2,202,997 & 2 & 3 & 4 & 5 & 5\\
 
-up &  & Min & 2\\
+\textbackslash{}\# Wholesalers &  & 2,202,997 & 2 & 3 & 4 & 5 & 5\\
 
-vert &  & Min & 0\\
+\textbackslash{}\# Integrated &  & 2,202,997 & 0 & 0 & 1 & 2 & 4\\
 
-barg &  & Min & 0\\
+Bargaining Power &  & 2,202,997 & 0.1 & 0.4 & 0.6 & 0.8 & 0.9\\
 
-nestParm &  & Min & 0\\
+Nesting Parameter &  & 2,202,997 & 0 & 0 & 0 & 0 & 0\\
 
-avgpricepre.up &  & Min & 1\\
+Avg. Upstream Price () &  & 2,202,997 & 0.6 & 2.2 & 4.7 & 9.8 & 270\\
 
-avgpricepre.down &  & Min & 6\\
+Avg. Downstream Price () &  & 2,202,997 & 5.8 & 10 & 13 & 19 & 297\\
 
-mktElast & \multirow{-8}{*}{\raggedright\arraybackslash all} & Min & -60\\
-\cline{1-4}
-hhipre &  & Min & 2008\\
+Market Elasticity & \multirow{-8}{*}{\raggedright\arraybackslash All} & 2,202,997 & -60 & -0.85 & -0.51 & -0.37 & -0.23\\
+\cline{1-8}
+ & Integrated & 384,325 & 2,205 & 3,591 & 4,275 & 5,358 & 9,998\\
 
-hhipost &  & Min & 2915\\
+ & Upstream & 701,936 & 2,011 & 2,572 & 3,166 & 4,257 & 10,000\\
 
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash up} & Min & 0\\
-\cline{1-4}
-hhipre &  & Min & 2011\\
+ & Downstream & 654,731 & 2,008 & 2,393 & 2,876 & 3,794 & 10,000\\
 
-hhipost &  & Min & 2931\\
+\multirow{-4}{*}{\raggedright\arraybackslash Pre-Merger HHI} & Vertical & 462,005 & 2,100 & 3,623 & 4,391 & 5,679 & 9,962\\
+\cline{1-8}
+ & Integrated & 384,325 & 3,633 & 6,242 & 7,272 & 8,648 & 10,000\\
 
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash down} & Min & 0\\
-\cline{1-4}
-hhipre &  & Min & 2100\\
+ & Upstream & 701,936 & 2,931 & 4,135 & 5,207 & 7,391 & 10,000\\
 
-hhipost &  & Min & 3120\\
+ & Downstream & 654,731 & 2,915 & 4,011 & 4,963 & 6,780 & 10,000\\
 
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash vertical} & Min & 32\\
-\cline{1-4}
-hhipre &  & Min & 2205\\
+\multirow{-4}{*}{\raggedright\arraybackslash Post-Merger HHI} & Vertical & 462,005 & 3,120 & 5,069 & 6,016 & 7,293 & 10,000\\
+\cline{1-8}
+ & Integrated & 384,325 & 2 & 2,463 & 2,800 & 3,187 & 5,000\\
 
-hhipost &  & Min & 3633\\
+ & Upstream & 701,936 & 0 & 1,431 & 2,040 & 2,934 & 5,000\\
 
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash both} & Min & 2\\
-\cline{1-4}
-down &  & p25 & 3\\
+ & Downstream & 654,731 & 0 & 1,546 & 2,027 & 2,891 & 5,000\\
 
-up &  & p25 & 3\\
-
-vert &  & p25 & 0\\
-
-barg &  & p25 & 0\\
-
-nestParm &  & p25 & 0\\
-
-avgpricepre.up &  & p25 & 2\\
-
-avgpricepre.down &  & p25 & 10\\
-
-mktElast & \multirow{-8}{*}{\raggedright\arraybackslash all} & p25 & -1\\
-\cline{1-4}
-hhipre &  & p25 & 2393\\
-
-hhipost &  & p25 & 4011\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash up} & p25 & 1546\\
-\cline{1-4}
-hhipre &  & p25 & 2572\\
-
-hhipost &  & p25 & 4135\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash down} & p25 & 1431\\
-\cline{1-4}
-hhipre &  & p25 & 3623\\
-
-hhipost &  & p25 & 5069\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash vertical} & p25 & 1051\\
-\cline{1-4}
-hhipre &  & p25 & 3591\\
-
-hhipost &  & p25 & 6242\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash both} & p25 & 2463\\
-\cline{1-4}
-down &  & p50 & 4\\
-
-up &  & p50 & 4\\
-
-vert &  & p50 & 1\\
-
-barg &  & p50 & 1\\
-
-nestParm &  & p50 & 0\\
-
-avgpricepre.up &  & p50 & 5\\
-
-avgpricepre.down &  & p50 & 13\\
-
-mktElast & \multirow{-8}{*}{\raggedright\arraybackslash all} & p50 & -1\\
-\cline{1-4}
-hhipre &  & p50 & 2876\\
-
-hhipost &  & p50 & 4963\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash up} & p50 & 2027\\
-\cline{1-4}
-hhipre &  & p50 & 3166\\
-
-hhipost &  & p50 & 5207\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash down} & p50 & 2040\\
-\cline{1-4}
-hhipre &  & p50 & 4391\\
-
-hhipost &  & p50 & 6016\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash vertical} & p50 & 1292\\
-\cline{1-4}
-hhipre &  & p50 & 4275\\
-
-hhipost &  & p50 & 7272\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash both} & p50 & 2800\\
-\cline{1-4}
-down &  & p75 & 5\\
-
-up &  & p75 & 5\\
-
-vert &  & p75 & 2\\
-
-barg &  & p75 & 1\\
-
-nestParm &  & p75 & 0\\
-
-avgpricepre.up &  & p75 & 10\\
-
-avgpricepre.down &  & p75 & 19\\
-
-mktElast & \multirow{-8}{*}{\raggedright\arraybackslash all} & p75 & 0\\
-\cline{1-4}
-hhipre &  & p75 & 3794\\
-
-hhipost &  & p75 & 6780\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash up} & p75 & 2891\\
-\cline{1-4}
-hhipre &  & p75 & 4257\\
-
-hhipost &  & p75 & 7391\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash down} & p75 & 2934\\
-\cline{1-4}
-hhipre &  & p75 & 5679\\
-
-hhipost &  & p75 & 7293\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash vertical} & p75 & 1755\\
-\cline{1-4}
-hhipre &  & p75 & 5358\\
-
-hhipost &  & p75 & 8648\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash both} & p75 & 3187\\
-\cline{1-4}
-down &  & Max & 5\\
-
-up &  & Max & 5\\
-
-vert &  & Max & 4\\
-
-barg &  & Max & 1\\
-
-nestParm &  & Max & 0\\
-
-avgpricepre.up &  & Max & 270\\
-
-avgpricepre.down &  & Max & 297\\
-
-mktElast & \multirow{-8}{*}{\raggedright\arraybackslash all} & Max & 0\\
-\cline{1-4}
-hhipre &  & Max & 10000\\
-
-hhipost &  & Max & 10000\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash up} & Max & 5000\\
-\cline{1-4}
-hhipre &  & Max & 10000\\
-
-hhipost &  & Max & 10000\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash down} & Max & 5000\\
-\cline{1-4}
-hhipre &  & Max & 9962\\
-
-hhipost &  & Max & 10000\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash vertical} & Max & 4314\\
-\cline{1-4}
-hhipre &  & Max & 9998\\
-
-hhipost &  & Max & 10000\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash both} & Max & 5000\\
-\cline{1-4}
-down &  & Markets & 2202997\\
-
-up &  & Markets & 2202997\\
-
-vert &  & Markets & 2202997\\
-
-barg &  & Markets & 2202997\\
-
-nestParm &  & Markets & 2202997\\
-
-avgpricepre.up &  & Markets & 2202997\\
-
-avgpricepre.down &  & Markets & 2202997\\
-
-mktElast & \multirow{-8}{*}{\raggedright\arraybackslash all} & Markets & 2202997\\
-\cline{1-4}
-hhipre &  & Markets & 654731\\
-
-hhipost &  & Markets & 654731\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash up} & Markets & 654731\\
-\cline{1-4}
-hhipre &  & Markets & 701936\\
-
-hhipost &  & Markets & 701936\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash down} & Markets & 701936\\
-\cline{1-4}
-hhipre &  & Markets & 462005\\
-
-hhipost &  & Markets & 462005\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash vertical} & Markets & 462005\\
-\cline{1-4}
-hhipre &  & Markets & 384325\\
-
-hhipost &  & Markets & 384325\\
-
-hhidelta & \multirow{-3}{*}{\raggedright\arraybackslash both} & Markets & 384325\\
+\multirow{-4}{*}{\raggedright\arraybackslash Delta HHI} & Vertical & 462,005 & 32 & 1,051 & 1,292 & 1,755 & 4,314\\
 \hline
 \end{tabular}
