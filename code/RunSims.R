@@ -151,7 +151,7 @@ thisres$hhipost.vert <-thisres$hhidelta.up <- thisres$hhidelta.down <- thisres$h
 return(list(
   #mkt=thismkt,
   summary=thissum,
-  res=thisres))}
+  res=unique(thisres)))}
 
 repMkts <- function(x,y,z,t,m,n,b,c,large=TRUE){replicate(samples, genMkts(x,y,z,t,m,n,b,c,large),simplify = "list")}
 
@@ -196,7 +196,10 @@ res.nests <-  lapply(mkts.nests, function(x){
 
 
 res.nests <- data.table::rbindlist(res.nests)
-res.nests <- mutate(res.nests, up=factor(up), down=factor(down), vert=factor(vert),nestParm=factor(nestParm),
+res.nests <- mutate(res.nests, up=factor(up), down=factor(down),
+                    #vert=ifelse(merger=="vertical",vert+1,vert),
+                    vert=ifelse(merger=="both",vert+2,vert),
+                    vert=factor(vert),nestParm=factor(nestParm),
                     relleveragePre = (1- barg)/barg,barg=factor(barg),
                     type= ifelse(type == "1st", "Bertrand","2nd"),type=factor(type, levels=c("Bertrand","2nd")),
                     Retailers = down)
@@ -216,11 +219,8 @@ res.nests <- ungroup(res.nests) %>% group_by(merger,up,down,vert,type,nestParm,m
          isProfitable=ifelse(merger=="up", isProfitable.up,
                              ifelse(merger=="down",isProfitable.down,
                                     ifelse(merger=="vert",isProfitable.vert,isProfitable.both))),
-         relmarginPreCut=cut(relmarginPre,quantile(relmarginPre, probs=seq(0,1,.1),na.rm=TRUE), dig.lab=1, include.lowest = TRUE),
-         cv001=quantile(cv,.05,na.rm=TRUE),
-         cv999=quantile(cv,.95,na.rm=TRUE),
-         cvtrun =ifelse(cv< cv001,cv001,cv))
-res.nests$cvtrun <- with(res.nests, ifelse(cvtrun>cv999,cv999,cvtrun))
+         relmarginPreCut=cut(relmarginPre,quantile(relmarginPre, probs=seq(0,1,.1),na.rm=TRUE), dig.lab=1, include.lowest = TRUE))
+
 
 ##eliminate markets where the hhipre is 0, isMarket==0
 sink("isMarketSummary.txt")
@@ -321,7 +321,7 @@ sumtable <- spread(sumtable, quant, val) %>% select(-Max,Max) %>%
   rename(Variable=variable,Merger=merger,`50th`=p50,`25th`=p25,`75th`=p75)
 
 sink("./doc/sumtable.tex")
-kable(sumtable,format="latex",digits=0) %>% collapse_rows(columns = 1:2, latex_hline = "major", valign = "middle")
+print(kable(sumtable,format="latex",digits=0) %>% collapse_rows(columns = 1:2, latex_hline = "major", valign = "middle"))
 sink()
 
 #witholdfreq <- with(res.barg[merger=="vertical",],table(type,nsDown,useNA = "always"))

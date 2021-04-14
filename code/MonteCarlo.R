@@ -59,7 +59,8 @@ market<-function(nfirms.down=3, # # of downstream firms
                                 up = ids$up.firm == 1 | ids$up.firm == 2,
                                 down = ids$down.firm == 1 | ids$down.firm == 2,
                                 vertical= ids$up.firm == 1 | ids$down.firm == 1,
-                                both=ids$up.firm == 1 | ids$up.firm == 2 | ids$up.firm == 2 | ids$up.firm == 1)
+                                both=ids$up.firm == 1 | ids$up.firm == 2 #| ids$down.firm == 2 | ids$down.firm == 1
+                                )
 
 
 
@@ -121,11 +122,15 @@ market<-function(nfirms.down=3, # # of downstream firms
 
   ## when OwnerPost equals "vertical"
   ## simulate a vertical merger between U1 and D1
-  if(ownerPost  %in%  c("vertical") || nfirms.vert>0){
 
-    if (nfirms.vert>0) vertFirms <-2:(nfirms.vert + 1)
-    else if (ownerPost=="both") vertFirms <- c(1,vertFirms)
-    else{vertFirms=NULL}
+  vertFirms=NULL
+
+  if(ownerPost  %in%  c("vertical","both") || nfirms.vert>0){
+
+
+    if (nfirms.vert>0){vertFirms <-2:(nfirms.vert + 1)}
+    if (ownerPost=="both") {vertFirms <- vertFirms+1;vertFirms <- c(1:2,vertFirms)}
+
 
     #if(!(ownerPost  %in%  c("vertical")) && min(nfirms.down,nfirms.up) >2 ) vertFirms <- vertFirms+1
 
@@ -245,8 +250,9 @@ market<-function(nfirms.down=3, # # of downstream firms
     ## integrated wholesaler bargains with other retailers
     ownerVertPost.down[vertrowsUp, ids$down.firm == 1] <- -1
 
-    vertFirms <- c(1,vertFirms)
+
     }
+
     if(ownerPost  %in%  c("up","both")){
 
     vertrowsDown <- ids$up.firm != 1  & ids$down.firm == 2
@@ -263,6 +269,8 @@ market<-function(nfirms.down=3, # # of downstream firms
 
     ## integrated wholesaler bargains with other retailers
     ownerVertPost.down[vertrowsUp, ids$down.firm == 2] <- -1
+
+
     }
 
     if(ownerPost  %in%  c("down","both")){
@@ -283,6 +291,7 @@ market<-function(nfirms.down=3, # # of downstream firms
     ownerVertPost.down[vertrowsUp, ids$down.firm == 1] <- -1
     }
 
+    if(ownerPost %in% c("vertical")) vertFirms <- c(1,vertFirms)
 
     #vertical$bargparmPre <- bargparm
     vertical$bargparmPost <- bargparmPost
