@@ -270,7 +270,7 @@ sumtable <- data.frame(res.nests)
 
 
 sumtable <- select(sumtable,merger,down, up,vert,barg,nestParm, hhipre, hhipost, hhidelta,  avgpricepre.up, avgpricepre.down, avgpricedelta,
-                    mktElast) %>% distinct()  %>% mutate(
+                    mktElast)  %>% mutate(
                                                                                          #mktCnt=length(up),
                                                                                          up = as.numeric(as.character(up)),
                                                                                          down=as.numeric(as.character(down)),
@@ -321,7 +321,7 @@ sumtable <- spread(sumtable, quant, val) %>% select(-Max,Max) %>%
   rename(Variable=variable,Merger=merger,`50th`=p50,`25th`=p25,`75th`=p75)
 
 sink("./doc/sumtable.tex")
-print(kable(sumtable,format="latex",digits=0) %>% collapse_rows(columns = 1:2, latex_hline = "major", valign = "middle"))
+print(kable(sumtable,format="latex",digits=0) %>% collapse_rows(columns = 1:3, latex_hline = "major", valign = "middle"))
 sink()
 
 #witholdfreq <- with(res.barg[merger=="vertical",],table(type,nsDown,useNA = "always"))

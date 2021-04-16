@@ -32,6 +32,8 @@ res.nests.logit <- res.nests.long <- mutate(ungroup(res.nests.long),
 #partdata <- filter(partdata,up!="1" & down !="1" )%>%
 #  mutate_if(is.factor,droplevels)
 
+seq_palette <- RColorBrewer::brewer.pal(name="YlGnBu",n=8)[c(4,6,8)]
+
 boxfun <- function(x,probs=c(.05,.25,.5,.75,.95)){
 
   r <- quantile(x, probs,na.rm=TRUE)
@@ -45,7 +47,7 @@ boxfun <- function(x,probs=c(.05,.25,.5,.75,.95)){
 # ## box and whisker results for Incumbent
 #
 
-pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(vert!= "5" & vert !="6"), aes(y=Outcome_value/mktrev.pre*100,
+pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","Total")), aes(y=Outcome_value/mktrev.pre*100,
                                            #avgpricedelta/mktrev.pre*100,
                                            x=vert,color=Cost
                                            )
@@ -60,7 +62,7 @@ pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(vert!= "5" & vert !="6"), a
   #theme_tufte(ticks=FALSE) +
   #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
   #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
-  facet_grid(Merger~Outcome,scales="free",labeller = label_context)+
+  facet_grid(Outcome~Merger,scales="free",labeller = label_context)+
   xlab("# Pre-merger Vertically Integrated Firms")+
   ylab("Outcome (%)")+
   #ylab("Avg. Downstream Price Change (%)")+
@@ -405,7 +407,7 @@ pfirmsvert_retailers.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="vert
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
 
-pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up" & vert != "3" & vert !="4"), aes(y=Outcome_value/mktrev.pre*100,
+pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up" & vert != "3" & vert !="1"), aes(y=Outcome_value/mktrev.pre*100,
                                                          #avgpricedelta/mktrev.pre*100,
                                                          x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
@@ -414,7 +416,10 @@ pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up" & vert != "3" & ve
   scale_y_continuous(breaks=seq(-45, 20, by=5) ) +
   geom_hline(yintercept=0,linetype="dashed",color="black")+
   geom_vline(xintercept=5,linetype="dotted")+
-  theme_bw()+scale_colour_tableau('Color Blind')+ theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  theme_bw()+#scale_colour_tableau('Color Blind')+
+  #scale_color_brewer(palette = "PuRd",direction=-1)+
+  scale_color_manual(values = seq_palette)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
   #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
   #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
   #theme_tufte(ticks=FALSE) +
@@ -447,7 +452,7 @@ pbargup_all.bw <- pbargup_all.bw + geom_segment(
 
 
 
-pbargdown_all.bw <- ggplot(filter(res.nests.logit,merger =="down" & vert != "3" & vert !="4"), aes(y=Outcome_value/mktrev.pre*100,
+pbargdown_all.bw <- ggplot(filter(res.nests.logit,merger =="down" & vert != "3" & vert !="1"), aes(y=Outcome_value/mktrev.pre*100,
                                                                   #avgpricedelta/mktrev.pre*100,
                                                                   x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
@@ -456,7 +461,10 @@ pbargdown_all.bw <- ggplot(filter(res.nests.logit,merger =="down" & vert != "3" 
   scale_y_continuous(breaks=seq(-60, 30, by=10) ) +
   geom_hline(yintercept=0,linetype="dashed",color="black")+
   geom_vline(xintercept=5,linetype="dotted")+
-  theme_bw()+scale_colour_tableau('Color Blind')+ theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  theme_bw()+
+  #scale_colour_tableau('Color Blind')+
+  scale_color_manual(values = seq_palette)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
   #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
   #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.nests$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
   #theme_tufte(ticks=FALSE) +
@@ -492,7 +500,7 @@ pbargdown_all.bw <- pbargdown_all.bw + geom_segment(
 
 
 
-pbargvert_all.bw <- ggplot(filter(res.nests.logit,merger =="vertical" & vert != "3" & vert !="4" ), aes(y=Outcome_value/mktrev.pre*100,
+pbargvert_all.bw <- ggplot(filter(res.nests.logit,merger =="vertical" & vert != "1" & vert !="3" ), aes(y=Outcome_value/mktrev.pre*100,
                                                                       #avgpricedelta/mktrev.pre*100,
                                                                       x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
@@ -501,7 +509,10 @@ pbargvert_all.bw <- ggplot(filter(res.nests.logit,merger =="vertical" & vert != 
   coord_cartesian(ylim=c(-40,35))+
   geom_hline(yintercept=0,linetype="dashed",color="black")+
   geom_vline(xintercept=5,linetype="dotted")+
-  theme_bw()+scale_colour_tableau('Color Blind')+ theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  theme_bw()+
+  #scale_colour_tableau('Color Blind')+
+  scale_color_manual(values = seq_palette)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
   #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
   #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
   #theme_tufte(ticks=FALSE) +
@@ -534,7 +545,7 @@ pbargvert_all.bw <- pbargvert_all.bw + geom_segment(
 
 
 
-pbargboth_all.bw <- ggplot(filter(res.nests.logit,Merger =="Integrated" & vert != "3" & vert !="4"), aes(y=Outcome_value/mktrev.pre*100,
+pbargboth_all.bw <- ggplot(filter(res.nests.logit,Merger =="Integrated" & vert != "5" & vert !="3"), aes(y=Outcome_value/mktrev.pre*100,
                                                                              #avgpricedelta/mktrev.pre*100,
                                                                              x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
@@ -543,7 +554,10 @@ pbargboth_all.bw <- ggplot(filter(res.nests.logit,Merger =="Integrated" & vert !
   coord_cartesian(ylim=c(-40,35))+
   geom_hline(yintercept=0,linetype="dashed",color="black")+
   geom_vline(xintercept=5,linetype="dotted")+
-  theme_bw()+scale_colour_tableau('Color Blind')+ theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  theme_bw()+
+  #scale_colour_tableau('Color Blind')+
+  scale_color_manual(values = seq_palette)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
   #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
   #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
   #theme_tufte(ticks=FALSE) +
