@@ -49,7 +49,8 @@ boxfun <- function(x,probs=c(.05,.25,.5,.75,.95)){
 
 pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","Total")), aes(y=Outcome_value/mktrev.pre*100,
                                            #avgpricedelta/mktrev.pre*100,
-                                           x=vert,color=Cost
+                                           x=vert,#color=Cost
+                                           color=Outcome
                                            )
                                            ) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
@@ -62,13 +63,13 @@ pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","
   #theme_tufte(ticks=FALSE) +
   #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
   #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
-  facet_grid(Outcome~Merger,scales="free",labeller = label_context)+
+  facet_grid(~Merger,scales="free",labeller = label_context)+
   xlab("# Pre-merger Vertically Integrated Firms")+
   ylab("Outcome (%)")+
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
-  labs(colour="Cost:")+
+  labs(colour="Outcome:")+
   labs(title =  "The Distributions  of Merger Outcomes as the Number of Integrated Firms Increases",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
@@ -407,7 +408,7 @@ pfirmsvert_retailers.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="vert
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
 
-pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up" & vert != "3" & vert !="1"), aes(y=Outcome_value/mktrev.pre*100,
+pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up" & vert %in% c("0","1","4")), aes(y=Outcome_value/mktrev.pre*100,
                                                          #avgpricedelta/mktrev.pre*100,
                                                          x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
@@ -452,7 +453,7 @@ pbargup_all.bw <- pbargup_all.bw + geom_segment(
 
 
 
-pbargdown_all.bw <- ggplot(filter(res.nests.logit,merger =="down" & vert != "3" & vert !="1"), aes(y=Outcome_value/mktrev.pre*100,
+pbargdown_all.bw <- ggplot(filter(res.nests.logit,merger =="down" & vert %in% c("0","1","4")), aes(y=Outcome_value/mktrev.pre*100,
                                                                   #avgpricedelta/mktrev.pre*100,
                                                                   x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
@@ -500,7 +501,7 @@ pbargdown_all.bw <- pbargdown_all.bw + geom_segment(
 
 
 
-pbargvert_all.bw <- ggplot(filter(res.nests.logit,merger =="vertical" & vert != "1" & vert !="3" ), aes(y=Outcome_value/mktrev.pre*100,
+pbargvert_all.bw <- ggplot(filter(res.nests.logit,merger =="vertical" & vert %in% c("0","1","4")), aes(y=Outcome_value/mktrev.pre*100,
                                                                       #avgpricedelta/mktrev.pre*100,
                                                                       x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
