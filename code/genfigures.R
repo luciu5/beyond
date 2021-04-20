@@ -47,7 +47,8 @@ boxfun <- function(x,probs=c(.05,.25,.5,.75,.95)){
 # ## box and whisker results for Incumbent
 #
 
-pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","Total")), aes(y=Outcome_value/mktrev.pre*100,
+pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","Total") #& Cost=="Constant"
+                                                     ), aes(y=Outcome_value/mktrev.pre*100,
                                            #avgpricedelta/mktrev.pre*100,
                                            x=vert,#color=Cost
                                            color=Outcome
@@ -408,6 +409,52 @@ pfirmsvert_retailers.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="vert
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
 
+
+pbargnoboth.bw <- ggplot(filter(res.nests.logit,Outcome %in% c("Consumer","Total") & merger !="both" & vert %in% c("0","1","4")), aes(y=Outcome_value/mktrev.pre*100,
+                                                                                               #avgpricedelta/mktrev.pre*100,
+                                                                                               x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
+  #geom_boxplot(outlier.alpha = 0.1) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  #coord_cartesian(ylim=c(-60,60))+
+  scale_y_continuous(breaks=seq(-100, 100, by=10) ) +
+  geom_hline(yintercept=0,linetype="dashed",color="black")+
+  geom_vline(xintercept=5,linetype="dotted")+
+  theme_bw()+#scale_colour_tableau('Color Blind')+
+  #scale_color_brewer(palette = "PuRd",direction=-1)+
+  scale_color_manual(values = seq_palette)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(Outcome~Merger,scales="free",labeller = "label_context")+
+  xlab("Relative Bargaining Power")+
+  ylab("Outcome (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="# Integrated Firms:")+
+  labs(title =  "How Changing Bargaining Strength Affects Consumer and Total Surplus, By Merger",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
+
+
+pbargnoboth.bw <- pbargnoboth.bw + geom_segment(
+  aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
+  data=data.frame(x=5.1,y=-50,xend=9
+                  ,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                   Merger=factor("Vertical", levels=unique(res.nests.logit$Merger)))) +
+  geom_text(aes(x=x,y=y),color="black",label="equal power",angle=90,
+            data=data.frame(x=4.5,y=30,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                                                        Merger=factor("Vertical", levels=unique(res.nests.logit$Merger))),size=3.5) +
+  geom_text(aes(x=x,y=y),color="black",label="more retailer power",
+            data=data.frame(x=7.5,y=-40,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nests.logit$Merger))),size=3.5)
+
+
 pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up" & vert %in% c("0","1","4")), aes(y=Outcome_value/mktrev.pre*100,
                                                          #avgpricedelta/mktrev.pre*100,
                                                          x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
@@ -647,3 +694,6 @@ png("output/CVbargbothBW.png",width = 10, height = 7, units = "in", res=300)
 print(pbargboth_all.bw)
 dev.off()
 
+png("output/CVbargnobothBW.png",width = 10, height = 7, units = "in", res=300)
+print(pbargnoboth.bw)
+dev.off()
