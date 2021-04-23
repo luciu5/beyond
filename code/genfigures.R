@@ -19,13 +19,16 @@ load(file.path(simpath,"AllSims.RData"))
 
 relleverage=sort(unique(res.nests$relleveragePre),decreasing = TRUE)
 
+
+## Only include constant cost sims
 res.nests.logit <- res.nests.long <- mutate(ungroup(res.nests.long),
-                                            Merger=factor(merger,levels=c("down","up","vertical","both"),labels=c("Downstream","Upstream","Vertical","Integrated")),
+                                            Merger=factor(merger,levels=c("vertical","up","down","both"),labels=c("Vertical","Upstream","Downstream","Integrated")),
                                             Cost=factor(mc,labels=c("Constant"
                                                                     ,"Linear"#,"Quadratic","Linear/Quadratic","Quadratic/Linear","Linear/Constant","Constant/Linear"
                                                                     )
                                                         ),
-                                            Cost=reorder(Cost,-Outcome_value/mktrev.pre,median,na.rm=TRUE)) %>% select(-mc)
+                                            Cost=reorder(Cost,-Outcome_value/mktrev.pre,median,na.rm=TRUE)) %>% select(-mc) %>%
+                                            filter(Cost=="Constant")
 
 #res.nests.logit <- filter(as.data.frame(res.nests.logit),nestParm == "0" & Retailers !="1" & Wholesalers !="1") %>%
 #  mutate_if(is.factor,droplevels)
@@ -50,10 +53,41 @@ boxfun <- function(x,probs=c(.05,.25,.5,.75,.95)){
 pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","Total") #& Cost=="Constant"
                                                      ), aes(y=Outcome_value/mktrev.pre*100,
                                            #avgpricedelta/mktrev.pre*100,
-                                           x=vert,#color=Cost
-                                           color=Outcome
+                                           x=vert#color=Cost
+                                           #,color=Outcome
                                            )
                                            ) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  #coord_cartesian(ylim=c(-60,55))+
+  scale_y_continuous(breaks=seq(-100,100,10))+
+  geom_hline(yintercept=0,linetype="dashed",color="black")+
+  theme_bw()+scale_colour_tableau('Color Blind')+ theme(legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.barg$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(Outcome~Merger,scales="free",labeller = label_context)+
+  xlab("# Incumbent Vertically Integrated Firms")+
+  ylab("Outcome (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="Outcome:")+
+  labs(title =  "The Distributions  of Merger Outcomes as the Number of Integrated Firms Increases",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
+
+
+pvertincumb_updown.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","Total") & Merger %in% c("Downstream","Upstream") #& Cost=="Constant"
+), aes(y=Outcome_value/mktrev.pre*100,
+       #avgpricedelta/mktrev.pre*100,
+       x=vert,#color=Cost
+       color=Outcome
+)
+) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   #coord_cartesian(ylim=c(-60,55))+
   scale_y_continuous(breaks=seq(-100,100,10))+
@@ -71,7 +105,37 @@ pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
   labs(colour="Outcome:")+
-  labs(title =  "The Distributions  of Merger Outcomes as the Number of Integrated Firms Increases",
+  labs(title =  "The Distributions of Upstream and Downstream Merger Outcomes\nas the Number of Integrated Firms Increases",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
+
+pvertincumb_vertint.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","Total") & Merger %in% c("Vertical","Integrated") #& Cost=="Constant"
+), aes(y=Outcome_value/mktrev.pre*100,
+       #avgpricedelta/mktrev.pre*100,
+       x=vert,#color=Cost
+       color=Outcome
+)
+) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  #coord_cartesian(ylim=c(-60,55))+
+  scale_y_continuous(breaks=seq(-100,100,10))+
+  geom_hline(yintercept=0,linetype="dashed",color="black")+
+  theme_bw()+scale_colour_tableau('Color Blind')+ theme(legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.barg$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(~Merger,scales="free",labeller = label_context)+
+  xlab("# Pre-merger Vertically Integrated Firms")+
+  ylab("Outcome (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="Outcome:")+
+  labs(title =  "The Distributions of Vertical and Integrated Merger Outcomes\nas the Number of Integrated Firms Increases",
        subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
@@ -197,7 +261,7 @@ pboth_vertincumb.bw <-  ggplot(filter(res.nests.logit,Merger=="Integrated" & Out
 
 psummary.bw <-  ggplot(res.nests.logit, aes(y=Outcome_value/mktrev.pre*100,
                                             #avgpricedelta/mktrev.pre*100,
-                                            x=Merger,color=Cost
+                                            x=Merger#,color=Cost
 )
 ) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
@@ -645,7 +709,12 @@ dev.off()
 png("output/CVvertincumbBW.png",width = 10, height = 7, units = "in", res=300)
 print(pvertincumb.bw)
 dev.off()
-
+png("output/CVvertincumb_updownBW.png",width = 10, height = 7, units = "in", res=300)
+print(pvertincumb_updown.bw)
+dev.off()
+png("output/CVvertincumb_vertincBW.png",width = 10, height = 7, units = "in", res=300)
+print(pvertincumb_vertint.bw)
+dev.off()
 
 
 png("output/down_vertincumbBW.png",width = 7, height = 7, units = "in", res=300)

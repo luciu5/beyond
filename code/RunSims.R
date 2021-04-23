@@ -227,6 +227,7 @@ sink("isMarketSummary.txt")
 print(table(res.nests$isMarket,useNA="ifany"))
 print(table(res.nests$isMarket,res.nests$type,useNA="ifany"))
 print(table(res.nests$isProfitable,res.nests$merger,useNA="ifany"))
+print(table(res.nests$isProfitable,res.nests$mc,useNA="ifany"))
 print(with(res.nests[is.na(res.nests$isMarket) |! res.nests$isMarket,], table(up,down,useNA="ifany")))
 sink()
 
@@ -264,8 +265,8 @@ res.nest_all.long <- select(res.nest_all,type,down,up,merger,barg,nestParm,mc,cv
   mutate(Outcome=factor(Outcome,levels=c("Consumer","Retailer","Wholesaler","Total")))
 
 
-
-sumtable <- data.frame(res.nests)
+## only summarize constant costs
+sumtable <- data.frame(res.nests) %>% filter(mc=="constant")
 
 
 
@@ -307,18 +308,18 @@ options(scipen = 999)
 sumtable <- spread(sumtable, quant, val) %>% select(-Max,Max) %>%
   mutate(
     #set=factor(set,levels=c("firm","bargaining"),labels=c("Firm Count","Bargaining Power")),
-    merger=factor(merger, labels=c("All","Integrated","Upstream","Downstream","Vertical")),
+    merger=factor(merger, levels=c("all","vertical","up","down","both"),labels=c("All","Vertical","Upstream","Downstream","Integrated")),
     variable = factor(variable, levels=c("up","down","vert","barg","nestParm",
                                          "avgpricepre.up","avgpricepre.down","mktElast",
                                          "hhipre","hhipost","hhidelta"),
-                      labels = c("\\# Wholesalers","\\# Retailers","\\# Integrated","Bargaining Power","Nesting Parameter","Avg. Upstream Price ()","Avg. Downstream Price ()","Market Elasticity",
+                      labels = c("# Wholesalers","# Retailers","# Integrated","Bargaining Power","Nesting Parameter","Avg. Upstream Price ($)","Avg. Downstream Price ($)","Market Elasticity",
                                  "Pre-Merger HHI",
                                  "Post-Merger HHI","Delta HHI"
                       )
     ),
     Markets=as.numeric(Markets)) %>%
   mutate(across(where(is.numeric),.fns=prettyNum, digits=2,big.mark=",")) %>%
-  rename(Variable=variable,Merger=merger,`50th`=p50,`25th`=p25,`75th`=p75)
+  rename(Variable=variable,Merger=merger,`50th`=p50,`25th`=p25,`75th`=p75) %>%arrange(Variable,Merger)
 
 sink("./doc/sumtable.tex")
 print(kable(sumtable,format="latex",digits=0) %>% collapse_rows(columns = 1:3, latex_hline = "major", valign = "middle"))

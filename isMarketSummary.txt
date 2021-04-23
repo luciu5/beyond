@@ -9,6 +9,10 @@
             up   down vertical   both
   FALSE 363427  35794   341725 202025
   TRUE  768561 858517   533578 746100
+       
+        constant linprod
+  FALSE   476589  466382
+  TRUE   1485175 1421581
    down
 up      2     3     4     5
   2 25192 19069 18109 18247
