@@ -22,7 +22,7 @@ simpath <- "./data"
 #profiler <- microbenchmark::microbenchmark(times=1,{
 #Rprof(filename = "Rprof.out", append = FALSE, interval = 2, line.profiling=TRUE)
 
-cl <- makeCluster(mc <- getOption("cl.cores", 45))
+cl <- makeCluster(mc <- getOption("cl.cores", 100))
 ## to make this reproducible
 clusterSetRNGStream(cl, 3141519)
 
@@ -38,7 +38,7 @@ nestParm <- c(0)
 type=c("1st")
 merger=c("up","down", "vertical","both")
 bargparm <- seq(.1,.9,.1)
-mc=c("constant","linprod"#, "quadprod","linquad","quadlin","lincons","conslin"#,"linfirm"
+mc=c("constant","linprod","lincons","conslin","consparty","linparty"#, "quadprod","linquad","quadlin"#,"linfirm"
      )
 relleveragePre <-  (1-bargparm)/bargparm
 
@@ -196,7 +196,8 @@ res.nests <-  lapply(mkts.nests, function(x){
 
 
 res.nests <- data.table::rbindlist(res.nests)
-res.nests <- mutate(res.nests, up=factor(up), down=factor(down),
+res.nests <- mutate(res.nests,
+                    up=factor(up), down=factor(down),
                     #vert=ifelse(merger=="vertical",vert+1,vert),
                     vert=ifelse(merger=="both",vert+2,vert),
                     vert=factor(vert),nestParm=factor(nestParm),
