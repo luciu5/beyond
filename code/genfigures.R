@@ -21,14 +21,18 @@ relleverage=sort(unique(res.nests$relleveragePre),decreasing = TRUE)
 
 
 ## Only include constant cost sims
-res.nests.logit <- res.nests.long <- mutate(ungroup(res.nests.long),
+res.nests.all  <- mutate(ungroup(res.nests.long),
                                             Merger=factor(merger,levels=c("vertical","up","down","both"),labels=c("Vertical","Upstream","Downstream","Integrated")),
-                                            Cost=factor(mc,labels=c("Constant"
-                                                                    ,"Linear"#,"Quadratic","Linear/Quadratic","Quadratic/Linear","Linear/Constant","Constant/Linear"
+                                            Cost=factor(mc,
+                                                        levels=c("constant","linprod","lincons","conslin","consparty","linparty"),
+                                                        labels=c("Constant"
+                                                                    ,"Linear","Linear/Constant","Constant/Linear","Party Constant","Party Linear"# "Quadratic","Linear/Quadratic","Quadratic/Linear","Linear/Constant","Constant/Linear"
                                                                     )
                                                         ),
-                                            Cost=reorder(Cost,-Outcome_value/mktrev.pre,median,na.rm=TRUE)) %>% select(-mc) %>%
-                                            filter(Cost=="Constant")
+                                            Cost=reorder(Cost,-Outcome_value/mktrev.pre,median,na.rm=TRUE)) %>% select(-mc)
+
+
+res.nests.logit <- res.nests.long <- res.nests.all %>% filter(Cost=="Constant")
 
 #res.nests.logit <- filter(as.data.frame(res.nests.logit),nestParm == "0" & Retailers !="1" & Wholesalers !="1") %>%
 #  mutate_if(is.factor,droplevels)
@@ -44,6 +48,37 @@ boxfun <- function(x,probs=c(.05,.25,.5,.75,.95)){
   return(r)
 }
 
+
+
+psummary_cost.bw <-  ggplot(filter(res.nests.all,Outcome %in% c("Consumer","Total")) %>%
+                              mutate(Cost=reorder(Cost,ifelse((Outcome=="Consumer") & (Merger=="Vertical"),-Outcome_value/mktrev.pre,NA),quantile,probs=.5,na.rm=TRUE)),
+                            aes(y=Outcome_value/mktrev.pre*100,
+                                            #avgpricedelta/mktrev.pre*100,
+                                            x=Merger,color=Cost
+)
+) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  #coord_cartesian(ylim=c(-60,55))+
+  scale_y_continuous(breaks=seq(-100,100,5))+
+  geom_hline(yintercept=0,linetype="dashed",color="black")+
+  theme_bw()+scale_colour_tableau('Color Blind')+ theme(legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.barg$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(~Outcome,scales="free",labeller = "label_context")+
+  xlab("Change in Surplus")+
+  ylab("Outcome (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  #labs(colour="Cost:")+
+  labs(title =  "The Distributions  of Consumer and Total Surplus\nFor Different Cost Structures",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
 
 
 #
@@ -705,7 +740,11 @@ png("output/surplussum.png",width = 10, height = 7, units = "in", res=300)
 print(psummary.bw)
 dev.off()
 
+png("output/surplussum_cost.png",width = 10, height = 7, units = "in", res=300)
+print(psummary_cost.bw)
+dev.off()
 
+png("output/surplussum.png",width = 10, height = 7, units = "in", res=300)
 png("output/CVvertincumbBW.png",width = 10, height = 7, units = "in", res=300)
 print(pvertincumb.bw)
 dev.off()

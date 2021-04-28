@@ -16,10 +16,11 @@ market<-function(nfirms.down=3, # # of downstream firms
                  nprods.up=nprods.down, # # of upstream products
                  nfirms.vert=0, # number of integrated firms pre-merger
                  bargparm=runif(nfirms.down*nfirms.up, .25,.75), # bargaining parameters for each upstream/downstream firm pair
-                 bargpreset=c("none","party","rival"), # fix some bargaining parameters
+                 bargpreset=c("none","party","rival","diagonal"), # fix some bargaining parameters
                  # none: do not modify bargparm
                  # party: set party bargparm to 0.5, allow others to vary
-                 # rival: set non-parties to 0.5, allow others to vary
+                 # rival: set non-party bargparm to 0.5, allow others to vary
+                 # diagonal: Vertical only. set party bargparm to 1 ,allow others to vary
                  mcshare.up=runif(nfirms.up*nprods.up), # share of upstream costs
                  mcshare.down=runif(nfirms.down*nprods.down), # share of wholesale price
                  ownerPost = c("up","down","vertical","both"), # simulate an upstream horizontal merger, downstream horizontal merger,
@@ -55,28 +56,50 @@ market<-function(nfirms.down=3, # # of downstream firms
 
   nprods <- nrow(ids)
 
-  isJoint <-  isParty <- switch(ownerPost,
-                                up = ids$up.firm == 1 | ids$up.firm == 2,
-                                down = ids$down.firm == 1 | ids$down.firm == 2,
-                                vertical= ids$up.firm == 1 | ids$down.firm == 1,
-                                both=ids$up.firm == 1 | ids$up.firm == 2 #| ids$down.firm == 2 | ids$down.firm == 1
-                                )
+   isParty.down <-  isParty.up <- rep(FALSE,nprods)
 
+   if(ownerPost=="up"){
+     isParty.up[ids$up.firm == 1 | ids$up.firm == 2]=TRUE
+     if(nfirms.vert>0) isParty.down[ids$down.firm==2]=TRUE
+   }
 
-
-
-  if(nfirms.vert>0){
-    isJoint <-  isParty <- switch(ownerPost,
-                                 up = isParty | ids$down.firm==2,
-                                 down = isParty | ids$up.firm==2,
-                                 vertical= isParty,
-                                 both=isParty)
-
+   else if(ownerPost=="down"){
+     isParty.down[ids$down.firm == 1 | ids$down.firm == 2]=TRUE
+     if(nfirms.vert>0) isParty.up[ids$up.firm==2]=TRUE
+   }
+   else if(ownerPost=="vertical"){
+     isParty.up[ids$up.firm == 1 ]=TRUE
+     isParty.down[ids$down.firm == 1]=TRUE
+   }
+  else {
+    isParty.up[ids$up.firm == 1 | ids$up.firm == 2]=TRUE
+    isParty.down[ids$down.firm == 1 | ids$down.firm == 2]=TRUE
 
   }
 
 
-  if(ownerPost=="vertical"){isJoint <-  ids$up.firm == 1 & ids$down.firm == 1}
+  # switch(ownerPost,
+  #                               up = ids$up.firm == 1 | ids$up.firm == 2,
+  #                               down = ids$down.firm == 1 | ids$down.firm == 2,
+  #                               vertical= ids$up.firm == 1 | ids$down.firm == 1,
+  #                               both=ids$up.firm == 1 | ids$up.firm == 2 #| ids$down.firm == 2 | ids$down.firm == 1
+  #                               )
+  #
+  #
+  #
+  #
+  # if(nfirms.vert>0){
+  #   isJoint <-  isParty <- switch(ownerPost,
+  #                                up = isParty | ids$down.firm==2,
+  #                                down = isParty | ids$up.firm==2,
+  #                                vertical= isParty,
+  #                                both=isParty)
+  #
+  #
+  # }
+
+
+  #if(ownerPost=="vertical"){isJoint <-  ids$up.firm == 1 & ids$down.firm == 1}
 
   ## create nesting structures for different merger types
   if( missing(nests)){
@@ -116,8 +139,9 @@ market<-function(nfirms.down=3, # # of downstream firms
 
   bargparm <- switch(bargpreset,
                      none=bargparm,
-                     party=ifelse(isJoint,0.5,bargparm),
-                     rival=ifelse(!isJoint,0.5,bargparm)
+                     party=ifelse(isParty.up |isParty.down,0.5,bargparm),
+                     rival=ifelse(!(isParty.up |isParty.down),0.5,bargparm),
+                     diagonal=ifelse(isParty.up & isParty.down,1,bargparm)
   )
 
   ## when OwnerPost equals "vertical"
@@ -324,9 +348,9 @@ market<-function(nfirms.down=3, # # of downstream firms
 
   ## create a container to store upstream and downstream data
   mkt<-list(up=list(nfirms=nfirms.up,nproducts=nprods.up,ownerPre=ownerPre.up, ownerPost=ownerPost.up,
-                    bargparm=bargparm,mcshare=mcshare.up),
+                    bargparm=bargparm,mcshare=mcshare.up,isParty=isParty.up),
             down=list(nfirms=nfirms.down,nproducts=nprods.down,shares=sharesDown,
-                      shareOut=shareOutDown,M=M,outMargin=outMargin,ids=ids,isParty=isParty,mcshare=mcshare.down,
+                      shareOut=shareOutDown,M=M,outMargin=outMargin,ids=ids,isParty=isParty.down,mcshare=mcshare.down,
                       ownerPre=ownerPre.down,ownerPost=ownerPost.down, nests=nests,nestParm=nestParm, nestMat=nestMat),
             vertical = vertical)
 
@@ -442,10 +466,33 @@ calcMC.linfirm <- function (mkt,share)  {
 }
 
 
+calcMC.consparty <- function (mkt,share)  {
+
+  # return constant marginal costs for parties, linear for everyone else
+  M <- mkt$down$M
+  up <- ifelse(mkt$up$isParty,mkt$up$mcParm, (share*M)/mkt$up$mcParm)
+  down <- ifelse(mkt$down$isParty,mkt$down$mcParm, (share*M)/mkt$down$mcParm)
+
+
+  return(list(up=up,down=down))
+
+}
+
+calcMC.linparty <- function (mkt,share)  {
+
+  # return linear marginal costs for parties, constant for everyone else
+  M <- mkt$down$M
+  up <- ifelse(mkt$up$isParty, (share*M)/mkt$up$mcParm,mkt$up$mcParm)
+  down <- ifelse(mkt$down$isParty, (share*M)/mkt$down$mcParm,mkt$down$mcParm)
+
+
+  return(list(up=up,down=down))
+
+}
 
 
 ## modify methods and functions to allow for upstream and downstream linear marginal costs
-simMarket.1st <- function(mkt,cost_type=c("constant","linprod","quadprod","linquad","quadlin","lincons","conslin","linfirm"),...){
+simMarket.1st <- function(mkt,cost_type=c("constant","linprod","quadprod","linquad","quadlin","lincons","conslin","linfirm","consparty","linparty"),...){
 
   cost_type <- match.arg(cost_type)
 
@@ -461,6 +508,9 @@ simMarket.1st <- function(mkt,cost_type=c("constant","linprod","quadprod","linqu
   mcshare.down <- mkt$down$mcshare
   bargparm <- mkt$up$bargparm
   outMargin <- mkt$down$outMargin
+
+  isParty.up <- mkt$up$isParty
+  isParty.down <- mkt$down$isParty
 
 
   M <- mkt$down$M
@@ -528,6 +578,10 @@ simMarket.1st <- function(mkt,cost_type=c("constant","linprod","quadprod","linqu
   else if (cost_type=="linfirm"){{mcParm <- list(up= as.vector(ownerPre.up%*%sharesDown)*M/upMC,down=as.vector(ownerPre.down%*%sharesDown)*M/downMC)}}
   else if (cost_type=="lincons"){{mcParm <- list(up= (sharesDown*M)/upMC,down=downMC)}}
   else if (cost_type=="conslin"){{mcParm <- list(up= upMC,down=(sharesDown*M)/downMC)}}
+  else if (cost_type=="consparty"){{mcParm <- list(up= ifelse(isParty.up,upMC,(sharesDown*M)/upMC),
+                                                   down=ifelse(isParty.down,downMC,(sharesDown*M)/downMC))}}
+  else if (cost_type=="linparty"){{mcParm <- list(up= ifelse(isParty.up,(sharesDown*M)/upMC,upMC),
+                                                  down=ifelse(isParty.down,(sharesDown*M)/downMC,downMC))}}
 
   ## create a container to store upstream and downstream data
   mkt<-list(up=c(mkt$up,list(price=upPrices,margin=1-upMC/upPrices, mcParm = mcParm$up)),
@@ -713,7 +767,9 @@ PS.default <- function(mkt,upPrices,downPrices, useEst = FALSE,market=FALSE,rati
   psUP <- (upPrices - mcUp) * quantities
 
   if(party){
-    isParty <- mkt$down$isParty
+    isParty.down <- mkt$down$isParty
+    isParty.up   <- mkt$up$isParty
+    isParty <- isParty.up|isParty.down
     psUP <- psUP[isParty]
     psDown <- psDown[isParty]
     quantities <- quantities[isParty]
