@@ -197,7 +197,10 @@ res.nests <-  lapply(mkts.nests, function(x){
 
 res.nests <- data.table::rbindlist(res.nests)
 res.nests <- mutate(res.nests,
-                    up=factor(up), down=factor(down),
+                    up=ifelse(merger=="both",up+2,up),
+                    down=ifelse(merger=="both",down+2,down),
+                    up=factor(up),
+                    down=factor(down),
                     #vert=ifelse(merger=="vertical",vert+1,vert),
                     vert=ifelse(merger=="both",vert+2,vert),
                     vert=factor(vert),nestParm=factor(nestParm),
