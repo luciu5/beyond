@@ -70,7 +70,7 @@ psummary_cost.bw <-  ggplot(filter(res.nests.all,Outcome %in% c("Consumer","Tota
   #theme_tufte(ticks=FALSE) +
   #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
   #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
-  facet_grid(isParty~Outcome,scales="free",labeller = "label_context")+
+  facet_grid(isParty~Outcome,scales="fixed",labeller = "label_context")+
   xlab("Change in Surplus")+
   ylab("Outcome (%)")+
   #ylab("Avg. Downstream Price Change (%)")+
