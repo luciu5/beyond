@@ -50,8 +50,11 @@ boxfun <- function(x,probs=c(.05,.25,.5,.75,.95)){
 
 
 
-psummary_cost.bw <-  ggplot(filter(res.nests.all,Outcome %in% c("Consumer","Total")) %>%
-                              mutate(Cost=reorder(Cost,ifelse((Outcome=="Consumer") & (Merger=="Vertical"),-Outcome_value/mktrev.pre,NA),quantile,probs=.5,na.rm=TRUE)),
+psummary_cost.bw <-  ggplot(filter(res.nests.all,Outcome %in% c("Consumer","Total") & !Cost %in% c("Constant/Linear","Linear/Constant")) %>%
+                              mutate(isParty=factor(grepl("Party",as.character(Cost)),labels=c("All","Party")),
+                                     Cost=reorder(gsub("Party ","",as.character(Cost)),ifelse((Outcome=="Consumer") & (Merger=="Vertical"),-Outcome_value/mktrev.pre,NA),quantile,probs=.5,na.rm=TRUE),
+
+                                     ),
                             aes(y=Outcome_value/mktrev.pre*100,
                                             #avgpricedelta/mktrev.pre*100,
                                             x=Merger,color=Cost
@@ -67,7 +70,7 @@ psummary_cost.bw <-  ggplot(filter(res.nests.all,Outcome %in% c("Consumer","Tota
   #theme_tufte(ticks=FALSE) +
   #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
   #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
-  facet_grid(~Outcome,scales="free",labeller = "label_context")+
+  facet_grid(isParty~Outcome,scales="free",labeller = "label_context")+
   xlab("Change in Surplus")+
   ylab("Outcome (%)")+
   #ylab("Avg. Downstream Price Change (%)")+
@@ -743,7 +746,6 @@ dev.off()
 png("output/surplussum_cost.png",width = 10, height = 7, units = "in", res=300)
 print(psummary_cost.bw)
 dev.off()
-
 png("output/surplussum.png",width = 10, height = 7, units = "in", res=300)
 png("output/CVvertincumbBW.png",width = 10, height = 7, units = "in", res=300)
 print(pvertincumb.bw)
