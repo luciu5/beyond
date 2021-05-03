@@ -29,6 +29,8 @@
  \usepackage{makecell}
  \usepackage{xcolor}
 
+\interfootnotelinepenalty=10000
+
 \parskip     2.0mm       % space between paragraphs
 
 \alph{footnote}         % make title footnotes alpha-numeric
@@ -38,7 +40,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Title Page
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{Beyond ``Horizontal'' and ``Vertical'':\\ The Welfare Effects of Complex Integration\footnote{The analysis and conclusions set forth are those of the authors and do not indicate concurrence by other members of the Board research staff, by the Federal Reserve Board of Governors, or by the Federal Trade Commission.  Furthermore, the views expressed here should not be purported to reflect those of the U.S. Department of Justice.}}
+\title{Beyond ``Horizontal'' and ``Vertical'':\\ The Welfare Effects of Complex Integration\footnote{The analysis and conclusions set forth are those of the authors and do not indicate concurrence by other members of the Board research staff or by the Federal Reserve Board of Governors. Furthermore, the views expressed here should not be purported to reflect those of the Federal Trade Commission or the U.S. Department of Justice.}}
 
 \newcommand*\samethanks[1][\value{footnote}]{\footnotemark[#1]}
 \author{Gloria Sheu\footnote{Board of Governors of the Federal Reserve System, gloria.sheu@frb.gov. } \\ Federal Reserve Board \and  Charles Taragin\footnote{Federal Trade Commission, ctaragin@ftc.gov}  \\  Federal Trade Commission \and Margaret Loudermilk\footnote{U.S. Department of Justice, margaret.loudermilk@usdoj.gov}\\  U.S Department of Justice}
@@ -68,7 +70,7 @@ JEL classification: L13; L40; L41; L42
 % Body of Paper
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-Given the many different ways a firm may be organized, it is rare that any given merger can be neatly categorized as purely ``horizontal'' or ``vertical.''  Indeed, as the 2020 U.S. Department of Justice (DOJ) and Federal Trade Commission (FTC) Vertical Merger Guidelines (henceforth, the ``VMG'') state, mergers often have both horizontal and vertical aspects.  However, the typical theories and models used to analyze mergers rarely address these complexities.  Horizontal mergers are cast in terms of whether they create significant upward pricing pressure (UPP), while the focus for vertical mergers is on assessing the net effects of the elimination of double marginalization (EDM) versus raising rivals' costs (RRC).  Yet, a given merger may combine all of these effects simultaneously, which raises the necessity of balancing their impacts in a unified framework.
+Given the many different ways a firm may be organized, it is rare that any particular merger can be neatly categorized as purely ``horizontal'' or ``vertical.''  Indeed, as the 2020 U.S. Department of Justice (DOJ) and Federal Trade Commission (FTC) Vertical Merger Guidelines (henceforth, the ``VMG'') state, mergers often have both horizontal and vertical aspects.  However, the typical theories and models used to analyze mergers rarely address these complexities.  Horizontal mergers are cast in terms of whether they create significant upward pricing pressure (UPP), while the focus for vertical mergers is on assessing the net effects of the elimination of double marginalization (EDM) versus raising rivals' costs (RRC).  Yet, a given merger may combine all of these effects simultaneously, which raises the necessity of balancing their impacts in a unified framework.
 
 In this paper, we use a standard merger simulation model to assess the welfare implications of these complex mergers.  Our model is drawn directly from \citeN{ST2020}, and features a Bertrand logit downstream setup alongside a Nash Bargaining wholesale negotiation upstream.  We use this model to numerically simulate four types of mergers: (1) vertical mergers between an unintegrated retailer and an unintegrated wholesaler, (2) mixed downstream horizontal/vertical mergers between an unintegrated retailer and a previously integrated retailer/wholesaler pair, (3) mixed upstream horizontal/vertical mergers between an unintegrated wholesaler and a previously integrated retailer/wholesaler pair, and (4) integrated mergers between two previously integrated retailer/wholesaler pairs.  In each of these simulations, we calculate the impacts on consumer welfare and firm profits.  Furthermore, we examine how the presence of additional integrated rivals in the market changes our results. Our baseline simulations assume that units are produced with constant marginal costs, but we later extend our analysis to linear upward-sloping marginal costs.
 
