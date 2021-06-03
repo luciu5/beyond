@@ -21,7 +21,7 @@ relleverage=sort(unique(res.nests$relleveragePre),decreasing = TRUE)
 
 
 ## Only include constant cost sims
-res.nests.all  <- mutate(ungroup(res.nests.long),
+res.nests.allcost  <- mutate(ungroup(res.nests.long),
                                             Merger=factor(merger,levels=c("vertical","up","down","both"),labels=c("Vertical","Upstream","Downstream","Integrated")),
                                             Cost=factor(mc,
                                                         levels=c("constant","linprod","lincons","conslin","consparty","linparty"),
@@ -32,7 +32,20 @@ res.nests.all  <- mutate(ungroup(res.nests.long),
                                             Cost=reorder(Cost,-Outcome_value/mktrev.pre,median,na.rm=TRUE)) %>% select(-mc)
 
 
-res.nests.logit <- res.nests.long <- res.nests.all %>% filter(Cost=="Constant")
+res.nests.logit <- res.nests.long <- res.nests.allcost %>% filter(Cost=="Constant")
+
+
+res.nest_rival.allcost  <- ungroup(res.nest_all.long) %>% filter(preset=="rival") %>% mutate(
+                             Merger=factor(merger,levels=c("vertical","up","down","both"),labels=c("Vertical","Upstream","Downstream","Integrated")),
+                             Cost=factor(mc,
+                                         levels=c("constant","linprod","lincons","conslin","consparty","linparty"),
+                                         labels=c("Constant"
+                                                  ,"Linear","Linear/Constant","Constant/Linear","Party Constant","Party Linear"# "Quadratic","Linear/Quadratic","Quadratic/Linear","Linear/Constant","Constant/Linear"
+                                         )
+                             ),
+                             Cost=reorder(Cost,-Outcome_value/mktrev.pre,median,na.rm=TRUE)) %>% select(-mc)
+
+
 
 #res.nests.logit <- filter(as.data.frame(res.nests.logit),nestParm == "0" & Retailers !="1" & Wholesalers !="1") %>%
 #  mutate_if(is.factor,droplevels)
@@ -50,7 +63,7 @@ boxfun <- function(x,probs=c(.05,.25,.5,.75,.95)){
 
 
 
-psummary_cost.bw <-  ggplot(filter(res.nests.all,Outcome %in% c("Consumer","Total") & !Cost %in% c("Constant/Linear","Linear/Constant")) %>%
+psummary_cost.bw <-  ggplot(filter(res.nests.allcost,Outcome %in% c("Consumer","Total") & !Cost %in% c("Constant/Linear","Linear/Constant")) %>%
                               mutate(isParty=factor(grepl("Party",as.character(Cost)),labels=c("All","Party")),
                                      Cost=reorder(gsub("Party ","",as.character(Cost)),ifelse((Outcome=="Consumer") & (Merger=="Vertical"),-Outcome_value/mktrev.pre,NA),quantile,probs=.5,na.rm=TRUE),
 
@@ -557,6 +570,55 @@ pbargnoboth.bw <- pbargnoboth.bw + geom_segment(
                             Merger=factor("Vertical", levels=unique(res.nests.logit$Merger))),size=3.5)
 
 
+
+
+
+pbargrival.bw <- ggplot(filter(res.nest_rival.allcost ,Outcome %in% c("Consumer","Total")  & vert %in% c("0","1","4")), aes(y=Outcome_value/mktrev.pre*100,
+                                                                                                                                      #avgpricedelta/mktrev.pre*100,
+                                                                                                                                      x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
+  #geom_boxplot(outlier.alpha = 0.1) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  #coord_cartesian(ylim=c(-60,60))+
+  scale_y_continuous(breaks=seq(-100, 100, by=10) ) +
+  geom_hline(yintercept=0,linetype="dashed",color="black")+
+  geom_vline(xintercept=5,linetype="dotted")+
+  theme_bw()+#scale_colour_tableau('Color Blind')+
+  #scale_color_brewer(palette = "PuRd",direction=-1)+
+  scale_color_manual(values = seq_palette)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(Outcome~Merger,scales="free",labeller = "label_context")+
+  xlab("Relative Bargaining Power")+
+  ylab("Outcome (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="# Integrated Firms:")+
+  labs(title =  "How Changing Party Bargaining Strength Affects Consumer and Total Surplus, By Merger",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nRelative bargaining power for non-parties equal to 1."
+
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
+
+
+pbargrival.bw <- pbargrival.bw + geom_segment(
+  aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
+  data=data.frame(x=5.1,y=-50,xend=9
+                  ,Outcome=factor( "Consumer" ,levels=unique(res.nest_rival.allcost$Outcome)),
+                  Merger=factor("Vertical", levels=unique(res.nest_rival.allcost$Merger)))) +
+  geom_text(aes(x=x,y=y),color="black",label="equal power",angle=90,
+            data=data.frame(x=4.5,y=30,Outcome=factor( "Consumer" ,levels=unique(res.nest_rival.allcost$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nest_rival.allcost$Merger))),size=3.5) +
+  geom_text(aes(x=x,y=y),color="black",label="more retailer power",
+            data=data.frame(x=7.5,y=-40,Outcome=factor( "Consumer" ,levels=unique(res.nest_rival.allcost$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nest_rival.allcost$Merger))),size=3.5)
+
+
 pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up" & vert %in% c("0","1","4")), aes(y=Outcome_value/mktrev.pre*100,
                                                          #avgpricedelta/mktrev.pre*100,
                                                          x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
@@ -737,6 +799,48 @@ pbargboth_all.bw <- pbargboth_all.bw + geom_segment(
             data=data.frame(x=6.5,y=-20,Outcome=factor( "Wholesaler" ,levels=unique(res.nests.logit$Outcome))),size=3)
 
 
+pbargboth_rival.bw <- ggplot(filter(res.nest_rival.allcost,Merger =="Integrated" & vert != "5" & vert !="3"), aes(y=Outcome_value/mktrev.pre*100,
+                                                                                                         #avgpricedelta/mktrev.pre*100,
+                                                                                                         x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
+  #geom_boxplot(outlier.alpha = 0.1) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  scale_y_continuous(breaks=seq(-40,35,5))+
+  coord_cartesian(ylim=c(-40,35))+
+  geom_hline(yintercept=0,linetype="dashed",color="black")+
+  geom_vline(xintercept=5,linetype="dotted")+
+  theme_bw()+
+  #scale_colour_tableau('Color Blind')+
+  scale_color_manual(values = seq_palette)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(~Outcome,scales="free",labeller = "label_context")+
+  xlab("Relative Bargaining Power")+
+  ylab("Outcome (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="# Integrated Firms:")+
+  labs(title =  "How Changing Party Bargaining Strength Affects Surplus\n in an Integrated Merger",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nRelative bargaining power for non-parties equal to 1."
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
+
+
+pbargboth_rival.bw <- pbargboth_rival.bw + geom_segment(
+  aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
+  data=data.frame(x=5.1,y=-25,xend=7.5
+                  ,Outcome=factor( "Wholesaler" ,levels=unique(res.nest_all.long$Outcome)))) +
+  geom_text(aes(x=x,y=y),color="black",label="equal power",angle=90,
+            data=data.frame(x=4.7,y=15,Outcome=factor( "Wholesaler" ,levels=unique(res.nest_all.long$Outcome))),size=3.5) +
+  geom_text(aes(x=x,y=y),color="black",label="more\n retailer\n power",
+            data=data.frame(x=6.5,y=-20,Outcome=factor( "Wholesaler" ,levels=unique(res.nest_all.long$Outcome))),size=3)
+
+
 ## Output results
 
 png("output/surplussum.png",width = 10, height = 7, units = "in", res=300)
@@ -804,6 +908,15 @@ png("output/CVbargbothBW.png",width = 10, height = 7, units = "in", res=300)
 print(pbargboth_all.bw)
 dev.off()
 
+png("output/CVbargbothrivalBW.png",width = 10, height = 7, units = "in", res=300)
+print(pbargboth_rival.bw)
+dev.off()
+
 png("output/CVbargnobothBW.png",width = 10, height = 7, units = "in", res=300)
 print(pbargnoboth.bw)
+dev.off()
+
+
+png("output/CVbargrivalBW.png",width = 10, height = 7, units = "in", res=300)
+print(pbargrival.bw)
 dev.off()

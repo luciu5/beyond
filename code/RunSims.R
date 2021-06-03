@@ -30,7 +30,7 @@ clusterEvalQ(cl,{
              if(require(RevoUtilsMath)) setMKLthreads(1)
 })
 
-samples <- 1e3
+samples <- 1e3 #1e3
 ndfirms <- 2:5
 nufirms <- ndfirms
 nvfirms <- 0:4
@@ -38,13 +38,15 @@ nestParm <- c(0)
 type=c("1st")
 merger=c("up","down", "vertical","both")
 bargparm <- seq(.1,.9,.1)
+assym <- c("none","rival")
 mc=c("constant","linprod","lincons","conslin","consparty","linparty"#, "quadprod","linquad","quadlin"#,"linfirm"
      )
+
 relleveragePre <-  (1-bargparm)/bargparm
 
 
 
-genMkts <- function(x,y,z,t,m,n, b,c, large=TRUE, bargpreset="none"){
+genMkts <- function(x,y,z,t,m,n, b,c,a, large=TRUE){
 
 
 
@@ -64,7 +66,7 @@ genMkts <- function(x,y,z,t,m,n, b,c, large=TRUE, bargpreset="none"){
                                                       ownerPost = m,
                                                       M=1,cost_type=as.character(c),
                                                       largeMerger = large,
-                                                      bargpreset= bargpreset)
+                                                      bargpreset = as.character(a))
                  ,silent=TRUE)
 
 
@@ -106,6 +108,7 @@ thisres <- with(thissum,data.frame(
   nestParm=n,
   merger=m,
   barg=b,
+  preset=a,
   mc=c,
   M=M,
   outMargin=outMargin,
@@ -153,7 +156,7 @@ return(list(
   summary=thissum,
   res=unique(thisres)))}
 
-repMkts <- function(x,y,z,t,m,n,b,c,large=TRUE){replicate(samples, genMkts(x,y,z,t,m,n,b,c,large),simplify = "list")}
+repMkts <- function(x,y,z,t,m,n,b,c,a,large=TRUE){replicate(samples, genMkts(x,y,z,t,m,n,b,c,a,large),simplify = "list")}
 
 clusterExport(cl,varlist = setdiff(ls(),c("cl")))
 
@@ -170,7 +173,8 @@ res.nests <- expand.grid(up=ndfirms,
                          barg = bargparm,
                          type=type,
                          merger=merger,
-                         mc=mc)
+                         mc=mc,
+                         preset=assym)
 
 #res.nests <- (filter(res.nests, down==1))
 res.nests <- mutate(res.nests, type=as.character(type),
@@ -183,11 +187,11 @@ res.nests <- mutate(res.nests, type=as.character(type),
 
 mkts.nests <- clusterMap(cl, repMkts,
                          res.nests$up,res.nests$down,res.nests$vert, res.nests$type,res.nests$merger,res.nests$nestParm,
-                         res.nests$barg,res.nests$mc, SIMPLIFY = FALSE,
+                         res.nests$barg,res.nests$mc,res.nests$preset, SIMPLIFY = FALSE,
                          .scheduling = "dynamic"
 )
 
-names(mkts.nests) <- with(res.nests,as.character(interaction(up,down,vert,type,merger,mc,barg,nestParm)))
+names(mkts.nests) <- with(res.nests,as.character(interaction(up,down,vert,type,merger,nestParm,barg,mc,preset)))
 
 
 res.nests <-  lapply(mkts.nests, function(x){
@@ -204,6 +208,7 @@ res.nests <- mutate(res.nests,
                     #vert=ifelse(merger=="vertical",vert+1,vert),
                     vert=ifelse(merger=="both",vert+2,vert),
                     vert=factor(vert),nestParm=factor(nestParm),
+                    preset=factor(preset),
                     relleveragePre = (1- barg)/barg,barg=factor(barg),
                     type= ifelse(type == "1st", "Bertrand","2nd"),type=factor(type, levels=c("Bertrand","2nd")),
                     Retailers = down)
@@ -214,7 +219,7 @@ save(mkts.nests, file=file.path(simpath,"SimsNests.RData"))
 rm(mkts.nests)
 
 
-res.nests <- ungroup(res.nests) %>% group_by(merger,up,down,vert,type,nestParm,mc) %>%
+res.nests <- ungroup(res.nests) %>% group_by(merger,up,down,vert,type,preset,nestParm,mc) %>%
   mutate(upPSDelta=(upPSPost- upPSPre),
          downPSDelta=(downPSPost - downPSPre),
          cv= -cv,
@@ -252,7 +257,8 @@ res.nests <- filter(as.data.frame(res.nests),hhipre>0 & as.logical(isMarket)
 
 res.nest_all <- res.nests
 
-res.nests <- filter(res.nests,nestParm =="0")
+
+res.nests <- filter(res.nests,nestParm =="0" & preset=="none")
 
 res.nests.long <- select(res.nests,type,down,up,vert,merger,barg,nestParm,mc,cv,upPSDelta,downPSDelta,totalDelta,relleveragePre,relmarginPreCut,
                         avgpricedelta,mktrev.pre) %>%
@@ -261,7 +267,7 @@ res.nests.long <- select(res.nests,type,down,up,vert,merger,barg,nestParm,mc,cv,
   gather(key="Outcome",value="Outcome_value",Consumer,`Wholesaler`,`Retailer`,`Total`) %>%
   mutate(Outcome=factor(Outcome,levels=c("Consumer","Retailer","Wholesaler","Total")))
 
-res.nest_all.long <- select(res.nest_all,type,down,up,merger,barg,nestParm,mc,cv,upPSDelta,downPSDelta,totalDelta,relleveragePre,relmarginPreCut,
+res.nest_all.long <- select(res.nest_all,type,down,up,vert,merger,barg,nestParm,mc,preset,cv,upPSDelta,downPSDelta,totalDelta,relleveragePre,relmarginPreCut,
                             avgpricedelta,mktrev.pre) %>%
   rename(Consumer=cv, `Wholesaler`=upPSDelta, `Retailer`=downPSDelta,`Total`=totalDelta,  Wholesalers=up,
          Retailers=down) %>%
