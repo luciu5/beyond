@@ -38,7 +38,7 @@ nestParm <- c(0)
 type=c("1st")
 merger=c("up","down", "vertical","both")
 bargparm <- seq(.1,.9,.1)
-assym <- c("none","rival")
+assym <- c("none","diag1","diag0")
 mc=c("constant","linprod","lincons","conslin","consparty","linparty"#, "quadprod","linquad","quadlin"#,"linfirm"
      )
 
@@ -182,7 +182,8 @@ res.nests <- mutate(res.nests, type=as.character(type),
   filter(!(merger %in% c("up") & (up ==1))) %>%
   filter(!(merger %in% c("down") & (down ==1))) %>%
   filter(vert < up & vert<down) %>%
-  filter(!(merger %in% c("vertical") & (down == 1 & up ==1)))
+  filter(!(merger %in% c("vertical") & (down == 1 & up ==1))) %>%
+  filter(!(preset %in% c("diag1","diag0") & mc !="constant"))
 
 
 mkts.nests <- clusterMap(cl, repMkts,

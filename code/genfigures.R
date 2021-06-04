@@ -35,7 +35,7 @@ res.nests.allcost  <- mutate(ungroup(res.nests.long),
 res.nests.logit <- res.nests.long <- res.nests.allcost %>% filter(Cost=="Constant")
 
 
-res.nest_rival.allcost  <- ungroup(res.nest_all.long) %>% filter(preset=="rival") %>% mutate(
+res.nest_diagonal.allcost  <- ungroup(res.nest_all.long) %>% filter(preset != "none") %>% mutate(
                              Merger=factor(merger,levels=c("vertical","up","down","both"),labels=c("Vertical","Upstream","Downstream","Integrated")),
                              Cost=factor(mc,
                                          levels=c("constant","linprod","lincons","conslin","consparty","linparty"),
@@ -573,12 +573,12 @@ pbargnoboth.bw <- pbargnoboth.bw + geom_segment(
 
 
 
-pbargrival.bw <- ggplot(filter(res.nest_rival.allcost ,Outcome %in% c("Consumer","Total")  & vert %in% c("0","1","4")), aes(y=Outcome_value/mktrev.pre*100,
+pbargdiagonal.bw <- ggplot(filter(res.nest_diagonal.allcost ,Outcome %in% c("Consumer","Total")  & preset=="diag0" & vert %in% c("0","1","4")), aes(y=Outcome_value/mktrev.pre*100,
                                                                                                                                       #avgpricedelta/mktrev.pre*100,
                                                                                                                                       x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
-  #coord_cartesian(ylim=c(-60,60))+
+  coord_cartesian(ylim=c(-50,10))+
   scale_y_continuous(breaks=seq(-100, 100, by=10) ) +
   geom_hline(yintercept=0,linetype="dashed",color="black")+
   geom_vline(xintercept=5,linetype="dotted")+
@@ -598,25 +598,25 @@ pbargrival.bw <- ggplot(filter(res.nest_rival.allcost ,Outcome %in% c("Consumer"
   #ylab("Share-Weighted Downstream Price Change")+
   #geom_text(data=ann_text,label="Wholesale advantage")
   labs(colour="# Integrated Firms:")+
-  labs(title =  "How Changing Party Bargaining Strength Affects Consumer and Total Surplus, By Merger",
-       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nRelative bargaining power for non-parties equal to 1."
+  labs(title =  "How Changing non-Party  Bargaining Strength in Diagonal Mergers Affects Consumer and Total Surplus, By Merger",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nRelative bargaining power for parties' integrated product equal to 1."
 
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
 
 
-pbargrival.bw <- pbargrival.bw + geom_segment(
+pbargdiagonal.bw <- pbargdiagonal.bw + geom_segment(
   aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
   data=data.frame(x=5.1,y=-50,xend=9
-                  ,Outcome=factor( "Consumer" ,levels=unique(res.nest_rival.allcost$Outcome)),
-                  Merger=factor("Vertical", levels=unique(res.nest_rival.allcost$Merger)))) +
+                  ,Outcome=factor( "Consumer" ,levels=unique(res.nest_diagonal.allcost$Outcome)),
+                  Merger=factor("Vertical", levels=unique(res.nest_diagonal.allcost$Merger)))) +
   geom_text(aes(x=x,y=y),color="black",label="equal power",angle=90,
-            data=data.frame(x=4.5,y=30,Outcome=factor( "Consumer" ,levels=unique(res.nest_rival.allcost$Outcome)),
-                            Merger=factor("Vertical", levels=unique(res.nest_rival.allcost$Merger))),size=3.5) +
+            data=data.frame(x=4.5,y=30,Outcome=factor( "Consumer" ,levels=unique(res.nest_diagonal.allcost$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nest_diagonal.allcost$Merger))),size=3.5) +
   geom_text(aes(x=x,y=y),color="black",label="more retailer power",
-            data=data.frame(x=7.5,y=-40,Outcome=factor( "Consumer" ,levels=unique(res.nest_rival.allcost$Outcome)),
-                            Merger=factor("Vertical", levels=unique(res.nest_rival.allcost$Merger))),size=3.5)
+            data=data.frame(x=7.5,y=-40,Outcome=factor( "Consumer" ,levels=unique(res.nest_diagonal.allcost$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nest_diagonal.allcost$Merger))),size=3.5)
 
 
 pbargup_all.bw <- ggplot(filter(res.nests.logit,merger =="up" & vert %in% c("0","1","4")), aes(y=Outcome_value/mktrev.pre*100,
@@ -799,7 +799,7 @@ pbargboth_all.bw <- pbargboth_all.bw + geom_segment(
             data=data.frame(x=6.5,y=-20,Outcome=factor( "Wholesaler" ,levels=unique(res.nests.logit$Outcome))),size=3)
 
 
-pbargboth_rival.bw <- ggplot(filter(res.nest_rival.allcost,Merger =="Integrated" & vert != "5" & vert !="3"), aes(y=Outcome_value/mktrev.pre*100,
+pbargboth_diagonal.bw <- ggplot(filter(res.nest_diagonal.allcost,Merger =="Integrated" & vert != "5" & vert !="3"), aes(y=Outcome_value/mktrev.pre*100,
                                                                                                          #avgpricedelta/mktrev.pre*100,
                                                                                                          x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
@@ -831,7 +831,7 @@ pbargboth_rival.bw <- ggplot(filter(res.nest_rival.allcost,Merger =="Integrated"
   )
 
 
-pbargboth_rival.bw <- pbargboth_rival.bw + geom_segment(
+pbargboth_diagonal.bw <- pbargboth_diagonal.bw + geom_segment(
   aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
   data=data.frame(x=5.1,y=-25,xend=7.5
                   ,Outcome=factor( "Wholesaler" ,levels=unique(res.nest_all.long$Outcome)))) +
@@ -908,8 +908,8 @@ png("output/CVbargbothBW.png",width = 10, height = 7, units = "in", res=300)
 print(pbargboth_all.bw)
 dev.off()
 
-png("output/CVbargbothrivalBW.png",width = 10, height = 7, units = "in", res=300)
-print(pbargboth_rival.bw)
+png("output/CVbargbothdiagonalBW.png",width = 10, height = 7, units = "in", res=300)
+print(pbargboth_diagonal.bw)
 dev.off()
 
 png("output/CVbargnobothBW.png",width = 10, height = 7, units = "in", res=300)
@@ -917,6 +917,6 @@ print(pbargnoboth.bw)
 dev.off()
 
 
-png("output/CVbargrivalBW.png",width = 10, height = 7, units = "in", res=300)
-print(pbargrival.bw)
+png("output/CVbargdiagonalBW.png",width = 10, height = 7, units = "in", res=300)
+print(pbargdiagonal.bw)
 dev.off()
