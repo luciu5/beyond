@@ -16,11 +16,12 @@ market<-function(nfirms.down=3, # # of downstream firms
                  nprods.up=nprods.down, # # of upstream products
                  nfirms.vert=0, # number of integrated firms pre-merger
                  bargparm=runif(nfirms.down*nfirms.up, .25,.75), # bargaining parameters for each upstream/downstream firm pair
-                 bargpreset=c("none","party","rival","diagonal"), # fix some bargaining parameters
+                 bargpreset=c("none","party","rival","diag1","diag0"), # fix some bargaining parameters
                  # none: do not modify bargparm
                  # party: set party bargparm to 0.5, allow others to vary
                  # rival: set non-party bargparm to 0.5, allow others to vary
-                 # diagonal: Vertical only. set party bargparm to 1 ,allow others to vary
+                 # diag1: Vertical only. set party pre-merger bargparm to 1 ,allow others to vary
+                 # diag0: Vertical only. set party pre-merger bargparm to 0 ,allow others to vary
                  mcshare.up=runif(nfirms.up*nprods.up), # share of upstream costs
                  mcshare.down=runif(nfirms.down*nprods.down), # share of wholesale price
                  ownerPost = c("up","down","vertical","both"), # simulate an upstream horizontal merger, downstream horizontal merger,
@@ -141,7 +142,8 @@ market<-function(nfirms.down=3, # # of downstream firms
                      none=bargparm,
                      party=ifelse(isParty.up |isParty.down,0.5,bargparm),
                      rival=ifelse(!(isParty.up |isParty.down),0.5,bargparm),
-                     diagonal=ifelse(isParty.up & isParty.down,1,bargparm)
+                     diag1=ifelse(isParty.up & isParty.down,1,bargparm),
+                     diag0=ifelse(isParty.up & isParty.down,0,bargparm)
   )
 
   ## when OwnerPost equals "vertical"
