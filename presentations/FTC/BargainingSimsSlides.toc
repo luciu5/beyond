@@ -1,0 +1,10 @@
+\beamer@sectionintoc {1}{Introduction}{2}{0}{1}
+\beamer@sectionintoc {2}{The Model}{6}{0}{2}
+\beamer@subsectionintoc {2}{1}{Downstream}{8}{0}{2}
+\beamer@subsectionintoc {2}{2}{Upstream}{11}{0}{2}
+\beamer@subsectionintoc {2}{3}{Merger Simulation}{20}{0}{2}
+\beamer@sectionintoc {3}{Numerical Simulations}{24}{0}{3}
+\beamer@subsectionintoc {3}{1}{Overview }{27}{0}{3}
+\beamer@subsectionintoc {3}{2}{Integrated Firms }{29}{0}{3}
+\beamer@subsectionintoc {3}{3}{Convex Marginal Costs}{33}{0}{3}
+\beamer@sectionintoc {4}{Conclusion}{35}{0}{4}
