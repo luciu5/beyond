@@ -1,0 +1,608 @@
+%\documentclass[handout]{beamer}
+\documentclass{beamer}
+\usepackage{hyperref}   % displays URLs
+\usepackage{chicago}    % bibliography package
+\usepackage{graphicx}   % insert PostScript figures
+\usepackage{setspace}   % controls line spacing
+\usepackage{mathtools,amsthm,amssymb,amstext} % controls equation entry and symbols
+\usepackage{rotating}   % rotates graphics
+\usepackage{soul}       % controls hyphenation
+\usepackage{epsfig}     % helps with including graphics
+\usepackage{pdflscape}  % helps with displaying rotated graphics in PDFs
+\usepackage{lscape}     % helps with rotating pages
+\usepackage{setspace}   % controls line spacing
+\usepackage{caption}    % controls  captions
+\usepackage{bibentry}   %cite without bibliography
+%\usepackage{handoutWithNotes}
+%\setbeamertemplate{note page}[default]
+%\setbeameroption{show notes on second screen=right}
+%\setbeameroption{show only notes}
+%\insertslideintonotes{0.25}
+%\pgfpagesuselayout{4 on 1}[letterpaper,border shrink=5mm]
+
+
+\usetheme[subsectionpage=progressbar, numbering=fraction]{metropolis}
+
+%\setbeamertemplate{footnote}{%
+%  \hangpara{2em}{1}%
+%  \makebox[2em][l]{\insertfootnotemark}\footnotesize\insertfootnotetext\par%
+%}
+\renewcommand\thempfootnote{\arabic{mpfootnote}} % return footnotes numbers to numerals
+
+
+% shrink bibliographic text
+%\renewcommand{\bibfont}{\scriptsize}
+\setbeamerfont{bibliography item}{size=\footnotesize}
+\setbeamerfont{bibliography entry author}{size=\footnotesize}
+\setbeamerfont{bibliography entry title}{size=\footnotesize}
+\setbeamerfont{bibliography entry location}{size=\footnotesize}
+\setbeamerfont{bibliography entry note}{size=\footnotesize}
+
+%\author[Sheu and Taragin]{Gloria Sheu\footnote{ The views expressed herein are entirely those of the authors and should not be purported to reflect those of the U.S. Department of Justice.}\and Charles Taragin\footnotemark[1]}
+\author[Sheu et. al.]{Gloria Sheu\textsuperscript{1} \and Charles Taragin\inst{2} \and Margaret Loudermilk\inst{3}}
+\institute[]{\textsuperscript{1} Federal Reserve Board of Governors \and \inst{2}Federal Trade Commission \and \inst{3}U.S. Department of Justice}
+\title{Beyond ``Horizontal'' and ``Vertical'':\\ The Welfare Effects of Complex Integration}
+\date{April 2022}
+
+%\author[Sheu and Taragin]{Gloria Sheu\and Charles Taragin}
+
+\addtobeamertemplate{title page}{\footnotesize The views expressed herein are entirely those of the authors and should not be purported to reflect those of the Board of Governors, Federal Trade Commission, or U.S. Department of Justice.}{}
+\beamertemplatenavigationsymbolsempty
+%\beamerdefaultoverlayspecification{<+->}
+
+%\usepackage{Sweave}
+
+\begin{document}
+
+
+%\DefineVerbatimEnvironment{Sinput}{Verbatim} {xleftmargin=2em}
+%\DefineVerbatimEnvironment{Soutput}{Verbatim}{xleftmargin=2em}
+%\DefineVerbatimEnvironment{Scode}{Verbatim}{xleftmargin=2em}
+%\fvset{listparameters={\setlength{\topsep}{0pt}}}
+%\renewenvironment{Schunk}{\vspace{\topsep}}{\vspace{\topsep}}
+
+%\AtBeginSection[]
+%{
+%\begin{frame}{Table of Contents}
+%\tableofcontents[currentsection]
+%\end{frame}
+%}
+
+
+
+% \AtBeginSection[]{
+%   \begin{frame}
+%   \vfill
+%   \centering
+%   \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+%     \usebeamerfont{title}\insertsectionhead\par%
+%   \end{beamercolorbox}
+%   \vfill
+%   \end{frame}
+% }
+%
+% \def\SecT#1{\begin{frame}[plain]
+% \begin{block}{}
+% %\centering\huge\thesection. \insertsubsection
+% \centering\huge\insertsection
+% \end{block}
+% \vfill\Large #1
+% \end{frame}}
+
+
+%\begingroup
+%\setbeamertemplate{footline}{\vspace*{-0.5cm}The views expressed herein are
+%    entirely those of the authors\\ and should not be purported to
+%    reflect those of the U.S. Department of Justice.\par}
+
+\begin{frame}
+\titlepage
+\end{frame}
+%\frame{\titlepage}
+%\endgroup
+
+
+
+
+
+%\part{Introduction}
+%\frame{\partpage}
+\section{Introduction}
+
+\begin{frame}
+\frametitle{Mergers in Supply Chains Are Complex}
+
+\begin{itemize}
+\item literature has largely focused on mergers between unintegrated firms with unintegrated rivals. What about
+\begin{itemize}
+\item mergers where \textbf{one} party is already vertically integrated and the other is not?
+\item mergers where \textbf{both} parties are already vertically integrated?
+\item mergers where \textbf{3rd parties} are vertically integrated?
+\end{itemize}
+\item literature has focused on mergers between firms with \textbf{constant} marginal costs and no capacity constraints.
+
+\begin{itemize}
+\item constant marginal costs can understate raising rivals costs
+\item constant marginal costs can overstate EDM
+\end{itemize}
+
+\end{itemize}
+\end{frame}
+
+
+% \begin{table}
+% \centering
+% \small
+% \begin{tabular}{|r|c|c|c|c|}\hline
+% Matter & Industry& Year & Supply & Demand \\\hline
+% HR Block/TaxAct &Tax Prep.& 2011& Bertrand & Linear\\
+% Sysco/US Foods& Food Svc. Dist.&2015 &2nd Score & Logit\\
+% Anthem/Cigna&Health Ins.&2017&2nd Score & Logit\\
+% Aetna/Humana&Health Ins.&2017&Bertrand & Nested Logit\\\hline
+% \end{tabular}
+% \caption{Recent Matters that Employed Merger Simulation}
+% \end{table}
+% \end{frame}
+
+
+
+\begin{frame}[shrink=1]
+\frametitle{Our Contribution}
+
+\begin{block}{Use \citeN{ST2021} to examine merger effects}
+\begin{itemize}
+\item when an integrated firm merges with an unintegrated upstream firm,
+\item when an integrated firm merges with an unintegrated downstream firm,
+\item when two integrated firms merge,
+\item as the number of integrated rivals increases,
+\item when marginal costs are non-constant.
+\end{itemize}
+\end{block}
+
+\begin{block}{Case Studies: Solid Waste Management Mergers (In Progress)}
+\begin{itemize}
+\item Waste Management/Advanced Disposal Services (2020)
+\item Republic/Santek (2020)
+\end{itemize}
+\end{block}
+\end{frame}
+
+ % \begin{frame}[shrink=10]
+ % \frametitle{The Existing Literature}
+ % Our paper combines methods from two literatures
+ %
+ % \begin{block}{Merger Simulation}
+ % \begin{itemize}
+ % \item Bertrand Pricing with Differentiated Products: \citeN{WF1994};
+ % \item 2nd Score Auction with Differentiated Products: \citeN{Miller2014};
+ % \item Bargaining with Differentiated Products: \citeN{Grennan2013}, \citeN{GNT2015}.
+ % \end{itemize}
+ % \end{block}
+ %
+ % \begin{block}{Vertical Supply Chain}
+ % \begin{itemize}
+ % \item Retailer/Wholesaler Relationships: \citeN{DKVB2010};
+ % \item hospital-insurer contracting: \citeN{HL2017};
+ % \item video content creation/distribution: \citeN{CY2012}, \citeN{CLWY2017}.
+ % \end{itemize}
+ % \end{block}
+ %
+ % \end{frame}
+ %
+
+
+\begin{frame}
+\frametitle{Overview}
+\tableofcontents
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Model}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Overview}
+
+\begin{itemize}
+  \item We model a two-level supply chain
+  \begin{enumerate}
+    \item Nash bargaining upstream
+    \item Bertrand differentiated products logit downstream (\citeN{WF1994})
+  \end{enumerate}
+  \item Downstream model is purposefully kept in standard forms to facilitate calibration
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Downstream}
+\begin{frame}
+\frametitle{Demand}
+
+\begin{itemize}
+  \item Assume logit for downstream Bertrand
+  \item Each wholesaler $w$ in the set $\mathbb{W}$ offers a single product to retailers $r$ in the set $\mathbb{R}$,
+  which in turn sell to consumers
+  \item Market share of wholesaler $w$'s product purchased through retailer $r$ is
+  \begin{equation*}
+  s_{rw} = \frac{\exp(\delta_{rw} - \alpha p_{rw})}{1 + \sum_{t \in \mathbb{R}} \sum_{x \in \mathbb{W}^t} \exp(\delta_{tx}   - \alpha p_{tx})}
+  \end{equation*}
+  \item $\{\delta_{rw}; \forall r \in \mathbb{R}, \forall w \in \mathbb{W}\}$ and $\alpha$ are parameters to be calibrated
+\end{itemize}
+
+\end{frame}
+
+\note{retailer is selling a number of bundled products whose quality can vary.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Bertrand}
+
+\begin{itemize}
+  \item Assume firms set prices simultaneously in Bertrand Nash equilibrium
+  \item Retailer  marginal cost consists of wholesale fee $p^W_{rw}$ and other  \textcolor{cyan}{constant/linear} costs $c^R_{rw}$
+  \item Profit function for retailer $r$ is
+  \begin{equation*}
+  \pi^r = \sum_{w \in \mathbb{W}^r} [p_{rw} - p^W_{rw} - c^R_{rw}] s_{rw} M
+  \end{equation*}
+  \item Resulting first order conditions determine downstream equilibrium prices
+  \begin{equation*}
+  \sum_{x \in \mathbb{W}^r} [p_{rx} - p^W_{rx} - c^R_{rx}] \frac{\partial s_{rx}}{\partial p_{rw}} + s_{rw} = 0
+  \end{equation*}
+\end{itemize}
+
+\end{frame}
+
+\note{constant marginal costs assume a single unit of wholesaler product is used to produce a single unit of retailer product.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Upstream}
+\begin{frame}
+\frametitle{Nash Bargaining}
+
+\begin{itemize}
+  \item Assume a \textcolor{cyan}{linear} wholesale price set by Nash Bargaining
+  \begin{equation*}
+  \max_{p^W_{rw}} (\pi^r - d^r (\mathbb{W}^r \setminus \{w\}))^{\lambda_{rw}} (\pi^w - d^w (\mathbb{R}^w \setminus \{r\}
+  ))^{1 - \lambda_{rw}}
+  \end{equation*}
+  \item $\{\lambda_{rw}; \forall r \in \mathbb{R}, \forall w \in \mathbb{W}\}$ are parameters to be calibrated
+  \item Wholesaler marginal costs  are \textcolor{cyan}{constant/linear} and equal $c^W_{rw}$
+  \item Profit function for wholesaler $w$ is
+  \begin{equation*}
+  \pi^w = \sum_{r \in \mathbb{R}^w} [p^W_{rw} - c^W_{rw}] s_{rw} M
+  \end{equation*}
+  \item All wholesalers and retailers reach an agreement in equilibrium.
+\end{itemize}
+
+\end{frame}
+
+\note{
+\begin{enumerate}
+\item $\pi^r$: retailer profits from reaching agreement with wholesaler $w$
+\item $d^r$: \textbf{Bargaining Leverage}. retailer profits if not agreement is reached and retailer discontinues sale of product with $w$'s input. Some sales will be recaptured from remaining retailer profits.
+\item $\lambda_{rw}$: \textbf{Bargaining Power} parameter. Possibly reflects
+\begin{itemize}
+\item relative bargaining ability
+\item relative impatience (e.g. cost of capital)
+\item often assumed to be 0.5 but we will calibrate from data
+\end{itemize}
+\end{enumerate}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Simplifying Assumptions}
+
+\begin{itemize}
+  \item \only<1-5>{First} \only<6>{Simplified first} order condition is given by
+  \only<1-5>{
+  \begin{equation*}
+  \begin{split}
+  &\lambda_{rw}[\pi^w - d^w (\mathbb{R}^w \setminus \{r\})]
+  \left( \only<1-4>{\frac{\partial \pi^r}{\partial p^W_{rw}}} \only<5>{\textcolor{blue}{-s_{rw}M}}- \only<1-2>{\frac{\partial d^r (\mathbb{W}^r \setminus \{w\})}{\partial p^W_{rw}}} \only<3-5>{\textcolor{orange}{0}}  \right) + \\
+  &(1-\lambda_{rw})[\pi^r - d^r (\mathbb{W}^r \setminus \{w\})]
+  \left(\only<1-4>{\frac{\partial \pi^w}{\partial p^W_{rw}}} \only<5>{\textcolor{blue}{s_{rw}M}} - \only<1-2>{\frac{\partial d^w(\mathbb{R}^w \setminus \{r\})}{\partial p^W_{rw}}}  \only<3-5>{\textcolor{orange}{0}} \right) = 0,
+  \end{split}
+  \end{equation*}}
+  \only<6>{
+  \begin{equation*}
+  \pi^w - d^w (\mathbb{R}^w\setminus \{r\}) = \frac{1-\lambda_{rw}}{\lambda_{rw}} (\pi^r - d^r (\mathbb{W}^r \setminus      \{w\}))
+  \end{equation*}}
+  \item Use two simplifying assumptions
+  \begin{enumerate}
+    \item \uncover<2-6>{\textcolor{orange}{\textit{Simultaneous negotiations}}: treat other contracts as given}
+    \item \uncover<4-6>{\textcolor{blue}{\textit{Simultaneous downstream pricing}}: treat downstream prices as given}
+  \end{enumerate}
+\end{itemize}
+
+\end{frame}
+
+\note{\textbf{ simultaneous negotiations} is reasonable if other contracts cannot be easily or quickly renegotiated. \textbf{ simultaneous downstream pricing} is reasonable if wholesalers do not have much insight into how downstream prices are set OR if downstream prices change at a high frequency than upstream contracts are negotiated.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Disagreement Payoffs}
+
+\begin{itemize}
+  \item Profit for wholesaler $w$ if it does not sell to retailer $r$ is
+  \begin{equation*}
+  d^w (\mathbb{R}^w \setminus \{r\}) = \sum_{t \in \mathbb{R}^w \setminus \{r\}} [p^W_{tw} - c^W_{tw}] s_{tw}(\mathbb{W}^r   \setminus \{w\}) M
+  \end{equation*}
+  \item Profit for retailer $r$ if it does not buy from wholesaler $w$ is
+  \begin{equation*}
+  d^r (\mathbb{W}^r \setminus \{w\}) = \sum_{x \in \mathbb{W}^r \setminus \{w\}} [p_{rx} - p^W_{rx} - c^R_{rx}] s_{rx}
+  (\mathbb{W}^r \setminus \{w\}) M
+  \end{equation*}
+  \item Other things equal, a larger disagreement payoff increases bargaining leverage
+\end{itemize}
+
+\end{frame}
+
+
+
+% \subsection{Calibration}
+%
+% \begin{frame}
+% \frametitle{Downstream Parameters}
+% \small
+% Suppose we observe all shares and prices and at least one downstream product margin. Then we can recover $\{\delta_{rw}; \forall r \in \mathbb{R}, \forall w \in \mathbb{W}\}$ and $\alpha$ using the following equations
+%
+% \begin{align*}
+% \ln(s_{rw})-\ln(s_{00}) &= \delta_{rw} - \alpha p_{rw},\\
+% \intertext{\textbf{and} for Bertrand}
+%  m^R_{rw} &= -\frac{1}{\alpha
+%   \bigl(1 - \sum\limits_{x \in \mathbb{W}^r} s_{rx}\bigr)}\\
+% \intertext{\emph{or} for Second Score}
+% E \left[ m^R_{rw} \middle| rw \text{ wins} \right] &= -\frac{\ln
+%   \bigl(1 - \sum\limits_{x \in \mathbb{W}^r} s_{rx} \bigr)}{\alpha\bigl( \sum\limits_{x \in \mathbb{W}^r} s_{rx} \bigr)}
+% \end{align*}
+%
+% \end{frame}
+%
+%
+% \begin{frame}
+% \frametitle{Upstream Parameters}
+% Further, suppose we observe wholesale margins and prices. Then using the predicted retail margins and shares from the downstream calibration we can recover $\{\lambda_{rw}; \forall r \in \mathbb{R}, \forall w \in \mathbb{W}\}$
+%
+% \begin{equation*}
+% \begin{split}
+% &m^W_{rw}s_{rw} - \sum_{t \in \mathbb{R}^w \setminus \{r\}} m^W_{tw} \Delta s_{tw}(\mathbb{W}^r \setminus \{w\}) = \\
+% &\frac{1-\lambda_{rw}}{\lambda_{rw}} \left(\widehat{m^R_{rw}}s_{rw} - \sum_{x \in \mathbb{W}^r \setminus \{w\}} \widehat{m^R_{rx}} \Delta s_{rx}(\mathbb{W}^r \setminus \{w\})\right).
+% \end{split}
+% \end{equation*}
+%
+% \end{frame}
+
+\subsection{Merger Simulation}
+
+% \begin{frame}
+% \frametitle{Downstream Horizontal Merger: Recapture Lost Sales}
+% \small
+% Suppose that retailer $r$ acquires retailer $s$. Downstream, $r$ ``recaptures'' sales lost to $s$ (and vice versa)
+% \begin{block}{Bertrand}
+% \begin{equation*}
+% \sum_{x \in \mathbb{W}^r} [p_{rx} - p^W_{rx} - c^R_{rx}] \frac{\partial s_{rx}}
+% {\partial p_{rw}} + s_{rw}  +
+% \textcolor{red}{\underbrace{ \sum_{v \in \mathbb{W}^s} [p_{sv} - p^W_{sv} - c^R_{sv}] \frac{\partial s_{sv}}{\partial p_{rw}}}_\text{$\uparrow$ Price}} = 0,
+% \end{equation*}
+% \end{block}
+% \begin{block}{Second Score Auction}
+% \begin{equation*}
+%  E \left[ m^R_{rw} \middle| rw \text{ wins} \right] = -\frac{\ln
+%   \bigl(1 - \sum\limits_{x \in \mathbb{W}^r} s_{rx} - \textcolor{red}{\overbrace{\sum_{v \in \mathbb{W}^s} s_{sv}}^\text{$\uparrow$ Price}}\bigr)}{\alpha\bigl( \sum\limits_{x \in \mathbb{W}^r} s_{rx} +  \sum_{v \in \mathbb{W}^s} s_{sv}\bigr)}
+%   \end{equation*}
+% \end{block}
+% \end{frame}
+%
+% \note{
+% \begin{itemize}
+% \item Bertrand: new term is UPP
+% \item 2nd Score: Dominant strategy to only biud highest value alternative. Avoids cannibalization
+% \end{itemize}
+% }
+%
+% \begin{frame}
+% \frametitle{Downstream Horizontal Merger: Improved Bargaining Leverage}
+% Suppose that retailer $r$ acquires retailer $s$. Upstream, $r$'s bargaining leverage improves. Post-merger first order condition is given by
+%   \begin{align*}
+%   \pi^w - d^w (\mathbb{R}^w\setminus \{r\}) &= \frac{1-\lambda^*_{rs,w}}{\lambda^*_{rs,w}} (\pi^r - d^r (\mathbb{W}^r \setminus      \{w\}) - \textcolor{red}{\underbrace{d^s (\mathbb{W}^r \setminus      \{w\})}_\text{$\uparrow$ Price}})\\
+%   \intertext{Merger can also change retailer's bargaining power}
+%   \lambda^*_{rs,w} &=\begin{cases}
+%        \max\{\lambda_{rw}, \lambda_{sw}\} & \text{if synergy,} \\
+%        \min\{\lambda_{rw}, \lambda_{sw}\} & \text{if dis-synergy,}\\
+%        \lambda_{rw}                       & \text{if no change.}\\
+%     \end{cases}
+%   \end{align*}
+% \end{frame}
+%
+%
+%
+% \begin{frame}
+% \frametitle{Upstream Horizontal Merger: Improved Bargaining Leverage}
+% Suppose that wholesaler $w$ acquires wholesaler $v$. Upstream, $w$'s bargaining leverage improves. Post-merger first order condition is given by
+%   \begin{align*}
+%   \pi^w - d^w (\mathbb{R}^w\setminus \{r\})- \textcolor{red}{\underbrace{d^v (\mathbb{R}^w \setminus      \{w\})}_\text{$\uparrow$ Price}} &= \frac{1-\lambda^*_{r, wv}}{\lambda^*_{r, wv}} (\pi^r - d^r (\mathbb{W}^r \setminus      \{w\}) )\\
+%  \intertext{Merger can also change wholesaler's bargaining power}
+%   \lambda^*_{r, wv} &=\begin{cases}
+%        \max\{\lambda_{rw}, \lambda_{rv}\} & \text{if synergy,} \\
+%        \min\{\lambda_{rw}, \lambda_{rv}\} & \text{if dis-synergy,}\\
+%        \lambda_{rw}                       & \text{if no change.}\\
+%     \end{cases}
+%   \end{align*}
+% \end{frame}
+%
+
+
+
+\begin{frame}
+\frametitle{Integrated Firm: Own Retail Prices}
+Assume that retailer $r$ acquires wholesaler $w$. $r$'s price downstream is determined by
+
+\begin{equation*}
+\begin{split}
+\sum_{x \in \mathbb{W}^r \setminus \{w\}} [p_{rx} - p^W_{rx} - c^R_{rx}]\frac{\partial s_{rx}}{\partial p_{rw}} &+ s_{rw}\\
+\textcolor{blue}{\underbrace{[p_{rw}-c^R_{rw}-c^W_{rw}]\frac{\partial s_{rw}}{\partial p_{rw}}}_\text{EDM}} &+ \textcolor{red}{\underbrace{\sum_{t \in \mathbb{R}^w \setminus \{r\}} [p^W_{tw} - c^W_{tw}] \frac{\partial s_{tw}}{\partial p_{rw}}}_\text{UPP}} = 0.
+\end{split}
+\end{equation*}
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Integrated Firm: Wholesale Price to Rival Retailer}
+Assume that retailer $r$ acquires wholesaler $w$. $w$ bargains with \emph{unaffiliated} retailer $u$, yielding a wholesale price determined by
+
+\tiny
+\begin{equation*}
+\begin{split}
+&[p^W_{sw} - c^W_{sw}]s_{sw} - \sum_{t \in \mathbb{R}^w \setminus \{r,s\}} [p^W_{tw} - c^W_{tw}] \Delta s_{tw}(\mathbb{W}^s \setminus \{w\})\\
+& - \overbrace{\overbrace{[p_{rw}-c^W_{rw}-c^R_{rw}] \Delta s_{rw}(\mathbb{W}^s \setminus \{w\})}^{\text{indirect EDM effect}} - \sum_{x \in \mathbb{W}^r \setminus \{w\}} [p_{rx} - p^W_{rx} - c^R_{rx}] \Delta s_{rx}(\mathbb{W}^s \setminus \{w\})}^{\text{RRC effect}}=\\
+&\frac{1-\lambda}{\lambda} \left([p_{sw} - p^W_{sw} - c^R_{sw}]s_{sw} - \sum_{x \in \mathbb{W}^r \setminus \{w\}} [p_{sx} - p^W_{sx} - c^R_{sx}] \Delta s_{sx}(\mathbb{W}^s \setminus \{w\})\right).
+\end{split}
+\label{eq: vmerger wh upstream foc}
+\end{equation*}
+\end{frame}
+
+\begin{frame}
+\frametitle{Integrated Firm: Wholesale Price from Wholesaler Rival}
+Assume that retailer $r$ acquires wholesaler $w$. $r$ bargains with \emph{unaffiliated} wholesaler $v$, yielding a wholesale price determined by
+
+\tiny
+\begin{equation*}
+\begin{split}
+&[p^W_{rv} - c^W_{rv}]s_{rv} - \sum_{t \in \mathbb{R}^v \setminus \{r\}} [p^W_{tv} - c^W_{tv}] \Delta s_{tv}(\mathbb{W}^r \setminus \{v\}) = \\
+&\frac{1-\lambda}{\lambda} \left([p_{rv} - p^W_{rv} - c^R_{rv}]s_{rv} - \sum_{x \in \mathbb{W}^r \setminus \{w,v\}} [p_{rx} - p^W_{rx} - c^R_{rx}] \Delta s_{rx}(\mathbb{W}^r \setminus \{v\})\right.\\
+&\left.- \underbrace{[p_{rw} - c^W_{rw} - c^R_{rw}] \Delta s_{rw}(\mathbb{W}^r \setminus \{v\})}_{\text{EDM recapture effect}}-\underbrace{\sum_{t \in \mathbb{R}^w \setminus \{r\}} [p^W_{tw} - c^W_{tw}] \Delta s_{tw}(\mathbb{W}^r \setminus \{v\})}_{\text{wholesale recapture leverage effect}}\right).
+\end{split}
+\label{eq: vmerger ret upstream foc}
+\end{equation*}
+\end{frame}
+
+\section{Numerical Simulations}
+
+
+\begin{frame}
+\frametitle{Objective}
+The purpose of these numerical simulations is to use the above model to explore how these different mergers can affect market participants under a wide array of market conditions.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Data Generating Process (1.4 million simulated mergers)}
+
+
+\begin{itemize}
+\item simulate markets with either 2, 3, 4 or 5 wholesalers/retailers
+\item 0 to 4 \textbf{non-siloed} integrated incumbents pre-merger
+\begin{itemize}
+\item up to 6 for integrated mergers
+\end{itemize}
+\item bargaining power parameter ranges from 0.1 to 0.9 in 0.1 increments
+\item marginal costs are either constant or linear.
+\item eliminate
+\begin{itemize}
+\item unprofitable mergers
+\item mergers that do no pass the HMT
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+
+\subsection{Overview }%\SecT{}
+
+\begin{frame}
+\centering
+\includegraphics[width=4.5in,height=3.5in]{../../output/surplussum.png}
+
+\end{frame}
+
+\subsection{Integrated Firms }
+
+\begin{frame}
+\centering
+\includegraphics[width=4.5in,height=3.5in]{../../output/CVvertincumbBW.png}
+
+\end{frame}
+
+\begin{frame}
+\centering
+\includegraphics[width=4.5in,height=3.5in]{../../output/CVbargnobothBW.png}
+
+\end{frame}
+
+
+
+\note{
+\begin{enumerate}
+
+\item $\uparrow$  wholesalers $\rightarrow$ $\downarrow$ harm at increasing rate
+\item $\uparrow$ retailers  $\rightarrow$ $\uparrow$ harm at decreasing rate
+\item gap between Bertrand and 2nd score $\downarrow$ as \# of wholesalers and retailers $\uparrow$
+
+\end{enumerate}
+
+}
+\begin{frame}
+\centering
+\includegraphics[width=4.5in,height=3.5in]{../../output/CVbargbothBW.png}
+
+\end{frame}
+
+\note{
+\begin{enumerate}
+
+\item $\uparrow$ retailer bargaining power diminishes harm at a linear rate
+
+\end{enumerate}
+
+}
+
+
+\subsection{Convex Marginal Costs}
+
+\begin{frame}
+\centering
+\includegraphics[width=4.5in,height=3.5in]{../../output/surplussum_cost.png}
+\end{frame}
+
+
+\note{
+\begin{enumerate}
+\item
+\end{enumerate}
+
+}
+
+\section{Conclusion}
+
+\begin{frame}
+\frametitle{Summary}
+\begin{itemize}
+\item paper relaxes two strong assumptions
+\begin{itemize}
+\item pre-merger, no firms are vertically integrated,
+\item all firms employ constant marginal cost technology,
+\end{itemize}
+\item simulations with these assumptions relaxed yield markedly different outcomes from those when assumptions are maintained.
+\item relative bargaining power is a useful indicia for predicting consumer and total harm in these mergers.
+\end{itemize}
+%\bibliographystyle{chicago}
+%\bibliography{master-bib}
+\end{frame}
+
+\appendix
+
+ \begin{frame}[allowframebreaks]
+ \footnotesize
+ \bibliographystyle{chicago}
+ \bibliography{../../doc/master-bib}
+ \end{frame}
+
+
+\end{document}
