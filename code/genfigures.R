@@ -318,8 +318,8 @@ psummary.bw <-  ggplot(res.nests.logit, aes(y=Outcome_value/mktrev.pre*100,
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   #coord_cartesian(ylim=c(-60,55))+
   scale_y_continuous(breaks=seq(-100,100,5))+
-  geom_hline(yintercept=0,linetype="dashed",color="black")+
-  theme_bw()+scale_colour_tableau('Color Blind')+ theme(legend.position="bottom")+
+  geom_hline(yintercept=0,linetype="dashed",color="goldenrod")+
+  theme_bw()+scale_colour_tableau('Color Blind')+ theme(legend.position="bottom",axis.text.x = element_text(angle = 45,hjust=1))+
   #scale_x_discrete(labels=rev(levels(res.barg$relleveragePre)))+
   #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
   #theme_tufte(ticks=FALSE) +
