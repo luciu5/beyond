@@ -111,7 +111,7 @@ pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","
   stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
   #coord_cartesian(ylim=c(-60,55))+
   scale_y_continuous(breaks=seq(-100,100,10))+
-  geom_hline(yintercept=0,linetype="dashed",color="black")+
+  geom_hline(yintercept=0,linetype="dashed",color="goldenrod")+
   theme_bw()+scale_colour_tableau('Color Blind')+ theme(legend.position="bottom")+
   #scale_x_discrete(labels=rev(levels(res.barg$relleveragePre)))+
   #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
