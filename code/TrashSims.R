@@ -21,13 +21,25 @@ simdata <- filter(paired_data_4_22,collection_paired_share>0) %>%
          disposal_dollar_margin=ifelse(disposal_firm_name=="Republic",
                                        disposal_percent_margin*disposal_price_republic,
                                        disposal_dollar_margin),
-         disposal_price=ifelse(disposal_firm_name=="Republic" &
-                                 collection_firm_name=="Republic",
+         # Peggy suggests assuming Santek and WasteConn have the same upstream margin as Republic
+         # and use that margin to recover costs
+         disposal_price=ifelse(disposal_firm_name=="Republic",
                                disposal_price_republic - disposal_dollar_margin,disposal_price),
-         barg=ifelse(disposal_firm_name==collection_firm_name,1,0.7)
+         barg=ifelse(disposal_firm_name==collection_firm_name,1,0.9),
+         disposal_dollar_margin=ifelse(disposal_firm_name %in% c("Santek","WasteConn"),
+                                       max(disposal_percent_margin,na.rm=TRUE)*disposal_price,
+                                       disposal_dollar_margin)
          ) %>%
+  group_by(disposal_firm_name) %>%
+  mutate(
+    disposal_dollar_margin=max(disposal_dollar_margin,na.rm=TRUE),
+    disposal_price=ifelse(is.na(disposal_price),max(disposal_price,na.rm=TRUE) - disposal_dollar_margin,disposal_price),
+    disposal_cost= ifelse(disposal_firm_name==collection_firm_name,disposal_price, disposal_price-disposal_dollar_margin),
+    disposal_dollar_margin=ifelse(disposal_firm_name==collection_firm_name,0,disposal_dollar_margin)) %>%
   group_by(collection_firm_name) %>%
-  mutate(Name=interaction(disposal_firm_name,collection_firm_name,sep=":",drop=TRUE),
+  mutate(
+
+         Name=interaction(disposal_firm_name,collection_firm_name,sep=":",drop=TRUE),
          firmShare=sum(collection_paired_share),
          ownerPreUp=disposal_firm_name,
          ownerPostUp=ifelse(ownerPreUp=="Santek","Republic",ownerPreUp),
@@ -55,7 +67,7 @@ diag(div) <- -sharesNoOut
 vertFirms <- intersect(simdata$ownerPreUp,simdata$ownerPreDown)
 
 
-minD <- function(alpha,is2nd=FALSE,margins=FALSE){
+minD <- function(barg,is2nd=FALSE,margins=FALSE){
 
   nprods <- nrow(simdata)
 
@@ -65,13 +77,24 @@ minD <- function(alpha,is2nd=FALSE,margins=FALSE){
 
   ownerDownMatVertical <- matrix(0,nrow=nprods,ncol=nprods)
 
-  #alpha <- theta[1]
+if(!is2nd)  alpha <- simdata$alpha_bert[1]
+else{ alpha <- simdata$alpha_2nd[1]}
+
+  b <- rep(1,nprods)
   #b <- theta[-1]
   #b <- b[as.numeric(id)]
 
 
-  #b[simdata$ownerPreUp == simdata$ownerPreDown] <- 1
-  b <- simdata$barg
+  #b[simdata$ownerPreUp != simdata$ownerPreDown] <- barg
+  b[simdata$ownerPreUp=="Santek" & simdata$ownerPreDown!="Santek"] <- barg[1]
+  b[simdata$ownerPreUp=="WasteConn" & simdata$ownerPreDown!="WasteConn"] <- barg[2]
+
+  #b[simdata$ownerPreUp!="Republic" & simdata$ownerPreDown=="Republic"] <- barg[1]
+  #b[simdata$ownerPreUp!="WM_ADS" & simdata$ownerPreDown=="WM_ADS"] <- barg[2]
+  #b[simdata$ownerPreUp!="Regional" & simdata$ownerPreDown=="Regional"] <- barg[3]
+
+
+  #b <- simdata$barg
 
   for( v in vertFirms){
 
@@ -121,31 +144,47 @@ minD <- function(alpha,is2nd=FALSE,margins=FALSE){
     marginsCandUp <- solve(diag(nprods) + (upMarginPart %*% elast.inv %*%  (ownerDownMatVertical* elast)))
     marginsCandUp <- drop(marginsCandUp %*% upMarginPart %*% marginsCandDown)
 
+
     if(!is2nd){
     marginsCandDown <- marginsCandDown - elast.inv %*% ( (ownerDownMatVertical * elast) %*% (marginsCandUp) )
 
   }
 
-  #depVar <- as.vector((ownerPreUpMat  * div) %*% marginsUp)
-  #regressor <- as.vector( ( ownerBargDownVert  * div) %*% marginsCandDown)
+  depVar <- as.vector((ownerPreUpMat  * div) %*% marginsUp)
+  regressor <- as.vector( ( ownerBargDownVert  * div) %*% marginsCandDown)
 
-  err <- c(#depVar - regressor,
+  err <- c(depVar - regressor,
     marginsDown - marginsCandDown)
 
   if(!margins) return(sum((err)^2,na.rm = TRUE))
   else{return(list(up=marginsCandUp,down=as.vector(marginsCandDown)))}
   }
 
-minAlpha_bert <- optimise(minD,c(-1e6,0))$minimum
-minAlpha_2nd <- optimise(minD,c(-1e6,0),is2nd=TRUE)$minimum
-predMargins_bert=minD(minAlpha_bert,margins=TRUE)
-predMargins_2nd=minD(minAlpha_2nd,is2nd=TRUE,margins=TRUE)
+
+## same bargaininag parameter for all non-integrated options
+#minBarg_bert <- optimise(minD,c(0,1))
+#minBarg_2nd <- optimise(minD,c(0,1),is2nd=TRUE)
+
+## same bargaininag parameter for retailers
+#minBarg_bert <- optim(rep(.5,3),minD,method="L-BFGS-B",lower=rep(0,3),upper=rep(1,3))
+#minBarg_2nd <- optim(rep(.5,3),minD,method="L-BFGS-B",lower=rep(0,3),upper=rep(1,3),is2nd=TRUE)
+
+## same bargaininag parameter for wholesalers
+minBarg_bert <- optim(rep(.5,2),minD,method="L-BFGS-B",lower=rep(0,2),upper=rep(1,2))
+minBarg_2nd <- optim(rep(.5,2),minD,method="L-BFGS-B",lower=rep(0,2),upper=rep(1,2),is2nd=TRUE)
+
+
+predMargins_bert=minD(minBarg_bert$par,margins=TRUE)
+predMargins_2nd=minD(minBarg_2nd$par,is2nd=TRUE,margins=TRUE)
 
  simdata <-
           mutate(simdata,
-          alpha_bert=minAlpha_bert,
-          disposal_cost_2nd=disposal_price- predMargins_2nd$up,
-          disposal_cost_bert=disposal_price - predMargins_bert$up) %>% group_by(disposal_firm_name) %>%
+          marginUp_2nd=predMargins_2nd$up,
+          marginUp_bert=predMargins_bert$up,
+          marginDown_2nd=predMargins_2nd$down,
+          marginDown_bert=predMargins_bert$down,
+          disposal_cost_2nd=disposal_price- marginUp_2nd,
+          disposal_cost_bert=disposal_price - marginUp_bert) %>% group_by(disposal_firm_name) %>%
           mutate(
           disposal_price_2nd=ifelse(is.na(disposal_price) & disposal_firm_name==collection_firm_name,
                                     max(disposal_cost_2nd,na.rm=TRUE),
@@ -156,7 +195,10 @@ predMargins_2nd=minD(minAlpha_2nd,is2nd=TRUE,margins=TRUE)
    mutate(
           priceDown_2nd=predMargins_2nd$down + `collection cost` + disposal_price_2nd,
 
-          priceDown_bert=predMargins_bert$down + `collection cost` + disposal_price_bert
+          priceDown_bert=predMargins_bert$down + `collection cost` + disposal_price_bert,
+          priceDown_repmargin_2nd=predMargins_2nd$down + `collection cost` + disposal_price,
+
+          priceDown_repmargin_bert=predMargins_bert$down + `collection cost` + disposal_price,
          ) %>% ungroup()
 
 
@@ -164,14 +206,16 @@ predMargins_2nd=minD(minAlpha_2nd,is2nd=TRUE,margins=TRUE)
 
 ## Run Simulation:
 
+ marginsDown_bert_prop <- with(simdata,marginDown_bert/priceDown_repmargin_bert)
+ #marginsDown_bert_prop[-1] <- NA
 
 simres_noeff <- with(simdata,
                            logit(
   ownerPre = ownerPreDown,
   ownerPost = ownerPostDown,
-  prices = priceDown_bert,
+  prices = priceDown_repmargin_bert,
   shares = collection_paired_share,
-  margins = disposal_percent_margin,
+  margins = marginsDown_bert_prop,
   mcDelta = rep(0,nrow(simdata)),
   insideSize = sum(disposal_volume),
   labels = as.character(Name)
@@ -182,9 +226,9 @@ simres_noeff_2nd <- with(simdata,
                      auction2nd.logit(
                        ownerPre = ownerPreDown,
                        ownerPost = ownerPostDown,
-                       prices = priceDown_bert,
+                       prices = priceDown_repmargin_2nd,
                        shares = collection_paired_share,
-                       margins = disposal_percent_margin,
+                       margins = marginDown_2nd,
                        mcDelta = rep(0,nrow(simdata)),
                        insideSize = sum(disposal_volume),
                        labels = as.character(Name)
@@ -203,12 +247,12 @@ marginUp_percent_2nd[1] <- NA
 simres_vert <<- with(simdata,
                      vertical.barg(supplyDown = "bertrand",
                               sharesDown = collection_paired_share,
-                              pricesDown=priceDown_bert,
-                              marginsDown=disposal_percent_margin,
+                              pricesDown=priceDown_repmargin_bert,
+                              marginsDown=marginsDown_bert_prop,
                               ownerPreDown=ownerPreDown,
                               ownerPostDown=ownerPostDown,
-                              pricesUp=disposal_price_bert,
-                              marginsUp=marginUp_percent_bert,
+                              pricesUp=disposal_price,
+                              marginsUp=disposal_dollar_margin/disposal_price +.0001,
                               ownerPreUp=ownerPreUp,
                               ownerPostUp=ownerPostUp,
                               labels = as.character(Name),
@@ -216,11 +260,11 @@ simres_vert <<- with(simdata,
                               #,constrain="pair"
 ))
 
-simres_vert@up@bargpowerPre[simres_vert@up@bargpowerPre==0.5] <- 0.3
-simres_vert@up@bargpowerPost[simres_vert@up@bargpowerPost==0.5] <- 0.3
+simres_vert@up@bargpowerPre[simres_vert@up@bargpowerPre==0.99] <- 0.5
+simres_vert@up@bargpowerPost[simres_vert@up@bargpowerPost==0.99] <- 0.5
 simres_vert@up@bargpowerPost["Santek:Republic"] <- 1
 simres_vert@down@slopes$alpha <- simdata$alpha_bert[1]
-simres_vert@down@slopes$meanval <- with(simdata,log(collection_paired_share) - log(collection_paired_share[1]) - simres_vert@down@slopes$alpha *(priceDown_bert - priceDown_bert[1]))
+simres_vert@down@slopes$meanval <- log(simres_vert@down@shares) - log(simres_vert@down@shares)[1]  - simres_vert@down@slopes$alpha *(simres_vert@down@prices - simres_vert@down@prices[1])
 simres_vert <- ownerToMatrix(simres_vert, preMerger = TRUE)
 simres_vert <- ownerToMatrix(simres_vert, preMerger = FALSE)
 mcPre <- calcMC(simres_vert, TRUE)

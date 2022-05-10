@@ -22,7 +22,7 @@ simpath <- "./data"
 #profiler <- microbenchmark::microbenchmark(times=1,{
 #Rprof(filename = "Rprof.out", append = FALSE, interval = 2, line.profiling=TRUE)
 
-cl <- makeCluster(mc <- getOption("cl.cores", 100))
+cl <- makeCluster(mc <- getOption("cl.cores", 75))
 ## to make this reproducible
 clusterSetRNGStream(cl, 3141519)
 
