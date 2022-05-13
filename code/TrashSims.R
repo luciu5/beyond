@@ -320,7 +320,7 @@ sink("./doc/TrashData.tex")
 print(kable(select(simdata,disposal_firm_name,
                    collection_firm_name,
                    disposal_volume,
-                   disposal_cost,
+                   disposal_price,
                    disposal_dollar_margin,
                    collection_dollar_margin,
                    priceDown_repmargin_2nd
@@ -329,7 +329,7 @@ print(kable(select(simdata,disposal_firm_name,
               rename("Disposal Firm"=disposal_firm_name,
                      "Collection Firm"=collection_firm_name,
                      "Volume (000s)"=disposal_volume,
-                     "Disposal Price"=disposal_cost,
+                     "Disposal Price"=disposal_price,
                      "Disposal Margin ($)"=disposal_dollar_margin,
                      "Collection Margin ($)"=collection_dollar_margin,
                      "Collection Price"=priceDown_repmargin_2nd
