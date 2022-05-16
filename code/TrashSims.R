@@ -395,24 +395,34 @@ kable(vert_sum,format = "latex",
   #collapse_rows(1:2,row_group_label_position="stack")
 sink()
 
-# firmplot <- ggplot(data=  vert_sum
-# ,
-#        aes(x=firm,y=value, fill=level)) +
-#        facet_grid(key~Efficiency,scales = "free_y") + geom_bar(stat="identity", position=position_dodge())  +
-#   xlab("Insurer") + ylab("Equilibrium Level Changes") + geom_hline(yintercept = 0,linetype="dashed") + coord_flip()+ scale_fill_grey(start = .9, end = .1) +
-#   geom_text(aes(label=
-#                   ifelse(abs(value)>0,round(value,1),NA),
-#                    hjust=ifelse(sign(value)>0,1,0),color=ifelse(level=="Down","white","black")),
-#                   position=position_dodge(width=.9),size =3) + theme_bw() +
-#   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
 
-#
-# png(filename="./output/AnthemCignaSimsFirm.png" ,res = 250, units="in"
-#     ,width = 4, height = 4 )
-#
-# print(firmplot_82_33)
-#
-# dev.off()
+firmplot <- ggplot(data=  vert_sum %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
+                                  Name=reorder(Name,`Post-merger`* as.numeric(Effect=="Prices") * as.numeric(Level=="Collection"))) %>%
+         mutate(Change=`Post-merger` - `Pre-merger`)
+
+                %>%
+         pivot_longer(c(`Pre-merger` ,`Post-merger`),names_to = "Type",values_to = "value") %>%
+         mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger"))) %>%
+         filter(!grepl("Change",Type)),
+aes(x=Name,y=value,fill=Type,label=value)) +
+  facet_grid(~Level+Effect,scales = "free_x") + geom_bar(stat="identity",
+                                                             position=position_dodge()
+                                                             #position="stack"
+                                                         )  +
+  xlab("Disposal/Collector") + ylab("Equilibrium Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
+  scale_fill_brewer(type="qual",palette = "Paired") +#scale_fill_grey(start = .9, end = .1) +
+  geom_text( #color=ifelse(Type=="Post-merger","white","black"),
+                hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+ png(filename="./output/TrashSimsFirm.png" ,res = 250, units="in"
+     ,width = 6, height = 6 )
+
+ print(firmplot)
+
+ dev.off()
 #
 
 #png(filename="./output/AnthemCignaSimsMkt.png" ,res = 200
