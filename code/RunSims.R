@@ -74,7 +74,8 @@ genMkts <- function(x,y,z,t,m,n, b,c,a, large=TRUE){
     summary=thismkt,
     res=thismkt))}
 
-isVert <- length(thismkt$vertical)>0
+vertFirms <- thismkt$vertical$vertFirms
+isVert <- length(vertFirms)>0
 
 
 shareOutDown <- thismkt$down$shareOut
@@ -94,6 +95,10 @@ isMarket=try(HypoMonTest(thismkt),silent=TRUE)
 if(class(isMarket)=="try-error") isMarket=NA
 thissum$idVert <- thissum$idDown
 thissum$idVert[thissum$idUp == 1] <- 1
+
+# for(v in vertFirms){
+#   thissum$idVert[thissum$idUp == v] <- v
+# }
 
 sumshares.pre <- sum(thissum$shares.pre,na.rm=TRUE)
 sumshares.post <- sum(thissum$shares.post,na.rm=TRUE)
@@ -246,13 +251,14 @@ sink()
 #dplyr::summarize(rho=cor(relmarginPre,as.numeric(relabarg)))
 
 
+profitableMarkets <- filter(res.nests,isMarket) %>% group_by(merger,vert,mc,preset,barg) %>% summarize(n=n(),isprofitable=sum(isProfitable))
 
 res.nests <- filter(as.data.frame(res.nests),hhipre>0 & as.logical(isMarket)
                     ) %>%
   filter(#nestParm =="0"  &
          #barg != "0.1" &
          isProfitable &
-         avgpricepre.up>0 & up!="1" & down !="1"
+         avgpricepre.up>=0 & up!="1" & down !="1"
          ) %>%
   mutate_if(is.factor,droplevels)
 

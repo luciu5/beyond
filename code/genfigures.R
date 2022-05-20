@@ -338,6 +338,42 @@ psummary.bw <-  ggplot(res.nests.logit, aes(y=Outcome_value/mktrev.pre*100,
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
 
+pprofits <- ggplot(data=filter(profitableMarkets,mc=="constant" & preset=="none") %>% group_by(merger,vert) %>%
+                     summarize(`Profitable Mergers (%)`=sum(isprofitable)/sum(n)*100)%>% ungroup() %>%
+                     mutate(Merger=factor(merger,levels=c("vertical","up","down","both"),labels=c("Vertical","Upstream","Downstream","Integrated"))),
+                   aes(x=vert,y=`Profitable Mergers (%)`,color=Merger)
+) + geom_point()+geom_line(aes(group=Merger)) +theme_bw() +theme(legend.position = "bottom") +
+  labs(title =  "Percentage of Profitable Mergers, By # of Integrated Firms"#,
+      # subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
+  )
+
+pprofits_barg <- ggplot(data=filter(profitableMarkets,mc=="constant" & preset=="none" & vert %in% c(0,1,2,4,6)) %>% group_by(merger,barg,vert) %>%
+                     summarize(`Profitable Mergers (%)`=sum(isprofitable)/sum(n)*100)%>% ungroup() %>%
+                     mutate(Merger=factor(merger,levels=c("vertical","up","down","both"),labels=c("Vertical","Upstream","Downstream","Integrated"))),
+                   aes(x=factor(barg,labels=MASS::fractions(relleverage)),y=`Profitable Mergers (%)`,color=vert)
+) + facet_grid(~Merger) + geom_point()+geom_line(aes(group=vert)) +theme_bw() +theme(legend.position = "bottom") +
+  labs(title =  "Percentage of Profitable Mergers, By Bargaining Parameter"#,
+       #subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
+  ) + scale_color_manual(values = RColorBrewer::brewer.pal(name="YlGnBu",n=9)[c(4,5,6,8,10)-1]) +
+geom_vline(xintercept=5,linetype="dashed",color="black") +xlab("Relative Bargaining Power")
+
+pprofits_barg <- pprofits_barg + geom_segment(
+    aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
+    data=data.frame(x=5.1,y=15,xend=9
+                    ,#Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                    Merger=factor("Integrated", levels=c("Vertical","Upstream","Downstream","Integrated")))) +
+  geom_text(aes(x=x,y=y),color="black",label="equal power",angle=90,
+            data=data.frame(x=4.5,y=40,#Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                            Merger=factor("Integrated", levels=c("Vertical","Upstream","Downstream","Integrated"))),size=3.5) +
+  geom_text(aes(x=x,y=y),color="black",label="more retailer power",
+            data=data.frame(x=6.75,y=20,#Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                            Merger=factor("Integrated", levels=c("Vertical","Upstream","Downstream","Integrated"))),size=2.5)
+
+
+
+
+
+
 pnests.bw <-  ggplot(filter(ungroup(res.nest_all.long),Outcome %in% c("Consumer","Total")) %>%
                        rename(Merger=merger) %>%
                        mutate(Merger=factor(Merger,levels=c("up","down","vertical"),
