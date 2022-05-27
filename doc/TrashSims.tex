@@ -1,29 +1,43 @@
+\begin{table}
 
-Merger simulation results under 'Logit' demand:
-
-                      pricePre pricePost priceDelta sharesPre sharesPost outputDelta
-* Republic:Republic        179       204      13.71      30.8       23.9         -22
-* Santek:Republic          174       198      14.17       5.7        4.5         -22
-* Santek:Santek            140       162      16.19      33.6       28.5         -15
-  Santek:WM_ADS            215       216       0.91       7.0       10.7          52
-  Santek:Regional          215       216       0.91       7.0       10.7          52
-* WasteConn:Republic       162       187      15.17       3.1        2.5         -21
-  WasteConn:WasteConn      105       107       1.93       5.5        8.4          53
-  WasteConn:WM_ADS         203       205       0.96       3.6        5.5          52
-  WasteConn:Regional       203       205       0.96       3.6        5.5          52
-
-	Notes: '*' indicates merging parties' products.
- 	Deltas are percent changes.
-	Output is based on revenues.
-
-
-                    isParty pricePre pricePost priceDelta sharesPre sharesPost outputDelta
-Republic:Republic         * 179.3500  203.9349 13.7078053 30.821204  23.924020   -22.37805
-Santek:Republic           * 173.5200  198.1049 14.1683632  5.709189   4.449534   -22.06364
-Santek:Santek             * 139.8209  162.4629 16.1936376 33.604975  28.525101   -15.11643
-Santek:WM_ADS               214.5477  216.5013  0.9105749  7.030637  10.669321    51.75468
-Santek:Regional             214.5477  216.5013  0.9105749  7.030637  10.669321    51.75468
-WasteConn:Republic        * 162.1100  186.6949 15.1655932  3.127511   2.458759   -21.38288
-WasteConn:WasteConn         105.0460  107.0749  1.9314786  5.493007   8.398124    52.88754
-WasteConn:WM_ADS            203.1377  205.0913  0.9617202  3.591420   5.452910    51.83160
-WasteConn:Regional          203.1377  205.0913  0.9617202  3.591420   5.452910    51.83160
+\caption{\label{tab:}Republic/Santex Simulation Effects}
+\centering
+\begin{tabular}[t]{llllrrr}
+\toprule
+Level & Effect & Disposal & Collector & Pre-merger & Post-merger & Change (\%)\\
+\midrule
+Disposal & Prices & Republic & Republic & 42 & 42 & 0\\
+Disposal & Prices & Santek & WM\_ADS & 36 & 69 & 88\\
+Disposal & Prices & Santek & Regional & 36 & 69 & 88\\
+Disposal & Prices & Santek & Santek & 16 & 16 & 0\\
+Disposal & Prices & Santek & Republic & 36 & 14 & -62\\
+\addlinespace
+Disposal & Prices & WasteConn & WM\_ADS & 25 & 31 & 22\\
+Disposal & Prices & WasteConn & Republic & 25 & 31 & 22\\
+Disposal & Prices & WasteConn & Regional & 25 & 31 & 22\\
+Disposal & Prices & WasteConn & WasteConn & 11 & 11 & 0\\
+Collection & Prices & Republic & Republic & 179 & 217 & 21\\
+\addlinespace
+Collection & Prices & Santek & Santek & 140 & 172 & 23\\
+Collection & Prices & Santek & Regional & 215 & 247 & 15\\
+Collection & Prices & Santek & WM\_ADS & 215 & 247 & 15\\
+Collection & Prices & Santek & Republic & 174 & 189 & 9\\
+Collection & Prices & WasteConn & Republic & 162 & 206 & 27\\
+\addlinespace
+Collection & Prices & WasteConn & WasteConn & 105 & 111 & 5\\
+Collection & Prices & WasteConn & WM\_ADS & 203 & 210 & 3\\
+Collection & Prices & WasteConn & Regional & 203 & 210 & 3\\
+Collection & Shares & Republic & Republic & 31 & 23 & -28\\
+Collection & Shares & Santek & Republic & 6 & 9 & 47\\
+\addlinespace
+Collection & Shares & Santek & Santek & 32 & 29 & -9\\
+Collection & Shares & Santek & WM\_ADS & 7 & 6 & -17\\
+Collection & Shares & Santek & Regional & 7 & 6 & -17\\
+Collection & Shares & WasteConn & WasteConn & 5 & 11 & 103\\
+Collection & Shares & WasteConn & WM\_ADS & 4 & 7 & 94\\
+\addlinespace
+Collection & Shares & WasteConn & Regional & 4 & 7 & 94\\
+Collection & Shares & WasteConn & Republic & 3 & 2 & -38\\
+\bottomrule
+\end{tabular}
+\end{table}
