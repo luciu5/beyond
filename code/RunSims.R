@@ -38,7 +38,8 @@ nestParm <- c(0)
 type=c("1st")
 merger=c("up","down", "vertical","both")
 bargparm <- seq(.1,.9,.1)
-assym <- c("none","diag1","diag0")
+assym <- c("none","diag1","diag0"
+           )
 mc=c("constant","linprod","lincons","conslin","consparty","linparty"#, "quadprod","linquad","quadlin"#,"linfirm"
      )
 
@@ -83,6 +84,8 @@ M <- thismkt$down$M
 outMargin <- thismkt$down$outMargin
 #thismkt <- calcSlopes(thismkt,constrain="global");
 
+isNegMCUp <- any(thismkt$up$mc<0)
+isNegMCDown <- any(thismkt$ip$mc<0)
 
 mcParmUp <- thismkt$up$mcParm
 mcParmDown <- thismkt$down$mcParm
@@ -143,6 +146,8 @@ thisres <- with(thissum,data.frame(
   # avgPartyCostParmDown.vert = weighted.mean(mcParmDown[idDown ==1],shares.pre[idDown == 1]),
   #avgpricedelta = sum(thissum$downPricePost*shares.post,na.rm=TRUE) + outMargin*(1-sumshares.post ) - sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE) - outMargin*(1-sumshares.pre ),
   avgpricedelta = sum(thissum$downPricePost*shares.post/sumshares.post,na.rm=TRUE) - sum(thissum$downPricePre*shares.pre/sumshares.pre,na.rm=TRUE) ,
+  isNegMCUp=isNegMCUp,
+  isNegMCDown=isNegMCDown,
   hhidelta.down = 2 * prod(tapply(shares.pre/sumshares.pre * 100,idDown, sum,na.rm=TRUE)[1:2]),
   hhipre.down = sum(tapply(shares.pre/sumshares.pre * 100,idDown, sum)^2,na.rm=TRUE),
   hhidelta.up = 2 * prod(tapply(shares.pre/sumshares.pre * 100,idUp, sum,na.rm=TRUE)[1:2]),
@@ -233,7 +238,7 @@ res.nests <- ungroup(res.nests) %>% group_by(merger,up,down,vert,type,preset,nes
          avgpricedelta=avgpricedelta,
          isProfitable=ifelse(merger=="up", isProfitable.up,
                              ifelse(merger=="down",isProfitable.down,
-                                    ifelse(merger=="vert",isProfitable.vert,isProfitable.both))),
+                                    ifelse(merger=="vertical",isProfitable.vert,isProfitable.both))),
          relmarginPreCut=cut(relmarginPre,quantile(relmarginPre, probs=seq(0,1,.1),na.rm=TRUE), dig.lab=1, include.lowest = TRUE))
 
 

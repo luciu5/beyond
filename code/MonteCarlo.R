@@ -227,24 +227,26 @@ market<-function(nfirms.down=3, # # of downstream firms
 
     for( v in vertFirms){
 
-      ## set integrated margin disagreement payoff to 0
-      ownerPre.up[ids$up.firm==v & ids$down.firm!=v
-                   , ids$up.firm==v & ids$down.firm==v]=0
-      ## constrain upstream integrated margin to zero
-       ownerPre.up[ids$up.firm==v & ids$down.firm==v
-                   , ids$up.firm==v & ids$down.firm!=v]=0
 
-       ## set integrated margin disagreement payoff to 0
-       ownerPost.up[ids$up.firm==v & ids$down.firm!=v
-                   , ids$up.firm==v & ids$down.firm==v]=0
-       ## constrain upstream integrated margin to zero
-       ownerPost.up[ids$up.firm==v & ids$down.firm==v
-                   , ids$up.firm==v & ids$down.firm!=v]=0
       ## integrated retailer bargains with other wholesalers
       vertrowsDown <-ids$up.firm  != v  & ids$down.firm  == v
 
       ownerPre.up[vertrowsDown, ids$up.firm == v] <- -(1-bargparm[vertrowsDown])/bargparm[vertrowsDown]
       ownerPost.up[vertrowsDown, ids$up.firm == v] <- -(1-bargparmPost[vertrowsDown])/bargparmPost[vertrowsDown]
+
+      ## set integrated margin disagreement payoff to 0
+      ownerPre.up[!(ids$up.firm==v & ids$down.firm==v)
+                  , ids$up.firm==v & ids$down.firm==v]=0
+      ## constrain upstream integrated margin to zero
+      ownerPre.up[ids$up.firm==v & ids$down.firm==v
+                  , !(ids$up.firm==v & ids$down.firm==v)]=0
+
+      ## set integrated margin disagreement payoff to 0
+      ownerPost.up[!(ids$up.firm==v & ids$down.firm==v)
+                   , ids$up.firm==v & ids$down.firm==v]=0
+      ## constrain upstream integrated margin to zero
+      ownerPost.up[ids$up.firm==v & ids$down.firm==v
+                   ,!(ids$up.firm==v & ids$down.firm==v)]=0
 
       #ownerBargUpVertPre[vertrowsDown, ids$up.firm  == v] <- -(1-bargparm[vertrowsDown])/bargparm[vertrowsDown]
     }
@@ -275,17 +277,19 @@ market<-function(nfirms.down=3, # # of downstream firms
 
     if(ownerPost  %in%  c("vertical")){
 
-      ## set integrated margin disagreement payoff to 0
-      ownerPost.up[ids$up.firm==1 & ids$down.firm!=1
-                   , ids$up.firm==1 & ids$down.firm==1]=0
-      ## constrain upstream integrated margin to zero
-      ownerPost.up[ids$up.firm==1 & ids$down.firm==1
-                   , ids$up.firm==1 & ids$down.firm!=1]=0
 
     vertrowsDown <- ids$up.firm != 1  & ids$down.firm == 1
 
     ## integrated retailer bargains with other wholesalers
     ownerPost.up[vertrowsDown, ids$up.firm == 1] <- -(1-bargparmPost[vertrowsDown])/bargparmPost[vertrowsDown]
+
+    ## set integrated margin disagreement payoff to 0
+    ownerPost.up[!(ids$up.firm==1 & ids$down.firm==1)
+                 , ids$up.firm==1 & ids$down.firm==1]=0
+    ## constrain upstream integrated margin to zero
+    ownerPost.up[ids$up.firm==1 & ids$down.firm==1
+                 , !(ids$up.firm==1 & ids$down.firm==1)]=0
+
 
     vertrowsUp <-  ids$up.firm == 1  & ids$down.firm != 1
 
@@ -302,17 +306,31 @@ market<-function(nfirms.down=3, # # of downstream firms
 
     if(ownerPost  %in%  c("up","both")){
 
-      ## set integrated margin disagreement payoff to 0
-      ownerPost.up[ids$up.firm==1 & ids$down.firm!=2
-                   , ids$up.firm==1 & ids$down.firm==2]=0
-      ## constrain upstream integrated margin to zero
-      ownerPost.up[ids$up.firm==1 & ids$down.firm==2
-                   , ids$up.firm==1 & ids$down.firm!=2]=0
+
 
     vertrowsDown <- ids$up.firm != 1  & ids$down.firm == 2
 
+
     ## integrated retailer bargains with other wholesalers
     ownerPost.up[vertrowsDown, ids$up.firm == 1] <- -(1-bargparmPost[vertrowsDown])/bargparmPost[vertrowsDown]
+
+    ## set integrated margin disagreement payoff to 0
+    ownerPost.up[!(ids$up.firm==1 & ids$down.firm==2)
+                 , ids$up.firm==1 & ids$down.firm==2]=0
+    ## constrain upstream integrated margin to zero
+    ownerPost.up[ids$up.firm==1 & ids$down.firm==2
+                 , !(ids$up.firm==1 & ids$down.firm==2)]=0
+
+    if(ownerPost=="both"){
+
+      # set integrated margin disagreement payoff to 0
+      ownerPost.up[!(ids$up.firm==1 & ids$down.firm==1)
+                   , ids$up.firm==1 & ids$down.firm==1]=0
+      ## constrain upstream integrated margin to zero
+      ownerPost.up[ids$up.firm==1 & ids$down.firm==1
+                   , !(ids$up.firm==1 & ids$down.firm==1)]=0
+    }
+
 
     vertrowsUp <-  ids$up.firm == 1  & ids$down.firm != 2
 
@@ -329,17 +347,31 @@ market<-function(nfirms.down=3, # # of downstream firms
 
     if(ownerPost  %in%  c("down","both")){
 
-      ## set integrated margin disagreement payoff to 0
-      ownerPost.up[ids$up.firm==2 & ids$down.firm!=1
-                   , ids$up.firm==2 & ids$down.firm==1]=0
-      ## constrain upstream integrated margin to zero
-      ownerPost.up[ids$up.firm==2 & ids$down.firm==1
-                   , ids$up.firm==2 & ids$down.firm!=1]=0
 
     vertrowsDown <- ids$up.firm != 2  & ids$down.firm == 1
 
+
     ## integrated retailer bargains with other wholesalers
     ownerPost.up[vertrowsDown, ids$up.firm == 2] <- -(1-bargparmPost[vertrowsDown])/bargparmPost[vertrowsDown]
+
+    ## set integrated margin disagreement payoff to 0
+    ownerPost.up[!(ids$up.firm==2 & ids$down.firm==1)
+                 , ids$up.firm==2 & ids$down.firm==1]=0
+    ## constrain upstream integrated margin to zero
+    ownerPost.up[ids$up.firm==2 & ids$down.firm==1
+                 , !(ids$up.firm==2 & ids$down.firm==1)]=0
+
+
+    if(ownerPost=="both"){
+
+      # set integrated margin disagreement payoff to 0
+      ownerPost.up[!(ids$up.firm==2 & ids$down.firm==2)
+                   , ids$up.firm==2 & ids$down.firm==2]=0
+      ## constrain upstream integrated margin to zero
+      ownerPost.up[ids$up.firm==2 & ids$down.firm==2
+                   , !(ids$up.firm==2 & ids$down.firm==2)]=0
+    }
+
 
     vertrowsUp <-  ids$up.firm == 2  & ids$down.firm != 1
 
@@ -622,9 +654,9 @@ simMarket.1st <- function(mkt,cost_type=c("constant","linprod","quadprod","linqu
                                                   down=ifelse(isParty.down,(sharesDown*M)/downMC,downMC))}}
 
   ## create a container to store upstream and downstream data
-  mkt<-list(up=c(mkt$up,list(price=upPrices,margin=1-upMC/upPrices, mcParm = mcParm$up)),
+  mkt<-list(up=c(mkt$up,list(price=upPrices,margin=1-upMC/upPrices,mc=upMC, mcParm = mcParm$up)),
             down=c(mkt$down,list(alpha=alpha,price=downPrices,
-                                 margin=1-(upPrices + downMC)/downPrices, mcParm =mcParm$down, meanval=meanvalDown)),
+                                 margin=1-(upPrices + downMC)/downPrices, mc=downMC,mcParm =mcParm$down, meanval=meanvalDown)),
             vertical = mkt$vertical
   )
 
@@ -877,7 +909,10 @@ calcPricesHypoMon.default <-
 
 
 
-summary.1st <-function(mkt, market =FALSE, vertical = ifelse(length(mkt$vertical)>0 & mkt$vertical$vertFirms==1, TRUE,FALSE), useEst = FALSE,level = c("all","up","down")){
+summary.1st <-function(mkt, market =FALSE,
+                       #vertical = ifelse(length(mkt$vertical)>0 & mkt$vertical$vertFirms==1, TRUE,FALSE),
+                       useEst = FALSE,
+                       level = c("all","up","down")){
 
 
   if(useEst){

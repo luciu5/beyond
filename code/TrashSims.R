@@ -60,6 +60,8 @@ ownerPreUpMat=tcrossprod(ownerPreUpMat)
 ownerPreDownMat=model.matrix(~-1+ownerPreDown,data=simdata)
 ownerPreDownMat=tcrossprod(ownerPreDownMat)
 
+vertFirms <- intersect(simdata$ownerPreUp,simdata$ownerPreDown)
+
 for (v in vertFirms){
   ## set integrated margin disagreement payoff to 0
   ownerPreUpMat[simdata$ownerPreUp==v & simdata$ownerPreDown!=v
@@ -74,7 +76,7 @@ sharesNoOut <- with(simdata,collection_paired_share)
 div <- tcrossprod(1/(1-sharesNoOut),sharesNoOut)*sharesNoOut
 diag(div) <- -sharesNoOut
 
-vertFirms <- intersect(simdata$ownerPreUp,simdata$ownerPreDown)
+
 
 
 minD <- function(barg,is2nd=FALSE,margins=FALSE){
@@ -112,6 +114,12 @@ else{ alpha <- simdata$alpha_2nd[1]}
     ownerPreUpMat[vertrows, simdata$ownerPreUp == v] <- -(1-b[vertrows])/b[vertrows]
   }
 
+  ## set integrated margin disagreement payoff to 0,
+  ## constrain upstream integrated margin to zero
+
+  for(n in which(simdata$ownerPreUp==simdata$ownerPreDown)){
+    ownerPreUpMat[n,-n] <- ownerPreUpMat[-n,n] <- 0
+  }
 
   ownerBargDownVert  <-  ownerPreDownMat  * (1-b)/b
 
@@ -231,6 +239,20 @@ simres_noeff <- with(simdata,
   labels = as.character(Name)
 ))
 
+simres_noeff_up <- with(simdata,
+                     logit(
+                       ownerPre = ownerPreUp,
+                       ownerPost = ownerPostUp,
+                       prices = priceDown_repmargin_bert,
+                       shares = collection_paired_share,
+                       margins = marginsDown_bert_prop,
+                       mcDelta = rep(0,nrow(simdata)),
+                       insideSize = sum(disposal_volume),
+                       labels = as.character(Name)
+                     ))
+
+
+
 
 simres_noeff_2nd <- with(simdata,
                      auction2nd.logit(
@@ -246,15 +268,13 @@ simres_noeff_2nd <- with(simdata,
 
 
 
-simres_vert <- NULL
-
 marginUp_percent_bert <- with(simdata,marginUp_bert/disposal_price_bert)
 #marginUp_percent_bert[1] <- NA
 
 marginUp_percent_2nd <- with(simdata,marginUp_2nd/disposal_price_2nd)
 #marginUp_percent_2nd[1] <- NA
 
-simres_vert <<- with(simdata,
+simres_vert <- with(simdata,
                      vertical.barg(supplyDown = "bertrand",
                               sharesDown = collection_paired_share,
                               pricesDown=priceDown_repmargin_bert,
@@ -296,7 +316,7 @@ simres_vert@down@pricePost <- simres_vertsPost$down
 simres_vert@up@pricePost <- simres_vertsPost$up
 
 
-simres_vert_2nd <<- with(simdata,
+simres_vert_2nd <- with(simdata,
                      vertical.barg(supplyDown = "2nd",
                                    sharesDown = collection_paired_share,
                                    pricesDown=priceDown_2nd,
@@ -371,6 +391,11 @@ sink()
 # )
 
 vert_sum <- summary(simres_vert)
+
+base_sum <- summary(simres_noeff)
+
+base_sum$name=rownames(base_sum)
+
 vert_sum$name=rownames(vert_sum)
 
 vert_sum <- separate(vert_sum,name,sep=":",into=c("Disposal","Collector")) %>%
@@ -380,13 +405,31 @@ vert_sum <- separate(vert_sum,name,sep=":",into=c("Disposal","Collector")) %>%
          name=gsub("Pre|Post|Up|Down","",name)) %>%
   rename(Effect=name) %>%
   pivot_wider(values_from=value,names_from=Pre) %>%
-  mutate(`Change (%)`=(1-`Pre-merger`/`Post-merger`)*100,
+  mutate(`Change (%)`=(`Post-merger`/`Pre-merger` - 1)*100,
          Effect=factor(Effect, labels=c("Prices","Shares")),
           Level=factor(Level,levels=rev(sort(unique(Level))))) %>%
   select(-priceUpDelta,-priceDownDelta,-outputDelta,-isParty) %>%
   arrange(Level,Effect,Disposal,desc(`Change (%)`)) %>%
   mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect)
 
+base_sum <- separate(base_sum,name,sep=":",into=c("Disposal","Collector")) %>%
+  pivot_longer(c( pricePre, pricePost, sharesPre, sharesPost)) %>%
+  mutate(Level=ifelse(grepl("Up",name),"Disposal","Collection"),
+         Pre=ifelse(grepl("Pre",name),"Pre-merger","Post-merger"),
+         name=gsub("Pre|Post|Up|Down","",name)) %>%
+  rename(Effect=name) %>%
+  pivot_wider(values_from=value,names_from=Pre) %>%
+  mutate(`Change (%)`=(`Post-merger`/`Pre-merger` - 1)*100,
+         Effect=factor(Effect, labels=c("Prices","Shares")),
+         Level=factor(Level,levels=rev(sort(unique(Level))))) %>%
+  select(-priceDelta,-outputDelta,-isParty) %>%
+  arrange(Level,Effect,Disposal,desc(`Change (%)`)) %>%
+  mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect)
+
+compare <- bind_rows(
+  mutate(vert_sum, Model="Vertical"),
+  mutate(base_sum, Model="Downstream Only")
+)
 
 sink("./doc/TrashSims.tex")
 kable(vert_sum,format = "latex",
@@ -417,36 +460,32 @@ aes(x=Name,y=value,fill=Type,label=value)) +
 
 
 
+
+
+compareplot <- ggplot(data=  compare %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
+                                              Name=reorder(Name,`Post-merger`*as.numeric(Model=="Vertical")*as.numeric(Effect=="Prices") * as.numeric(Level=="Collection"))) %>%
+                     mutate(Change=`Post-merger` - `Pre-merger`) %>%
+                     pivot_longer(c(`Pre-merger` ,`Post-merger`),names_to = "Type",values_to = "value") %>%
+                     mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger"))) %>%
+                     filter(Level=="Collection" & !grepl("Change|Pre",Type)),
+                   aes(x=Name,y=value,fill=Model,label=value)) +
+  facet_grid(~Level+Effect,scales = "free_x") + geom_bar(stat="identity",
+                                                         position=position_dodge()
+                                                         #position="stack"
+  )  +
+  xlab("Disposal/Collector") + ylab("Equilibrium Post-merger Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
+  scale_fill_brewer(type="qual",palette = "Paired") +#scale_fill_grey(start = .9, end = .1) +
+  geom_text( #color=ifelse(Type=="Post-merger","white","black"),
+    hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
  png(filename="./output/TrashSimsFirm.png" ,res = 250, units="in"
      ,width = 6, height = 6 )
 
  print(firmplot)
 
  dev.off()
-#
-
-#png(filename="./output/AnthemCignaSimsMkt.png" ,res = 200
-#    ,width = 1000, height = 800
-#)
-#print(mktplot_82_33)
-#dev.off()
-ggsave(plot=firmplot_82_33,file="./output/AnthemCignaSimsFirm.png" ,dpi=300,units="in",width=5,height=4)
-ggsave(plot=mktplot_82_33,file="./output/AnthemCignaSimsMkt.png" ,dpi=300,units="in",width=6,height=4)
-#
-# print(
-#   kable(mutate_if(res_82_33$firm,is.numeric,round,digits=2) ,format = "latex",
-#             booktabs = TRUE,
-#             caption = "Anthem/Cigna Merger Simulation Results",label = "siminputs") %>%
-#     column_spec(1, bold=T) %>%
-#     collapse_rows(columns = 1:2, latex_hline = "major", valign = "middle")
-#       ,digits=2)
 
 
-print(kable(tidyr::spread(data_82_33,key=key,value=value)%>% mutate(Efficiency=factor(Efficiency,c("None","Medical","Vertical")),
-                                                                    level=factor(level,c("Up","Down"),labels=c("Upstream","Downstream")),
-                                                                    firm=factor(firm,c("Anthem","Cigna","United","Aetna","Other")))%>% arrange(Efficiency,level,firm),digits=2,format = "latex",
-                   booktabs = TRUE,
-                   caption = "Anthem/Cigna Merger Simulation Results",label = "siminputs") %>%
-      column_spec(1) %>%
-             collapse_rows(columns = 1:2, latex_hline = "major")
-               ,digits=2)
