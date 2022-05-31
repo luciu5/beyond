@@ -793,7 +793,7 @@ pbargvert_all.bw <- pbargvert_all.bw + geom_segment(
 
 
 
-pbargboth_all.bw <- ggplot(filter(res.nests.logit,Merger =="Integrated" & vert != "5" & vert !="3"), aes(y=Outcome_value/mktrev.pre*100,
+pbargboth_all.bw <- ggplot(filter(res.nests.logit,Merger =="Integrated"  & !Outcome %in% c("Retailer","Wholesaler") & vert != "5" & vert !="3"), aes(y=Outcome_value/mktrev.pre*100,
                                                                              #avgpricedelta/mktrev.pre*100,
                                                                              x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
@@ -828,11 +828,11 @@ pbargboth_all.bw <- ggplot(filter(res.nests.logit,Merger =="Integrated" & vert !
 pbargboth_all.bw <- pbargboth_all.bw + geom_segment(
   aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
   data=data.frame(x=5.1,y=-25,xend=7.5
-                  ,Outcome=factor( "Wholesaler" ,levels=unique(res.nests.logit$Outcome)))) +
+                  ,Outcome=factor( "Total" ,levels=unique(res.nests.logit$Outcome)))) +
   geom_text(aes(x=x,y=y),color="black",label="equal power",angle=90,
-            data=data.frame(x=4.7,y=15,Outcome=factor( "Wholesaler" ,levels=unique(res.nests.logit$Outcome))),size=3.5) +
+            data=data.frame(x=4.7,y=15,Outcome=factor( "Total" ,levels=unique(res.nests.logit$Outcome))),size=3.5) +
   geom_text(aes(x=x,y=y),color="black",label="more\n retailer\n power",
-            data=data.frame(x=6.5,y=-20,Outcome=factor( "Wholesaler" ,levels=unique(res.nests.logit$Outcome))),size=3)
+            data=data.frame(x=6.5,y=-20,Outcome=factor( "Total" ,levels=unique(res.nests.logit$Outcome))),size=3)
 
 
 pbargboth_diagonal.bw <- ggplot(filter(res.nest_diagonal.allcost,Merger =="Integrated" & vert != "5" & vert !="3"), aes(y=Outcome_value/mktrev.pre*100,
