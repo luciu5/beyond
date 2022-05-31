@@ -459,12 +459,7 @@ aes(x=Name,y=value,fill=Type,label=value)) +
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
 
 
-png(filename="./output/TrashSimsFirm.png" ,res = 250, units="in"
-    ,width = 6, height = 6 )
 
-print(firmplot)
-
-dev.off()
 
 
 compareplot <- ggplot(data=  compare %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
@@ -486,11 +481,18 @@ compareplot <- ggplot(data=  compare %>% mutate(Name=interaction(Disposal,Collec
 
 
 
+ png(filename="./output/TrashSimsFirm.png" ,res = 250, units="in"
+     ,width = 6, height = 6 )
+
+ print(firmplot)
+
+ dev.off()
+
+
  png(filename="./output/TrashSimsCompare.png" ,res = 250, units="in"
      ,width = 6, height = 6 )
 
  print(compareplot)
 
  dev.off()
-
 
