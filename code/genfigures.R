@@ -131,6 +131,71 @@ pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
 
+pvertincumb_c.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer") #& Cost=="Constant"
+) %>% mutate(vert=as.numeric(as.character(vert)),
+        vert=ifelse(merger=="both",vert-2,vert),
+        vert=factor(vert)), aes(y=Outcome_value/mktrev.pre*100,
+       #avgpricedelta/mktrev.pre*100,
+       x=vert#color=Cost
+       #,color=Outcome
+)
+) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  #coord_cartesian(ylim=c(-60,55))+
+  scale_y_continuous(breaks=seq(-100,100,10))+
+  geom_hline(yintercept=0,linetype="dashed",color="goldenrod")+
+  theme_bw()+scale_colour_tableau('Color Blind')+ theme(legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.barg$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(~Merger,scales="free",labeller = label_context)+
+  xlab("# Incumbent Vertically Integrated Firms")+
+  ylab("Consumer Surplus (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="Outcome:")+
+  labs(title =  "The Distribution of Consumer Surplus Changes as the Number of Integrated Firms Increases",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
+
+pvertincumb_t.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Total") #& Cost=="Constant"
+) %>% mutate(vert=as.numeric(as.character(vert)),
+             vert=ifelse(merger=="both",vert-2,vert),
+             vert=factor(vert)), aes(y=Outcome_value/mktrev.pre*100,
+       #avgpricedelta/mktrev.pre*100,
+       x=vert#color=Cost
+       #,color=Outcome
+)
+) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  #coord_cartesian(ylim=c(-60,55))+
+  scale_y_continuous(breaks=seq(-100,100,10))+
+  geom_hline(yintercept=0,linetype="dashed",color="goldenrod")+
+  theme_bw()+scale_colour_tableau('Color Blind')+ theme(legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.barg$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(~Merger,scales="free",labeller = label_context)+
+  xlab("# Incumbent Vertically Integrated Firms")+
+  ylab("Consumer Surplus (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="Outcome:")+
+  labs(title =  "The Distribution of Total Surplus Changes as the Number of Integrated Firms Increases",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
+
+
 
 pvertincumb_updown.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","Total") & Merger %in% c("Downstream","Upstream") #& Cost=="Constant"
 ), aes(y=Outcome_value/mktrev.pre*100,
@@ -606,6 +671,156 @@ pbargnoboth.bw <- pbargnoboth.bw + geom_segment(
                             Merger=factor("Vertical", levels=unique(res.nests.logit$Merger))),size=3.5)
 
 
+pbargincumbent.bw <- ggplot(filter(res.nests.logit,Outcome %in% c("Consumer","Total") &
+                                  ((merger !="both" & vert %in% c("0","1","4")) | (merger =="both" & vert %in% c("2","3","6")))) %>%
+                            mutate(vert=as.numeric(as.character(vert)),
+                                   vert=ifelse(merger=="both",vert-2,vert),
+                                   vert=factor(vert)),
+                           aes(y=Outcome_value/mktrev.pre*100,
+                           #avgpricedelta/mktrev.pre*100,
+                          x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
+  #geom_boxplot(outlier.alpha = 0.1) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  coord_cartesian(ylim=c(-50,50))+
+  scale_y_continuous(breaks=seq(-100, 100, by=10) ) +
+  geom_hline(yintercept=0,linetype="dashed",color="black")+
+  geom_vline(xintercept=5,linetype="dotted")+
+  theme_bw()+#scale_colour_tableau('Color Blind')+
+  #scale_color_brewer(palette = "PuRd",direction=-1)+
+  scale_color_manual(values = seq_palette)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(Outcome~Merger,labeller = "label_context")+
+  xlab("Relative Bargaining Power")+
+  ylab("Outcome (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="# Integrated Firms:")+
+  labs(title =  "How Changing Bargaining Strength Affects Consumer and Total Surplus, By Merger",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
+
+
+pbargincumbent.bw <- pbargincumbent.bw + geom_segment(
+  aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
+  data=data.frame(x=5.1,y=-50,xend=9
+                  ,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                  Merger=factor("Vertical", levels=unique(res.nests.logit$Merger)))) +
+  geom_text(aes(x=x,y=y),color="black",label="equal power",angle=90,
+            data=data.frame(x=4.5,y=30,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nests.logit$Merger))),size=3.5) +
+  geom_text(aes(x=x,y=y),color="black",label="more retailer power",
+            data=data.frame(x=7.5,y=-40,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nests.logit$Merger))),size=3.5)
+
+
+
+pbargincumbent_c.bw <- ggplot(filter(res.nests.logit,Outcome %in% c("Consumer") &
+                                     ((merger !="both" & vert %in% c("0","1","4")) | (merger =="both" & vert %in% c("2","3","6")))) %>%
+                              mutate(vert=as.numeric(as.character(vert)),
+                                     vert=ifelse(merger=="both",vert-2,vert),
+                                     vert=factor(vert)),
+                            aes(y=Outcome_value/mktrev.pre*100,
+                                #avgpricedelta/mktrev.pre*100,
+                                x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
+  #geom_boxplot(outlier.alpha = 0.1) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  #coord_cartesian(ylim=c(-50,50))+
+  scale_y_continuous(breaks=seq(-100, 100, by=10) ) +
+  geom_hline(yintercept=0,linetype="dashed",color="black")+
+  geom_vline(xintercept=5,linetype="dotted")+
+  theme_bw()+#scale_colour_tableau('Color Blind')+
+  #scale_color_brewer(palette = "PuRd",direction=-1)+
+  scale_color_manual(values = seq_palette)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(~Merger,labeller = "label_context")+
+  xlab("Relative Bargaining Power")+
+  ylab("Outcome (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="# Integrated Firms:")+
+  labs(title =  "How Changing Bargaining Strength Affects Consumer Surplus, By Merger",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
+
+
+pbargincumbent_c.bw <- pbargincumbent_c.bw + geom_segment(
+  aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
+  data=data.frame(x=5.1,y=-50,xend=9
+                  ,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                  Merger=factor("Vertical", levels=unique(res.nests.logit$Merger)))) +
+  geom_text(aes(x=x,y=y),color="black",label="equal power",angle=90,
+            data=data.frame(x=4.5,y=30,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nests.logit$Merger))),size=3.5) +
+  geom_text(aes(x=x,y=y),color="black",label="more retailer power",
+            data=data.frame(x=7,y=-44,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nests.logit$Merger))),size=2.5)
+
+
+
+pbargincumbent_t.bw <- ggplot(filter(res.nests.logit,Outcome %in% c("Total") &
+                                       ((merger !="both" & vert %in% c("0","1","4")) | (merger =="both" & vert %in% c("2","3","6")))) %>%
+                                mutate(vert=as.numeric(as.character(vert)),
+                                       vert=ifelse(merger=="both",vert-2,vert),
+                                       vert=factor(vert)),
+                              aes(y=Outcome_value/mktrev.pre*100,
+                                  #avgpricedelta/mktrev.pre*100,
+                                  x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
+  #geom_boxplot(outlier.alpha = 0.1) +
+  stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
+  #coord_cartesian(ylim=c(-50,50))+
+  scale_y_continuous(breaks=seq(-100, 100, by=10) ) +
+  geom_hline(yintercept=0,linetype="dashed",color="black")+
+  geom_vline(xintercept=5,linetype="dotted")+
+  theme_bw()+#scale_colour_tableau('Color Blind')+
+  #scale_color_brewer(palette = "PuRd",direction=-1)+
+  scale_color_manual(values = seq_palette)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="bottom")+
+  #scale_x_discrete(labels=rev(levels(res.nests$relleveragePre)))+
+  #scale_x_discrete(drop=FALSE,labels=ifelse(levels(res.barg$relleveragePre) %in% as.character(round(relleveragePre,1)),levels(res.barg$relleveragePre),""))+
+  #theme_tufte(ticks=FALSE) +
+  #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
+  #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
+  facet_grid(~Merger,labeller = "label_context")+
+  xlab("Relative Bargaining Power")+
+  ylab("Outcome (%)")+
+  #ylab("Avg. Downstream Price Change (%)")+
+  #ylab("Share-Weighted Downstream Price Change")+
+  #geom_text(data=ann_text,label="Wholesale advantage")
+  labs(colour="# Integrated Firms:")+
+  labs(title =  "How Changing Bargaining Strength Affects Total Surplus, By Merger",
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
+       #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
+       #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
+  )
+
+
+pbargincumbent_t.bw <- pbargincumbent_t.bw + geom_segment(
+  aes(x=x,xend=xend,y=y,yend=y),color="black",arrow=arrow(length=unit(0.3,"cm"),ends="last",type="closed"),size=1, show.legend = FALSE,
+  data=data.frame(x=5.1,y=-12,xend=9
+                  ,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                  Merger=factor("Vertical", levels=unique(res.nests.logit$Merger)))) +
+  geom_text(aes(x=x,y=y),color="black",label="equal power",angle=90,
+            data=data.frame(x=4.5,y=20,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nests.logit$Merger))),size=3.5) +
+  geom_text(aes(x=x,y=y),color="black",label="more retailer power",
+            data=data.frame(x=7.5,y=-10,Outcome=factor( "Consumer" ,levels=unique(res.nests.logit$Outcome)),
+                            Merger=factor("Vertical", levels=unique(res.nests.logit$Merger))),size=2.5)
 
 
 
@@ -886,13 +1101,23 @@ dev.off()
 png("output/surplussum_cost.png",width = 10, height = 7, units = "in", res=300)
 print(psummary_cost.bw)
 dev.off()
-png("output/surplussum.png",width = 10, height = 7, units = "in", res=300)
+
 png("output/CVvertincumbBW.png",width = 10, height = 7, units = "in", res=300)
 print(pvertincumb.bw)
 dev.off()
+
+png("output/CVvertincumbBW_consumer.png",width = 10, height = 7, units = "in", res=300)
+print(pvertincumb_c.bw)
+dev.off()
+
+png("output/CVvertincumbBW_total.png",width = 10, height = 7, units = "in", res=300)
+print(pvertincumb_t.bw)
+dev.off()
+
 png("output/CVvertincumb_updownBW.png",width = 10, height = 7, units = "in", res=300)
 print(pvertincumb_updown.bw)
 dev.off()
+
 png("output/CVvertincumb_vertincBW.png",width = 10, height = 7, units = "in", res=300)
 print(pvertincumb_vertint.bw)
 dev.off()
@@ -900,13 +1125,16 @@ dev.off()
 
 png("output/down_vertincumbBW.png",width = 7, height = 7, units = "in", res=300)
 print(pdown_vertincumb.bw)
+
 dev.off()
 png("output/up_vertincumbBW.png",width = 10, height = 7, units = "in", res=300)
 print(pup_vertincumb.bw)
 dev.off()
+
 png("output/both_vertincumbBW.png",width = 10, height = 7, units = "in", res=300)
 print(pboth_vertincumb.bw)
 dev.off()
+
 png("output/vert_vertincumbBW.png",width = 10, height = 7, units = "in", res=300)
 print(pvert_vertincumb.bw)
 dev.off()
@@ -952,6 +1180,17 @@ png("output/CVbargnobothBW.png",width = 10, height = 7, units = "in", res=300)
 print(pbargnoboth.bw)
 dev.off()
 
+png("output/CVbargincumbent.png",width = 10, height = 7, units = "in", res=300)
+print(pbargincumbent.bw)
+dev.off()
+
+png("output/CVbargincumbent_consumer.png",width = 10, height = 7, units = "in", res=300)
+print(pbargincumbent_c.bw)
+dev.off()
+
+png("output/CVbargincumbent_total.png",width = 10, height = 7, units = "in", res=300)
+print(pbargincumbent_t.bw)
+dev.off()
 
 png("output/CVbargdiagonalBW.png",width = 10, height = 7, units = "in", res=300)
 print(pbargdiagonal.bw)
