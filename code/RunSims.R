@@ -331,10 +331,11 @@ sumtable <- spread(sumtable, quant, val) %>% select(-Max,Max) %>%
   mutate(
     #set=factor(set,levels=c("firm","bargaining"),labels=c("Firm Count","Bargaining Power")),
     merger=factor(merger, levels=c("all","vertical","up","down","both"),labels=c("All","Vertical","Upstream","Downstream","Integrated")),
-    variable = factor(variable, levels=c("up","down","vert","barg","nestParm",
+    variable = factor(variable, levels=c("up","down","vert","barg",#"nestParm",
                                          "avgpricepre.up","avgpricepre.down","mktElast",
                                          "hhipre","hhipost","hhidelta"),
-                      labels = c("# Wholesalers","# Retailers","# Integrated","Bargaining Power","Nesting Parameter","Avg. Upstream Price ($)","Avg. Downstream Price ($)","Market Elasticity",
+                      labels = c("# Wholesalers","# Retailers","# Integrated","Bargaining Power",#"Nesting Parameter",
+                                 "Avg. Upstream Price ($)","Avg. Downstream Price ($)","Market Elasticity",
                                  "Pre-Merger HHI",
                                  "Post-Merger HHI","Delta HHI"
                       )
