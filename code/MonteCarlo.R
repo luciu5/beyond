@@ -28,7 +28,7 @@ market<-function(nfirms.down=3, # # of downstream firms
                  # or a vertical merger
                  nests, # specify nesting structure. default is merging parties in same nest
                  nestParm = 0, # single nesting parameter. Default is flat Logit
-                 isNestedTogether=TRUE, # specify if parties are in the same nest (TRUE) or different nests (FALSE)
+                 isNestedTogether=c("none","same","different"), # specify if parties are in the same nest ("same") or different nests ("different")
                  outMargin=runif(1,1,1e2),
                  shareOutDown=runif(1,.01,.1), # outside good margin
                  shareParm=rep(1,nfirms.down*nprods.down*nfirms.up*nprods.up), # parameter for dirichlet (share) distribution (default is uniform)
@@ -39,6 +39,7 @@ market<-function(nfirms.down=3, # # of downstream firms
   ownerPost <- match.arg(ownerPost)
   supply.down <- match.arg(supply.down)
   bargpreset <- match.arg(bargpreset)
+  isNestedTogether <- match.arg(isNestedTogether)
 
 
   if(any(is.na(nestParm) | nestParm >=1 | nestParm<0)){stop("nestParm must be >=0 and <1")}
@@ -103,32 +104,34 @@ market<-function(nfirms.down=3, # # of downstream firms
   #if(ownerPost=="vertical"){isJoint <-  ids$up.firm == 1 & ids$down.firm == 1}
 
   ## create nesting structures for different merger types
-  if( missing(nests)){
-    if(isNestedTogether){
+if(missing(nests) && max(nestParm,na.rm=TRUE)>0){
+    if(isNestedTogether =="same"){
       if(ownerPost %in% c("up","both")) nests <- ids$up.firm == 1 | ids$up.firm == 2
       else if(ownerPost == "down")      nests <- ids$down.firm == 1 | ids$down.firm == 2
       else if (ownerPost == "vertical") nests <- ids$up.firm == 1 | ids$down.firm == 1
     }
 
-    else{
+    else if(isNestedTogether =="different"){
       if(ownerPost %in% c("up","both")) nests <- ids$up.firm == 1 | ids$up.firm == 3
       else if(ownerPost == "down")      nests <- ids$down.firm == 1 | ids$down.firm == 3
       else if (ownerPost == "vertical") nests <- ids$up.firm == 1 | ids$down.firm == 2
     }
 
+}
+    else{nests <- rep(TRUE,nrow(ids))}
 
     nests <- droplevels(factor(nests,levels=c(TRUE,FALSE)))
 
-  }
 
-  else if ( length(nests) != nrow(ids) | any(is.na(nest))){stop(" 'nests' length must be equal total number of products and cannot contain NAs")}
+
+  if ( length(nests) != nrow(ids) | any(is.na(nests))){stop(" 'nests' length must be equal total number of products and cannot contain NAs")}
 
   if(nlevels(nests) >1 ){nestMat <- tcrossprod(model.matrix(~-1+nests))}
   else{nestMat <- matrix(1,nrow=nrow(ids),ncol=nrow(ids))}
 
 
   #nestParm  <- c(nestParm,0)
-  nestParm  <- rep(nestParm,2)
+  nestParm  <- rep(nestParm,nlevels(nests))
 
 
 
