@@ -1,0 +1,16 @@
+disposal_firm_name,collection_firm_name,collection_paired_share,disposal_price,collection cost,disposal_volume,disposal_dollar_margin,disposal_percent_margin,collection_dollar_margin,collection_percent_margin
+Republic,Republic,0.284,,93.02,164728,,0.56,44.09,0.474
+Republic,Santek,0,,,0,,,,
+Republic,WasteConn,0,,,0,,,,
+Republic,WM_ADS,0,,,0,,,,
+Republic,Regional,0,,,0,,,,
+Santek,Republic,0.059,36.41,93.02,34008,,,,
+Santek,Santek,0.376,,73.77,217727,,,,
+Santek,WasteConn,0,,,0,,,,
+Santek,WM_ADS,0.053,36.41,148.12,30492,,,,
+Santek,Regional,0.053,36.41,148.12,30492,,,,
+WasteConn,Republic,0.033,25,93.02,19289,,,,
+WasteConn,Santek,0,,,0,,,,
+WasteConn,WasteConn,0.083,,62.61,47786,,,,
+WasteConn,WM_ADS,0.03,25,148.12,17294,,,,
+WasteConn,Regional,0.03,25,148.12,17294,,,,
