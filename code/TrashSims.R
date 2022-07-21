@@ -17,7 +17,11 @@ paired_data_4_22 <- read_csv("~/Projects/bargaining_convex/trash/paired_data_4_2
 disposal_price_republic <-  96 # source: 4/26 correspondence with Peggy
 
 simdata <- filter(paired_data_4_22,collection_paired_share>0) %>%
-  mutate(collection_paired_share=collection_paired_share/sum(collection_paired_share),
+  #group_by(disposal_firm_name) %>%
+  #mutate(disposal_volume=ifelse(disposal_firm_name != collection_firm_name,mean(disposal_volume[disposal_firm_name != collection_firm_name]),disposal_volume)) %>%
+  ungroup() %>%
+  mutate(#collection_paired_share=collection_paired_share/sum(collection_paired_share),
+         collection_paired_share=disposal_volume/sum(disposal_volume),
          disposal_dollar_margin=ifelse(disposal_firm_name=="Republic",
                                        disposal_percent_margin*disposal_price_republic,
                                        disposal_dollar_margin),
@@ -25,7 +29,7 @@ simdata <- filter(paired_data_4_22,collection_paired_share>0) %>%
          # and use that margin to recover costs
          disposal_price=ifelse(disposal_firm_name=="Republic",
                                disposal_price_republic - disposal_dollar_margin,disposal_price),
-         barg=ifelse(disposal_firm_name==collection_firm_name,1,0.5),
+         barg=ifelse(disposal_firm_name==collection_firm_name,1,0.6),
          disposal_dollar_margin=ifelse(disposal_firm_name %in% c("Santek","WasteConn"),
                                        max(disposal_percent_margin,na.rm=TRUE)*disposal_price,
                                        disposal_dollar_margin)
@@ -35,7 +39,9 @@ simdata <- filter(paired_data_4_22,collection_paired_share>0) %>%
     disposal_dollar_margin=max(disposal_dollar_margin,na.rm=TRUE),
     disposal_price=ifelse(is.na(disposal_price),max(disposal_price,na.rm=TRUE) - disposal_dollar_margin,disposal_price),
     disposal_cost= ifelse(disposal_firm_name==collection_firm_name,disposal_price, disposal_price-disposal_dollar_margin),
-    disposal_dollar_margin=ifelse(disposal_firm_name==collection_firm_name,0,disposal_dollar_margin)) %>%
+    disposal_dollar_margin=ifelse(disposal_firm_name==collection_firm_name,0,disposal_dollar_margin)#,
+    #disposal_dollar_margin=ifelse(min(collection_paired_share) == collection_paired_share | disposal_dollar_margin==0,disposal_dollar_margin,NA)
+    ) %>%
   group_by(collection_firm_name) %>%
   mutate(
 
@@ -79,8 +85,10 @@ diag(div) <- -sharesNoOut
 
 
 
-minD <- function(barg,is2nd=FALSE,margins=FALSE){
+minD <- function(theta,is2nd=FALSE,margins=FALSE){
 
+  alpha <- theta[1]
+  barg <- theta[-1]
   nprods <- nrow(simdata)
 
   marginsUp <- simdata$disposal_dollar_margin
@@ -89,8 +97,8 @@ minD <- function(barg,is2nd=FALSE,margins=FALSE){
 
   ownerDownMatVertical <- matrix(0,nrow=nprods,ncol=nprods)
 
-if(!is2nd)  alpha <- simdata$alpha_bert[1]
-else{ alpha <- simdata$alpha_2nd[1]}
+#if(!is2nd)  alpha <- simdata$alpha_bert[1]
+#else{ alpha <- simdata$alpha_2nd[1]}
 
   b <- rep(1,nprods)
   #b <- theta[-1]
@@ -188,11 +196,14 @@ else{ alpha <- simdata$alpha_2nd[1]}
 #minBarg_2nd <- optim(rep(.5,3),minD,method="L-BFGS-B",lower=rep(0,3),upper=rep(1,3),is2nd=TRUE)
 
 ## same bargaininag parameter for wholesalers
-minBarg_bert<- optim(rep(.5,2),minD,method="L-BFGS-B",lower=rep(0,2),upper=rep(1,2))
-minBarg_2nd <- optim(rep(.5,2),minD,method="L-BFGS-B",lower=rep(0,2),upper=rep(1,2),is2nd=TRUE)
+minBarg_bert<- optim(c(-1,rep(.6,2)),minD,method="L-BFGS-B",lower=c(-1e3,rep(.1,2)),upper=c(-1e-4,rep(1,2)))
+minBarg_2nd <- optim( c(-1,rep(.6,2)),minD,method="L-BFGS-B",lower=c(-1e3,rep(.1,2)),upper=c(-1e-4,rep(1,2)),is2nd=TRUE)
 
 
 predMargins_bert=minD(minBarg_bert$par,margins=TRUE)
+predMargins_6_bert=minD(c(minBarg_bert$par[1],.6,.6),margins=TRUE)
+predMargins_8_bert=minD(c(minBarg_bert$par[1],.8,.8),margins=TRUE)
+predMargins_9_bert=minD(c(minBarg_bert$par[1],.9,.9),margins=TRUE)
 predMargins_2nd=minD(minBarg_2nd$par,is2nd=TRUE,margins=TRUE)
 
  simdata <-
@@ -292,10 +303,12 @@ simres_vert <- with(simdata,
 
 
 ## bargaining parameters are not being recovered properly. Figure out why
-simres_vert@up@bargpowerPre[simdata$disposal_firm_name=="Santek" & simdata$collection_firm_name!="Santek"] <- minBarg_bert$par[1]
-simres_vert@up@bargpowerPost[simdata$disposal_firm_name=="Santek" & simdata$collection_firm_name!="Santek"] <- minBarg_bert$par[1]
-simres_vert@up@bargpowerPre[simdata$disposal_firm_name=="WasteConn" & simdata$collection_firm_name!="WasteConn"] <- minBarg_bert$par[2]
-simres_vert@up@bargpowerPost[simdata$disposal_firm_name=="WasteConn" & simdata$collection_firm_name!="WasteConn"] <- minBarg_bert$par[2]
+
+#minBarg_bert$par[2:3] <- 0.9
+simres_vert@up@bargpowerPre[simdata$disposal_firm_name=="Santek" & simdata$collection_firm_name!="Santek"] <- minBarg_bert$par[2]
+simres_vert@up@bargpowerPost[simdata$disposal_firm_name=="Santek" & simdata$collection_firm_name!="Santek"] <- minBarg_bert$par[2]
+simres_vert@up@bargpowerPre[simdata$disposal_firm_name=="WasteConn" & simdata$collection_firm_name!="WasteConn"] <- minBarg_bert$par[3]
+simres_vert@up@bargpowerPost[simdata$disposal_firm_name=="WasteConn" & simdata$collection_firm_name!="WasteConn"] <- minBarg_bert$par[3]
 simres_vert@up@bargpowerPost["Santek:Republic"] <- 1
 
 simres_vert@down@slopes$alpha <- simdata$alpha_bert[1]
@@ -304,6 +317,11 @@ simres_vert <- ownerToMatrix(simres_vert, preMerger = TRUE)
 simres_vert <- ownerToMatrix(simres_vert, preMerger = FALSE)
 mcPre <- calcMC(simres_vert, TRUE)
 mcPost <- calcMC(simres_vert, FALSE)
+
+## Set Santek:Santek marginal costs equal to the calibrated costs of other Santek Products
+mcPre$up["Santek:Santek"] <- mcPre$up["Santek:Regional"]
+mcPost$up["Santek:Santek"] <- mcPost$up["Santek:Regional"]
+
 simres_vert@down@mcPre <- mcPre$down
 simres_vert@down@mcPost <- mcPost$down
 simres_vert@up@mcPre <- mcPre$up
@@ -315,23 +333,23 @@ simres_vertsPost <- calcPrices(simres_vert, preMerger = FALSE)
 simres_vert@down@pricePost <- simres_vertsPost$down
 simres_vert@up@pricePost <- simres_vertsPost$up
 
-
-simres_vert_2nd <- with(simdata,
-                     vertical.barg(supplyDown = "2nd",
-                                   sharesDown = collection_paired_share,
-                                   pricesDown=priceDown_2nd,
-                                   marginsDown=disposal_percent_margin,
-                                   ownerPreDown=ownerPreDown,
-                                   ownerPostDown=ownerPostDown,
-                                   pricesUp=disposal_price_2nd,
-                                   marginsUp=marginUp_percent_2nd,
-                                   ownerPreUp=ownerPreUp,
-                                   ownerPostUp=ownerPostUp,
-                                   labels = as.character(Name),
-                                   insideSize=sum(disposal_volume)
-                                   #,constrain="pair"
-                     ))
-
+#
+# simres_vert_2nd <- with(simdata,
+#                      vertical.barg(supplyDown = "2nd",
+#                                    sharesDown = collection_paired_share,
+#                                    pricesDown=priceDown_2nd,
+#                                    marginsDown=disposal_percent_margin,
+#                                    ownerPreDown=ownerPreDown,
+#                                    ownerPostDown=ownerPostDown,
+#                                    pricesUp=disposal_price_2nd,
+#                                    marginsUp=marginUp_percent_2nd,
+#                                    ownerPreUp=ownerPreUp,
+#                                    ownerPostUp=ownerPostUp,
+#                                    labels = as.character(Name),
+#                                    insideSize=sum(disposal_volume)
+#                                    #,constrain="pair"
+#                      ))
+#
 
 
 ## Output data
