@@ -119,7 +119,7 @@ pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","
   #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
   #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
   facet_grid(Outcome~Merger,scales="free",labeller = label_context)+
-  xlab("# Incumbent Vertically Integrated Firms")+
+  xlab("# Vertically Integrated Firms")+
   ylab("Outcome (%)")+
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
@@ -151,7 +151,7 @@ pvertincumb_c.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer"
   #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
   #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
   facet_grid(~Merger,scales="free",labeller = label_context)+
-  xlab("# Incumbent Vertically Integrated Firms")+
+  xlab("# Vertically Integrated Firms")+
   ylab("Consumer Surplus (%)")+
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+
@@ -183,7 +183,7 @@ pvertincumb_t.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Total") #
   #geom_tufteboxplot(median.type = "line", whisker.type = 'line') +
   #facet_grid(Outcome~Retailers+Wholesalers,scales="free_y",labeller = "label_context")+
   facet_grid(~Merger,scales="free",labeller = label_context)+
-  xlab("# Incumbent Vertically Integrated Firms")+
+  xlab("# Vertically Integrated Firms")+
   ylab("Consumer Surplus (%)")+
   #ylab("Avg. Downstream Price Change (%)")+
   #ylab("Share-Weighted Downstream Price Change")+

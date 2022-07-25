@@ -31,7 +31,7 @@ market<-function(nfirms.down=3, # # of downstream firms
                  isNestedTogether=c("none","same","different"), # specify if parties are in the same nest ("same") or different nests ("different")
                  outMargin=runif(1,1,1e2),
                  shareOutDown=runif(1,.01,.1), # outside good margin
-                 shareParm=rep(2.5,nfirms.down*nprods.down*nfirms.up*nprods.up), # parameter for dirichlet (share) distribution (default is uniform)
+                 shareParm=rep(1,nfirms.down*nprods.down*nfirms.up*nprods.up), # parameter for dirichlet (share) distribution (default is uniform)
                  largeMerger=FALSE, # force the firms with the largest market shares to merge,
                  ...){
 
