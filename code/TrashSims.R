@@ -21,6 +21,7 @@ simdata <- filter(paired_data_4_22,collection_paired_share>0) %>%
   #mutate(disposal_volume=ifelse(disposal_firm_name != collection_firm_name,mean(disposal_volume[disposal_firm_name != collection_firm_name]),disposal_volume)) %>%
   ungroup() %>%
   mutate(#collection_paired_share=collection_paired_share/sum(collection_paired_share),
+         collection_firm_name=gsub("_","-",collection_firm_name),
          collection_paired_share=disposal_volume/sum(disposal_volume),
          disposal_dollar_margin=ifelse(disposal_firm_name=="Republic",
                                        disposal_percent_margin*disposal_price_republic,
@@ -367,17 +368,18 @@ print(kable(select(simdata,disposal_firm_name,
               rename("Disposal Firm"=disposal_firm_name,
                      "Collection Firm"=collection_firm_name,
                      "Volume (000s)"=disposal_volume,
-                     "Disposal Price"=disposal_price,
+                     "Disposal Price ($)"=disposal_price,
                      "Disposal Margin ($)"=disposal_dollar_margin,
                      "Collection Margin ($)"=collection_dollar_margin,
-                     "Collection Price"=priceDown_repmargin_2nd
+                     "Collection Price ($)"=priceDown_repmargin_2nd
                      ) %>%
   mutate(`Volume (000s)`=`Volume (000s)`/1e3) %>%
   mutate(across(where(is.numeric),round)),
-format = "latex",
+            format = "latex",
+            align = c("r","r",rep("c",5)),
             booktabs = TRUE,
-            caption = "Republic/Santek Merger Simulation Inputs"#,label = "siminputs"
-            ) %>% kable_styling(latex_options = "scale_down")
+            caption = "Republic/Santek Merger Simulation Inputs",label = "trashdata"
+            ) %>% kable_styling(latex_options = "scale_down") %>% collapse_rows(1, latex_hline = "major")
       ,digits=2)
 
 sink()
@@ -409,12 +411,13 @@ sink()
 # )
 
 vert_sum <- summary(simres_vert)
-
 base_sum <- summary(simres_noeff)
+up_sum <- summary(simres_noeff_up)
 
 base_sum$name=rownames(base_sum)
-
 vert_sum$name=rownames(vert_sum)
+up_sum$name=rownames(up_sum)
+
 
 vert_sum <- separate(vert_sum,name,sep=":",into=c("Disposal","Collector")) %>%
   pivot_longer(c(priceUpPre ,priceUpPost , priceDownPre, priceDownPost, sharesPre, sharesPost)) %>%
@@ -444,9 +447,26 @@ base_sum <- separate(base_sum,name,sep=":",into=c("Disposal","Collector")) %>%
   arrange(Level,Effect,Disposal,desc(`Change (%)`)) %>%
   mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect)
 
+
+
+up_sum <- separate(up_sum,name,sep=":",into=c("Disposal","Collector")) %>%
+  pivot_longer(c( pricePre, pricePost, sharesPre, sharesPost)) %>%
+  mutate(Level=ifelse(grepl("Up",name),"Disposal","Collection"),
+         Pre=ifelse(grepl("Pre",name),"Pre-merger","Post-merger"),
+         name=gsub("Pre|Post|Up|Down","",name)) %>%
+  rename(Effect=name) %>%
+  pivot_wider(values_from=value,names_from=Pre) %>%
+  mutate(`Change (%)`=(`Post-merger`/`Pre-merger` - 1)*100,
+         Effect=factor(Effect, labels=c("Prices","Shares")),
+         Level=factor(Level,levels=rev(sort(unique(Level))))) %>%
+  select(-priceDelta,-outputDelta,-isParty) %>%
+  arrange(Level,Effect,Disposal,desc(`Change (%)`)) %>%
+  mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect)
+
 compare <- bind_rows(
   mutate(vert_sum, Model="Vertical"),
-  mutate(base_sum, Model="Downstream Only")
+  mutate(base_sum, Model="Downstream Only"),
+  mutate(up_sum, Model="Upstream Only")
 )
 
 sink("./doc/TrashSims.tex")
@@ -478,14 +498,14 @@ aes(x=Name,y=value,fill=Type,label=value)) +
 
 
 
+compare <- compare %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
+           Name=reorder(Name,`Post-merger`*as.numeric(Model=="Vertical")*as.numeric(Effect=="Prices") * as.numeric(Level=="Collection"))) %>%
+  mutate(Change=`Post-merger` - `Pre-merger`) %>%
+  pivot_longer(c(`Pre-merger` ,`Post-merger`),names_to = "Type",values_to = "value") %>%
+  mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger"))) %>%
+  filter(Level=="Collection" & !grepl("Change|Pre",Type))
 
-
-compareplot <- ggplot(data=  compare %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
-                                              Name=reorder(Name,`Post-merger`*as.numeric(Model=="Vertical")*as.numeric(Effect=="Prices") * as.numeric(Level=="Collection"))) %>%
-                     mutate(Change=`Post-merger` - `Pre-merger`) %>%
-                     pivot_longer(c(`Pre-merger` ,`Post-merger`),names_to = "Type",values_to = "value") %>%
-                     mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger"))) %>%
-                     filter(Level=="Collection" & !grepl("Change|Pre",Type)),
+compareplot <- ggplot(data=  compare,
                    aes(x=Name,y=value,fill=Model,label=value)) +
   facet_grid(~Level+Effect,scales = "free_x") + geom_bar(stat="identity",
                                                          position=position_dodge()
@@ -498,6 +518,8 @@ compareplot <- ggplot(data=  compare %>% mutate(Name=interaction(Disposal,Collec
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
 
 
+compareplot_noup <- compareplot %+%
+  filter(compare, Model != "Upstream Only")
 
  png(filename="./output/TrashSimsFirm.png" ,res = 250, units="in"
      ,width = 6, height = 6 )
@@ -510,7 +532,13 @@ compareplot <- ggplot(data=  compare %>% mutate(Name=interaction(Disposal,Collec
  png(filename="./output/TrashSimsCompare.png" ,res = 250, units="in"
      ,width = 6, height = 6 )
 
- print(compareplot)
+ print(compareplot_noup)
 
  dev.off()
 
+ png(filename="./output/TrashSimsCompareAll.png" ,res = 250, units="in"
+     ,width = 6, height = 6 )
+
+ print(compareplot)
+
+ dev.off()
