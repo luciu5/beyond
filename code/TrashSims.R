@@ -367,18 +367,18 @@ print(kable(select(simdata,disposal_firm_name,
 
               rename("Disposal Firm"=disposal_firm_name,
                      "Collection Firm"=collection_firm_name,
-                     "Volume (000s)"=disposal_volume,
-                     "Disposal Price ($)"=disposal_price,
-                     "Disposal Margin ($)"=disposal_dollar_margin,
-                     "Collection Margin ($)"=collection_dollar_margin,
-                     "Collection Price ($)"=priceDown_repmargin_2nd
+                     "Volume"=disposal_volume,
+                     "Disposal Price"=disposal_price,
+                     "Disposal Margin"=disposal_dollar_margin,
+                     "Collection Margin"=collection_dollar_margin,
+                     "Collection Price"=priceDown_repmargin_2nd
                      ) %>%
-  mutate(`Volume (000s)`=`Volume (000s)`/1e3) %>%
+  mutate(`Volume (000s)`=`Volume`/1e3) %>%
   mutate(across(where(is.numeric),round)),
             format = "latex",
             align = c("r","r",rep("c",5)),
             booktabs = TRUE,
-            caption = "Republic/Santek Merger Simulation Inputs",label = "trashdata"
+            caption = "Republic/Santek Merger Simulation Inputs. Prices and margins are reported in dollars, while volume is reported in thousands of pounds.",label = "trashdata"
             ) %>% kable_styling(latex_options = "scale_down") %>% collapse_rows(1, latex_hline = "major")
       ,digits=2)
 
