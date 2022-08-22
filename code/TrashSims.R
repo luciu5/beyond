@@ -373,12 +373,12 @@ print(kable(select(simdata,disposal_firm_name,
                      "Collection Margin"=collection_dollar_margin,
                      "Collection Price"=priceDown_repmargin_2nd
                      ) %>%
-  mutate(`Volume (000s)`=`Volume`/1e3) %>%
+  mutate(`Volume`=`Volume`/1e3) %>%
   mutate(across(where(is.numeric),round)),
             format = "latex",
             align = c("r","r",rep("c",5)),
             booktabs = TRUE,
-            caption = "Republic/Santek Merger Simulation Inputs. Prices and margins are reported in dollars, while volume is reported in thousands of pounds.",label = "trashdata"
+            caption = "Republic/Santek Merger Simulation Inputs. Volume is reported in thousands of pounds, while prices and margins are reported in dollars.",label = "trashdata"
             ) %>% kable_styling(latex_options = "scale_down") %>% collapse_rows(1, latex_hline = "major")
       ,digits=2)
 
