@@ -29,6 +29,8 @@
  \usepackage{makecell}
  \usepackage{xcolor}
 
+\graphicspath{{../output/}}
+
 \interfootnotelinepenalty=10000
 
 \parskip     2.0mm       % space between paragraphs
@@ -343,28 +345,28 @@ This appears to be especially true when retailers have relatively more bargainin
 
 \begin{sidewaysfigure}
 \centering
-\includegraphics[scale=0.9]{output/surplussum.png}
+\includegraphics[scale=0.9]{surplussum.png}
 \caption{The figure displays box and whisker plots summarizing the extent to which mergers affect consumer, retailer, wholesaler, and total surplus. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median. }
 \label{fig:surplussum}
 \end{sidewaysfigure}
 
 \begin{sidewaysfigure}
 \centering
-\includegraphics[scale=0.9]{output/CVvertincumbBW_consumer.png}
+\includegraphics[scale=0.9]{CVvertincumbBW_consumer.png}
 \caption{The figure displays box and whisker plots summarizing the extent to which mergers affect consumer surplus as the number of vertically integrated firms present in a market changes.  Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median. }
 \label{fig:CVvertincumbBW_consumer}
 \end{sidewaysfigure}
 
 \begin{sidewaysfigure}
 \centering
-\includegraphics[scale=0.9]{output/CVbargincumbent_consumer.png}
+\includegraphics[scale=0.9]{CVbargincumbent_consumer.png}
 \caption{The figure displays box and whisker plots summarizing the extent to which vertical, upstream, downstream and integrated mergers affect consumer surplus as the bargaining power of wholesalers relative to retailers changes. The different colored boxes display how outcomes change as the number of vertically  integrated firms changes. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median.}
 \label{fig:CVbargincumbent_consumer}
 \end{sidewaysfigure}
 
 \begin{figure}
 \centering
-\includegraphics[scale=1.0]{output/chattanooga_tree.png}
+\includegraphics[scale=1.0]{chattanooga_tree.png}
 \caption{Structure of the Chattanooga Area Disposal and Collection Market}
 \label{fig:chatt_tree}
 \end{figure}
@@ -372,7 +374,7 @@ This appears to be especially true when retailers have relatively more bargainin
 
 \begin{figure}
 \centering
-\includegraphics[scale=1.0]{output/TrashSimsFirm.png}
+\includegraphics[scale=1.0]{TrashSimsFirm.png}
 \caption{Republic/Santek Simulation Results}
 \label{fig:TrashSimsFirms}
 \end{figure}
@@ -380,7 +382,7 @@ This appears to be especially true when retailers have relatively more bargainin
 
 \begin{figure}
 \centering
-\includegraphics{output/TrashSimsCompare.png}
+\includegraphics{TrashSimsCompare.png}
 \caption{Comparison between Collection-Only and Full Vertical Simulations for Republic/Santek}
 \label{fig:TrashSimsCompare}
 \end{figure}
@@ -409,7 +411,7 @@ The bottom panel of Figure \ref{fig:surplussumcost} compares a situation where o
 
 \begin{sidewaysfigure}
 \centering
-\includegraphics[scale=0.9]{output/surplussum_cost.png}
+\includegraphics[scale=0.9]{surplussum_cost.png}
 \caption{The figure displays box and whisker plots summarizing the extent to which merger outcomes change according to 4 different cost scenarios. The boxes in the top row (``All") either assume all firms face either constant marginal costs (blue, left) or linear marginal costs (orange, right). The boxes in the bottom row (``Party") either assume that the merging parties face constant marginal costs while other firms face linear marginal costs (blue, left), or the merging parties face linear marginal costs while other firms face constant marginal costs (orange, right). Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median. }
 \label{fig:surplussumcost}
 \end{sidewaysfigure}
@@ -422,14 +424,14 @@ mergers typically only occur when wholesalers have relatively more bargaining po
 
 \begin{sidewaysfigure}
 \centering
-\includegraphics[scale=0.9]{output/CVvertincumbBW_total.png}
+\includegraphics[scale=0.9]{CVvertincumbBW_total.png}
 \caption{The figure displays box and whisker plots summarizing the extent to which mergers affect total surplus as the number of vertically integrated firms present in a market changes.  Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median. }
 \label{fig:CVvertincumbBW_total}
 \end{sidewaysfigure}
 
 \begin{sidewaysfigure}
 \centering
-\includegraphics[scale=0.9]{output/CVbargincumbent_total.png}
+\includegraphics[scale=0.9]{CVbargincumbent_total.png}
 \caption{The figure displays box and whisker plots summarizing the extent to which vertical, upstream, downstream and integrated mergers affect total surplus as the bargaining power of wholesalers relative to retailers changes. The different colored boxes display how outcomes change as the number of vertically  integrated firms changes. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median.}
 \label{fig:CVbargincumbent_total}
 \end{sidewaysfigure}
@@ -443,42 +445,42 @@ The next sections present results of applying the model of Section \ref{sec:theo
 
 % \begin{sidewaysfigure}
 % \centering
-% \includegraphics[scale=0.9]{../output/CVvertincumb_updownBW.png}
+% \includegraphics[scale=0.9]{../CVvertincumb_updownBW.png}
 % \caption{The figure displays box and whisker plots summarizing the extent to which mergers affect consumer (blue,left) and total (orange,right) surplus as the number of vertically integrated firms present in a market change.  Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median. }
 % \label{fig:CVvertincumbupdownBW}
 % \end{sidewaysfigure}
 %
 % \begin{sidewaysfigure}
 % \centering
-% \includegraphics[scale=0.9]{../output/CVvertincumb_vertincBW.png}
+% \includegraphics[scale=0.9]{../CVvertincumb_vertincBW.png}
 % \caption{The figure displays box and whisker plots summarizing the extent to which mergers affect consumer (blue,left) and total (orange,right) surplus as the number of vertically integrated firms present in a market change.  Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median. }
 % \label{fig:CVvertincumbvertincBW}
 % \end{sidewaysfigure}
 
 % \begin{sidewaysfigure}
 % \centering
-% \includegraphics[scale=0.9]{../output/CVbargupBW.png}
+% \includegraphics[scale=0.9]{../CVbargupBW.png}
 % \caption{The figure displays box and whisker plots summarizing the extent to which mergers among an integrated and unintegrated wholesaler affect consumer, retailer, wholesaler, and total surplus as the bargaining power of wholesalers relative to retailers changes. The different colored boxes display how outcomes change as the number of vertically  integrated firms increases. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median.}
 % \label{fig:CVbargupBW}
 % \end{sidewaysfigure}
 %
 % \begin{sidewaysfigure}
 % \centering
-% \includegraphics[scale=0.9]{../output/CVbargdownBW.png}
+% \includegraphics[scale=0.9]{../CVbargdownBW.png}
 % \caption{The figure displays box and whisker plots summarizing the extent to which mergers among an integrated and unintegrated retailer affect consumer, retailer, wholesaler, and total surplus as the bargaining power of wholesalers relative to retailers changes. The different colored boxes display how outcomes change as the number of vertically  integrated firms increases. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median.}
 % \label{fig:CVbargdownBW}
 % \end{sidewaysfigure}
 %
 % \begin{sidewaysfigure}
 % \centering
-% \includegraphics[scale=0.9]{../output/CVbargvertBW.png}
+% \includegraphics[scale=0.9]{../CVbargvertBW.png}
 % \caption{The figure displays box and whisker plots summarizing the extent to which mergers among an unintegrated wholesaler and unintegrated retailer affect consumer, retailer, wholesaler, and total surplus as the bargaining power of wholesalers relative to retailers changes. The different colored boxes display how outcomes change as the number of vertically  integrated firms increases. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median.}
 % \label{fig:CVbargvertBW}
 % \end{sidewaysfigure}
 
 % \begin{sidewaysfigure}
 % \centering
-% \includegraphics[scale=0.85]{output/CVbargbothBW.png}
+% \includegraphics[scale=0.85]{CVbargbothBW.png}
 % \caption{The figure displays box and whisker plots summarizing the extent to which mergers among two integrated wholesalers and retailers affect consumer, retailer, wholesaler, and total surplus as the bargaining power of wholesalers relative to retailers changes. The different colored boxes display how outcomes change as the number of vertically  integrated firms increases. Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median.}
 % \label{fig:CVbargbothBW}
 % \end{sidewaysfigure}

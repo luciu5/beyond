@@ -299,7 +299,8 @@ simres_vert <- with(simdata,
                               ownerPostUp=ownerPostUp,
                               labels = as.character(Name),
                               insideSize=sum(disposal_volume)
-                              ,constrain="wholesaler"
+                              ,constrain="wholesaler",
+                              chain_level="full"
 ))
 
 
@@ -327,6 +328,11 @@ simres_vert@down@mcPre <- mcPre$down
 simres_vert@down@mcPost <- mcPost$down
 simres_vert@up@mcPre <- mcPre$up
 simres_vert@up@mcPost <- mcPost$up
+
+simres_vert_nodown <- simres_vert_noup <- simres_vert
+simres_vert_nodown@chain_level="wholesaler"
+simres_vert_noup@chain_level="retailer"
+
 simres_vertsPre <- calcPrices(simres_vert, preMerger = TRUE)
 simres_vert@down@pricePre <- simres_vertsPre$down
 simres_vert@up@pricePre <- simres_vertsPre$up
@@ -334,6 +340,26 @@ simres_vertsPost <- calcPrices(simres_vert, preMerger = FALSE)
 simres_vert@down@pricePost <- simres_vertsPost$down
 simres_vert@up@pricePost <- simres_vertsPost$up
 
+simres_vertsPre <- calcPrices(simres_vert_noup, preMerger = TRUE)
+simres_vert_noup@down@pricePre <- simres_vertsPre$down
+simres_vert_noup@up@pricePre <- simres_vertsPre$up
+simres_vertsPost <- calcPrices(simres_vert_noup, preMerger = FALSE)
+simres_vert_noup@down@pricePost <- simres_vertsPost$down
+simres_vert_noup@up@pricePost <- simres_vertsPost$up
+
+simres_vertsPre <- calcPrices(simres_vert_nodown, preMerger = TRUE)
+simres_vert_nodown@down@pricePre <- simres_vertsPre$down
+simres_vert_nodown@up@pricePre <- simres_vertsPre$up
+simres_vertsPost <- calcPrices(simres_vert_nodown, preMerger = FALSE)
+simres_vert_nodown@down@pricePost <- simres_vertsPost$down
+simres_vert_nodown@up@pricePost <- simres_vertsPost$up
+
+cat("Market results Full model:\n")
+summary(simres_vert,market=TRUE)
+cat("Market results Downstream Only model:\n")
+summary(simres_vert_noup,market=TRUE)
+cat("Market results Upstream Only model:\n")
+summary(simres_vert_nodown,market=TRUE)
 #
 # simres_vert_2nd <- with(simdata,
 #                      vertical.barg(supplyDown = "2nd",
@@ -383,39 +409,19 @@ print(kable(select(simdata,disposal_firm_name,
       ,digits=2)
 
 sink()
-#
-# mktplot_82_33 <- ggplot(data= mkt_82_33
-#                          ,
-#                          aes(x=key,y=value,fill=Model)) +
-#   #facet_wrap(~key,scales = "free_x") +
-#   geom_bar(stat="identity", position=position_dodge()) + theme_bw() +
-#   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1),
-#         axis.text.y = element_text(angle = 45, hjust = 1)) +
-#   xlab("") + ylab("Equilibrium Level Changes (Millions $)") + geom_hline(yintercept = 0,linetype="dashed")+ coord_flip() +
-#   scale_fill_grey(start = .9, end = .1) +  geom_text(aes(label=round(value),hjust = ifelse(value >= 0, 0, 1)), position=position_dodge(width=0.9),color="black",size=2)
-#
-#
-# data_82_33 <-
-#   tidyr::gather(res_82_33$firm,key="key",value="value",-level,-model,-firm) %>%
-#   mutate(firm=factor(firm,levels=rev(levels(firm))),
-#          model=factor(model,labels = c("None","Medical","Vertical"))) %>%
-#   filter(key %in% c("outputDelta","priceDelta")) %>%
-#   mutate(key=factor(key,levels=c("priceDelta","outputDelta"),
-#                     labels=c("Price","Output")),
-#          level=factor(level,levels=c("up","down"),labels=c("Up","Down"))) %>%
-#   rename(Efficiency=model)
-#
-# data_82_33 <- rbind(data_82_33,
-#                     data.frame(level="Up",Efficiency="Medical",firm="Anthem",key="Price",value=simdata$`Post-merger Cost Changes($/unit)`[1]),
-#                     data.frame(level="Up",Efficiency="Medical",firm="Cigna",key="Price",value=simdata$`Post-merger Cost Changes($/unit)`[2])
-# )
+
 
 vert_sum <- summary(simres_vert)
+vertnoup_sum <- summary(simres_vert_noup)
+vertnodown_sum <- summary(simres_vert_nodown)
+
 base_sum <- summary(simres_noeff)
 up_sum <- summary(simres_noeff_up)
 
 base_sum$name=rownames(base_sum)
 vert_sum$name=rownames(vert_sum)
+vertnoup_sum$name=rownames(vertnoup_sum)
+vertnodown_sum$name=rownames(vertnodown_sum)
 up_sum$name=rownames(up_sum)
 
 
@@ -429,6 +435,34 @@ vert_sum <- separate(vert_sum,name,sep=":",into=c("Disposal","Collector")) %>%
   mutate(`Change (%)`=(`Post-merger`/`Pre-merger` - 1)*100,
          Effect=factor(Effect, labels=c("Prices","Shares")),
           Level=factor(Level,levels=rev(sort(unique(Level))))) %>%
+  select(-priceUpDelta,-priceDownDelta,-outputDelta,-isParty) %>%
+  arrange(Level,Effect,Disposal,desc(`Change (%)`)) %>%
+  mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect)
+
+vertnoup_sum <- separate(vertnoup_sum,name,sep=":",into=c("Disposal","Collector")) %>%
+  pivot_longer(c(priceUpPre ,priceUpPost , priceDownPre, priceDownPost, sharesPre, sharesPost)) %>%
+  mutate(Level=ifelse(grepl("Up",name),"Disposal","Collection"),
+         Pre=ifelse(grepl("Pre",name),"Pre-merger","Post-merger"),
+         name=gsub("Pre|Post|Up|Down","",name)) %>%
+  rename(Effect=name) %>%
+  pivot_wider(values_from=value,names_from=Pre) %>%
+  mutate(`Change (%)`=(`Post-merger`/`Pre-merger` - 1)*100,
+         Effect=factor(Effect, labels=c("Prices","Shares")),
+         Level=factor(Level,levels=rev(sort(unique(Level))))) %>%
+  select(-priceUpDelta,-priceDownDelta,-outputDelta,-isParty) %>%
+  arrange(Level,Effect,Disposal,desc(`Change (%)`)) %>%
+  mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect)
+
+vertnodown_sum <- separate(vertnodown_sum,name,sep=":",into=c("Disposal","Collector")) %>%
+  pivot_longer(c(priceUpPre ,priceUpPost , priceDownPre, priceDownPost, sharesPre, sharesPost)) %>%
+  mutate(Level=ifelse(grepl("Up",name),"Disposal","Collection"),
+         Pre=ifelse(grepl("Pre",name),"Pre-merger","Post-merger"),
+         name=gsub("Pre|Post|Up|Down","",name)) %>%
+  rename(Effect=name) %>%
+  pivot_wider(values_from=value,names_from=Pre) %>%
+  mutate(`Change (%)`=(`Post-merger`/`Pre-merger` - 1)*100,
+         Effect=factor(Effect, labels=c("Prices","Shares")),
+         Level=factor(Level,levels=rev(sort(unique(Level))))) %>%
   select(-priceUpDelta,-priceDownDelta,-outputDelta,-isParty) %>%
   arrange(Level,Effect,Disposal,desc(`Change (%)`)) %>%
   mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect)
@@ -464,9 +498,9 @@ up_sum <- separate(up_sum,name,sep=":",into=c("Disposal","Collector")) %>%
   mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect)
 
 compare <- bind_rows(
-  mutate(vert_sum, Model="Vertical"),
-  mutate(base_sum, Model="Downstream Only"),
-  mutate(up_sum, Model="Upstream Only")
+  mutate(vert_sum, Model="Full"),
+  mutate(vertnoup_sum, Model="Downstream Only"),
+  mutate(vertnodown_sum, Model="Upstream Only")
 )
 
 sink("./doc/TrashSims.tex")
@@ -499,14 +533,30 @@ aes(x=Name,y=value,fill=Type,label=value)) +
 
 
 compare <- compare %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
-           Name=reorder(Name,`Post-merger`*as.numeric(Model=="Vertical")*as.numeric(Effect=="Prices") * as.numeric(Level=="Collection"))) %>%
+           Name=reorder(Name,`Post-merger`*as.numeric(Model=="Full")*as.numeric(Effect=="Prices") * as.numeric(Level=="Collection"))) %>%
   mutate(Change=`Post-merger` - `Pre-merger`) %>%
   pivot_longer(c(`Pre-merger` ,`Post-merger`),names_to = "Type",values_to = "value") %>%
-  mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger"))) %>%
-  filter(Level=="Collection" & !grepl("Change|Pre",Type))
+  mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger")),
+         Model=factor(Model,levels=c("Full","Downstream Only","Upstream Only"))) %>%
+  filter(!grepl("Change|Pre",Type))
 
-compareplot <- ggplot(data=  compare,
+compareplot <- ggplot(data=  filter(compare,Effect!="Shares" &
+                                      !(Level=="Disposal" & Model=="Downstream Only") &
+                                      !(Level=="Collection" & Model =="Upstream Only")),
                    aes(x=Name,y=value,fill=Model,label=value)) +
+  facet_grid(~Level,scales = "free_x") + geom_bar(stat="identity",
+                                                         position=position_dodge()
+                                                         #position="stack"
+  )  +
+  xlab("Disposal/Collector") + ylab("Equilibrium Post-merger Prices") + #geom_hline(yintercept = 0,linetype="dashed") +
+  scale_fill_brewer(type="qual",palette = "Paired") +#scale_fill_grey(start = .9, end = .1) +
+  geom_text( #color=ifelse(Type=="Post-merger","white","black"),
+    hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
+
+compareplot_noup <- ggplot(data=  filter(compare,!(Level=="Disposal" & Effect=="Prices") &
+                                      Model!="Upstream Only"),
+                      aes(x=Name,y=value,fill=Model,label=value)) +
   facet_grid(~Level+Effect,scales = "free_x") + geom_bar(stat="identity",
                                                          position=position_dodge()
                                                          #position="stack"
@@ -517,9 +567,6 @@ compareplot <- ggplot(data=  compare,
     hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
 
-
-compareplot_noup <- compareplot %+%
-  filter(compare, Model != "Upstream Only")
 
  png(filename="./output/TrashSimsFirm.png" ,res = 250, units="in"
      ,width = 6, height = 6 )
