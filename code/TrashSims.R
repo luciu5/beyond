@@ -497,6 +497,7 @@ up_sum <- separate(up_sum,name,sep=":",into=c("Disposal","Collector")) %>%
   arrange(Level,Effect,Disposal,desc(`Change (%)`)) %>%
   mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect)
 
+
 compare <- bind_rows(
   mutate(vert_sum, Model="Full"),
   mutate(vertnoup_sum, Model="Downstream Only"),
@@ -538,23 +539,27 @@ compare <- compare %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep=
   pivot_longer(c(`Pre-merger` ,`Post-merger`),names_to = "Type",values_to = "value") %>%
   mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger")),
          Model=factor(Model,levels=c("Full","Downstream Only","Upstream Only"))) %>%
-  filter(!grepl("Change|Pre",Type))
+  filter(!grepl("Change",Type))
 
 compareplot <- ggplot(data=  filter(compare,Effect!="Shares" &
+                                      !(Type=="Pre-merger" & Model!="Full") &
                                       !(Level=="Disposal" & Model=="Downstream Only") &
-                                      !(Level=="Collection" & Model =="Upstream Only")),
+                                      !(Level=="Collection" & Model =="Upstream Only")) %>%
+                        mutate(Model=ifelse(Type=="Pre-merger","Pre-merger",as.character(Model)),
+                               Model=factor(Model,levels=c("Pre-merger","Full","Upstream Only","Downstream Only"))),
                    aes(x=Name,y=value,fill=Model,label=value)) +
   facet_grid(~Level,scales = "free_x") + geom_bar(stat="identity",
                                                          position=position_dodge()
                                                          #position="stack"
   )  +
-  xlab("Disposal/Collector") + ylab("Equilibrium Post-merger Prices") + #geom_hline(yintercept = 0,linetype="dashed") +
-  scale_fill_brewer(type="qual",palette = "Paired") +#scale_fill_grey(start = .9, end = .1) +
+  xlab("Disposal/Collector") + ylab("Equilibrium Prices") + #geom_hline(yintercept = 0,linetype="dashed") +
+  scale_fill_brewer(type="qual",palette = "Dark2",direction=-1) +#scale_fill_grey(start = .9, end = .1) +
   geom_text( #color=ifelse(Type=="Post-merger","white","black"),
     hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
-  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(fill="")
 
-compareplot_noup <- ggplot(data=  filter(compare,!(Level=="Disposal" & Effect=="Prices") &
+compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="Disposal" & Effect=="Prices") &
                                       Model!="Upstream Only"),
                       aes(x=Name,y=value,fill=Model,label=value)) +
   facet_grid(~Level+Effect,scales = "free_x") + geom_bar(stat="identity",
