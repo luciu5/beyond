@@ -126,7 +126,7 @@ pvertincumb.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer","
   #geom_text(data=ann_text,label="Wholesale advantage")
   labs(colour="Outcome:")+
   labs(title =  "The Distributions  of Merger Outcomes as the Number of Integrated Firms Increases",
-       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
@@ -158,7 +158,7 @@ pvertincumb_c.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Consumer"
   #geom_text(data=ann_text,label="Wholesale advantage")
   labs(colour="Outcome:")+
   labs(title =  "The Distribution of Consumer Surplus Changes as the Number of Integrated Firms Increases",
-       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
@@ -190,7 +190,7 @@ pvertincumb_t.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Total") #
   #geom_text(data=ann_text,label="Wholesale advantage")
   labs(colour="Outcome:")+
   labs(title =  "The Distribution of Total Surplus Changes as the Number of Integrated Firms Increases",
-       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
@@ -222,7 +222,7 @@ pvertincumb_updown.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Cons
   #geom_text(data=ann_text,label="Wholesale advantage")
   labs(colour="Outcome:")+
   labs(title =  "The Distributions of Upstream and Downstream Merger Outcomes\nas the Number of Integrated Firms Increases",
-       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )
@@ -252,7 +252,7 @@ pvertincumb_vertint.bw <-  ggplot(res.nests.logit %>% filter(Outcome %in% c("Con
   #geom_text(data=ann_text,label="Wholesale advantage")
   labs(colour="Outcome:")+
   labs(title =  "The Distributions of Vertical and Integrated Merger Outcomes\nas the Number of Integrated Firms Increases",
-       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures.\nHorizontal mergers occur between a vertically integrated and unintegrated firm."
+       subtitle="Outcomes are reported as a percentage of pre-merger total expenditures."
        #subtitle = "1st and 2nd score auctions yields radically different predictions for downstream mergers,\n but similar predictions for upstream mergers",
        #caption ="outMargin = 25\nshareOutDown = .15\nmcshare.up =.25\nmcshare.down = .1\nnfirms.up = 3"
   )

@@ -500,8 +500,8 @@ up_sum <- separate(up_sum,name,sep=":",into=c("Disposal","Collector")) %>%
 
 compare <- bind_rows(
   mutate(vert_sum, Model="Full"),
-  mutate(vertnoup_sum, Model="Downstream Only"),
-  mutate(vertnodown_sum, Model="Upstream Only")
+  mutate(vertnoup_sum, Model="Downstream-only"),
+  mutate(vertnodown_sum, Model="Upstream-only")
 )
 
 sink("./doc/TrashSims.tex")
@@ -538,15 +538,15 @@ compare <- compare %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep=
   mutate(Change=`Post-merger` - `Pre-merger`) %>%
   pivot_longer(c(`Pre-merger` ,`Post-merger`),names_to = "Type",values_to = "value") %>%
   mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger")),
-         Model=factor(Model,levels=c("Full","Downstream Only","Upstream Only"))) %>%
+         Model=factor(Model,levels=c("Full","Downstream-only","Upstream-only"))) %>%
   filter(!grepl("Change",Type))
 
 compareplot <- ggplot(data=  filter(compare,Effect!="Shares" &
                                       !(Type=="Pre-merger" & Model!="Full") &
-                                      !(Level=="Disposal" & Model=="Downstream Only") &
-                                      !(Level=="Collection" & Model =="Upstream Only")) %>%
+                                      !(Level=="Disposal" & Model=="Downstream-only") &
+                                      !(Level=="Collection" & Model =="Upstream-only")) %>%
                         mutate(Model=ifelse(Type=="Pre-merger","Pre-merger",as.character(Model)),
-                               Model=factor(Model,levels=c("Pre-merger","Full","Upstream Only","Downstream Only"))),
+                               Model=factor(Model,levels=c("Pre-merger","Full","Upstream-only","Downstream-only"))),
                    aes(x=Name,y=value,fill=Model,label=value)) +
   facet_grid(~Level,scales = "free_x") + geom_bar(stat="identity",
                                                          position=position_dodge()
@@ -560,7 +560,7 @@ compareplot <- ggplot(data=  filter(compare,Effect!="Shares" &
   labs(fill="")
 
 compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="Disposal" & Effect=="Prices") &
-                                      Model!="Upstream Only"),
+                                      Model!="Upstream-only"),
                       aes(x=Name,y=value,fill=Model,label=value)) +
   facet_grid(~Level+Effect,scales = "free_x") + geom_bar(stat="identity",
                                                          position=position_dodge()

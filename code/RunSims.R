@@ -22,7 +22,7 @@ simpath <- "./data"
 #profiler <- microbenchmark::microbenchmark(times=1,{
 #Rprof(filename = "Rprof.out", append = FALSE, interval = 2, line.profiling=TRUE)
 
-cl <- makeCluster(mc <- getOption("cl.cores", 75))
+cl <- makeCluster(mc <- getOption("cl.cores", 30))
 ## to make this reproducible
 clusterSetRNGStream(cl, 3141519)
 
@@ -344,6 +344,7 @@ sumtable <- spread(sumtable, quant, val) %>% select(-Max,Max) %>%
   mutate(across(where(is.numeric),.fns=prettyNum, digits=2,big.mark=",")) %>%
   rename(Variable=variable,Merger=merger,`50th`=p50,`25th`=p25,`75th`=p75) %>%arrange(Variable,Merger)
 
+sumtable <- filter(sumtable,!is.na(Variable))
 sink("./doc/sumtable.tex")
 print(kable(sumtable,format="latex",digits=0) %>% collapse_rows(columns = 1:3, latex_hline = "major", valign = "middle"))
 sink()
