@@ -553,7 +553,7 @@ compareplot <- ggplot(data=  filter(compare,Effect!="Shares" &
                                                          #position="stack"
   )  +
   xlab("Disposal/Collector") + ylab("Equilibrium Prices") + #geom_hline(yintercept = 0,linetype="dashed") +
-  scale_fill_brewer(type="qual",palette = "Dark2",direction=-1) +#scale_fill_grey(start = .9, end = .1) +
+  scale_fill_brewer(type="seq",palette = "YlGnBu",direction=-1) +#scale_fill_grey(start = .9, end = .1) +
   geom_text( #color=ifelse(Type=="Post-merger","white","black"),
     hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
