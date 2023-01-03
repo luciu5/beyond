@@ -1,0 +1,78 @@
+﻿
+Figure 1
+Figure 1 displays box and whisker plots summarizing the extent to which the simulated mergers affect consumer, retailer, wholesaler, and total surplus. Whiskers depict the 5th and 95th percentiles of a particular outcome, boxes depict the 25th and 75th percentiles, and the solid horizontal line depicts the median. Surplus is reported as a percentage change of total pre-merger expenditures in the downstream market. Negative outcome values imply harm, and positive values imply benefits.
+ 
+The left-most panel of Figure 1 depicts consumer harm from the different types of simulated mergers. Less than half of all simulated vertical mergers are harmful, while the majority of upstream, down-stream, and integrated mergers show harm. There is a partial rank-ordering of consumer surplus across types of mergers: first vertical mergers, second upstream mergers, third downstream mergers and fourth integrated mergers.
+
+The second panel from the left depicts retailer harm from the different types of simulated mergers. Whereas vertical mergers, downstream mergers, and integrated mergers almost always benefit retailers, upstream mergers harm retailers in about 60% of all simulations. Moreover, there is a partial rank-ordering of retailer surplus across mergers that is distinct from the consumer rank-ordering: first integrated mergers, second vertical mergers, third downstream mergers, and fourth upstream mergers.
+
+The third panel from the left depicts wholesaler harm from the different types of simulated mergers. Here, the effects are largely reversed from those for retailers: wholesaler surplus increases in about 64% of all upstream mergers, 11% of vertical mergers, and about 16% of downstream and integrated mergers. The partial rank order of wholesaler surplus is: first upstream mergers, second downstream mergers, third integrated mergers and fourth vertical mergers.
+
+The right-most panel depicts total welfare harm from the different types of simulated mergers. Here, approximately 29% of vertical mergers and 17% of integrated mergers are beneficial, whereas only 9% of upstream mergers and 2% of downstream mergers are beneficial. Moreover, there is a partial rank ordering of mergers: first vertical mergers, second upstream mergers, third downstream mergers and fourth integrated mergers.
+
+
+
+Figure 2
+Figure 2 displays box and whisker plots summarizing the extent to which the simulated mergers aﬀect consumer surplus as the number of vertically integrated ﬁrms present in a market changes. Whiskers depict the 5th and 95th percentiles of a particular outcome, boxes depict the 25th and 75th percentiles, and the solid horizontal line depicts the median.
+The leftmost panel in Figure 2 depicts consumer harm from simulated vertical mergers. Absent incumbent integration by rivals (denoted by 0 integrated ﬁrms in Figure 2), about half of vertical mergers beneﬁt consumers. The addition of a single rival integrated ﬁrm (denoted by 1 integrated ﬁrm in the ﬁgure) moves median consumer welfare from about 0% of pre-merger revenues to a positive 2% and widens the distribution of outcomes slightly. Adding more integrated rivals does not have much additional eﬀect. 
+The second panel from the left depicts consumer harm from simulated upstream mergers. Here, upstream mergers absent any incumbent vertical integration (0 integrated ﬁrms) are never beneﬁcial in the range studied, with median consumer harm at about 6% of pre-merger revenues. Once one of the merging firms is allowed to be integrated (1 integrated ﬁrm in the ﬁgure) beneﬁcial mergers appear. Consumer welfare increases in almost 30% of mergers, though median consumer harm is roughly steady at approximately 4% of pre-merger revenues. Adding in integration by rival ﬁrms (2-4 integrated ﬁrms in the ﬁgure) narrows the inter-quartile range and somewhat trims the whiskers while having little impact on median harm.
+
+The third panel from the left depicts consumer harm from simulated downstream mergers. As with upstream mergers, downstream mergers absent incumbent vertical integration (0 integrated ﬁrms in the ﬁgure) are never beneﬁcial in the 5th to 95th percentile range, with median consumer harm from downstream mergers equal to about 9% of pre-merger revenues. Allowing one of the merging ﬁrms to be vertically integrated when all other market participants are unintegrated (1 integrated ﬁrm in the ﬁgure) increases the range of outcomes while also leading to more median harm: consumer welfare increases in about 20% of mergers, but median consumer harm grows to about 12% of pre-merger revenues. Adding integrated third-party rivals (2-4 integrated ﬁrms in the ﬁgure) somewhat moves the distribution towards less harm. With 3 integrated third parties (denoted by 4 integrated ﬁrms in the ﬁgure), the merger beneﬁts consumers in about 34% of markets and shrinks median consumer harm to about 5% of pre-merger revenues.
+
+The right-most panel depicts consumer harm from simulated integrated mergers. Absent the presence of rival incumbent integrated ﬁrms (0 integrated ﬁrms in the ﬁgure), mergers between two integrated ﬁrms beneﬁt consumers in about 6% of simulated markets. Adding one additional rival incumbent integrated ﬁrm (1 integrated ﬁrm in the ﬁgure) does not have a signiﬁcant impact on the median or on the range of outcomes. Adding more integrated rivals (2-4 integrated ﬁrms in the ﬁgure) moves median consumer welfare to be slightly more negative.
+
+
+
+Figure 3
+Figure 3 depicts box and whisker plots summarizing consumer welfare effects (ordinate) for simulated vertical, upstream, downstream, and integrated mergers as the relative bargaining power parameter (abscissa) goes from 9 (wholesalers have the advantage) to 1/9 (retailers have the advantage). Positive consumer welfare values denote consumer benefit, while negative values denote harm. Also depicted for each bargaining power parameter are three sets of box and whisker plots that correspond to the number of incumbent vertically integrated firms included in the simulated markets: 0 (light blue), 1 (darker blue), and 4 (darkest blue) firms.
+The leftmost panel of Figure 3 depicts the effects of simulated vertical mergers. The light blue plots depict consume welfare effects when there are no incumbent integrated firms. Here, mergers tend to benefit consumers when wholesalers have relatively more power, and harm consumers when retailers have relatively more power. When bargaining power goes below 1 (more power to retailers), most simulations resulting in harm to consumers. As we add 1 and then 4 integrated rival firms (shown by the darker and darkest blue box plots, respectively), the range of welfare outcomes narrows and shifts upwards, though we still see the negative relationship between consumer welfare and relative retailer bargaining power. Across all three integrated incumbent scenarios, median consumer harm moves from about 24% of pre-merger expenditures when wholesalers have the advantage to 7% when retailers have the advantage. 
+The second panel from the left depicts consumer harm from simulated upstream mergers. Without incumbent integrated firms in the market (the light blue plots), the relationship between harm and bargaining power is unlike that for downstream and vertical mergers, as it is not monotonic in bargaining power. By contrast, for mergers between an integrated firm and an unintegrated upstream supplier (the darker blue plots), the relationship between harm and bargaining power is more in line with that for downstream and vertical mergers. Median consumer harm goes from roughly -21% of pre-merger expenditures when wholesalers have relatively more bargaining power to almost 8% of pre-merger expenditures when retailers have relatively more bargaining power. Adding 3 incumbent integrated rivals (the darkest blue plots) preserves the relationship between bargaining power and harm, though the spread of outcomes narrows and the medians shift up slightly. 
+The third panel from the left depicts consumer harm from simulated downstream mergers. We find that higher retailer relative bargaining power leads to more negative impacts on welfare. Absent any incumbent integration (the light blue plots), all the outcomes shown in Figure 3 harm consumers. Median consumer harm goes from about 1% of pre-merger expenditures when wholesalers have relatively more bargaining power to 19% of pre-merger expenditures when retailers have relatively more bargaining power. Once we allow one of the merging firms to be integrated (the darker blue plots), some beneficial mergers appear, particularly when wholesalers have relatively more bargaining power.  Median consumer harm goes from approximately -28% of pre-merger revenues when wholesalers have the advantage to 24% of pre-merger revenues when retailers have the advantage.
+The right-most panel in Figure 3 depicts consumer harm from simulated integrated mergers. In terms of bargaining power and resulting harm, integrated mergers are perhaps most similar to vertical mergers. Like vertical mergers, there is a strong monotonic relationship between bargaining power and harm. Median consumer harm moves from about 0% of pre-merger expenditures when wholesalers have relatively more bargaining power to about 26% of pre-merger expenditures when retailers have relatively more bargaining power. A second similarity between vertical and integrated mergers is that the presence of rival integrated incumbents (see the darker and darkest blue plots) tends to narrow the range of outcomes and somewhat shift the distribution upwards. However, a key difference between vertical and integrated mergers is that while vertical mergers are often beneficial when wholesalers have relatively more bargaining power, integrated mergers are often harmful unless wholesaler relative bargaining power is roughly 4 times or more. The crossing at zero harm is shifted to the left. 
+
+
+
+Figure 4
+
+Figure 4 depicts the structure of the Chattanooga area disposal and collection markets, by showing the connections between the companies in the upstream disposal market and the downstream collection market. The figure depicts that Republic uses their own disposal, Santek’s disposal and Waste Connections’ disposal. WM-ADS and Regional use both Santek’s disposal and Waste Connections’ disposal. Santek and Waste Connections only use their own disposals.
+
+
+
+Figure 5
+Figure 5 depicts the pre- and post-merger disposal prices, collection prices and collection shares from the Republic/Santek merger simulation. Disposal prices for pre-merger integrated pairs are unchanged post-merger. However, disposal prices increase to all rival haulers post-merger (i.e., all unintegrated pairs). The merged ﬁrms’ disposal prices to downstream rivals are estimated to increase 88% post-merger, and Waste Connections’ prices to its downstream rivals are estimated to increase 22%. These large price increases are oﬀset by the large decrease in the disposal price for the integrating pair post-merger, as the cost to Republic for volume disposed with Santek decreases by 60%.
+In the downstream market, all collection prices increase post-merger. The merging parties’ post-merger collection prices increase by approximately 20%, and their share decreases by about 8 percentage points overall. The Republic/Republic product’s price increases 21%, and the Santek/Santek product’s price increases by 23%. The newly integrated Santek/Republic product’s price is estimated to increase by 9. The integrated rival, Waste Connections, increases its collection price by approximately 5%, and its share increases by 6 percentage points. The unintegrated rivals’ collection prices each increase by about 9%, and their shares increase slightly.
+
+
+
+Figure 6
+Figure 6 compares the full vertical model results, which compute both post-merger downstream and upstream price eﬀects, to two other models that hold the prices of one level ﬁxed. The “downstream-only” model computes collection price eﬀects holding disposal prices ﬁxed at pre-merger levels, and the “upstream-only” model computes disposal price eﬀects holding collection prices ﬁxed at pre-merger levels.
+The downstream-only model results in an estimated 11% increase in collection prices with a greater than 16% increase in the merging parties’ price. In the upstream-only model, overall disposal prices increase by 8.2% post-merger. 
+
+
+
+Figure A.1
+Figure Appendix A.1 displays box and whisker plots for the net eﬀect on consumer and total welfare under four diﬀerent scenarios: constant marginal costs for all ﬁrms (top row, blue), linear marginal costs for all ﬁrms (top row, orange), constant marginal costs for the merging parties’ products but linear costs for the non-merging parties’ products (bottom row, blue), and linear marginal costs for the merging parties’ products but constant costs for the non-merging parties’ products (bottom row, orange).
+The top two panels in Figure Appendix A.1 compare a scenario where all ﬁrms have constant marginal costs to one where they all have linear marginal costs. Overall, harm is greater for mergers with linear costs. The diﬀerence is largest for vertical mergers. When all ﬁrms have constant marginal costs, vertical mergers increase consumer surplus in about 55% of simulations and total surplus in about 29% of simulations, but only increase consumer surplus in about 36% of simulations and total surplus in about 2% of simulations when all ﬁrms have linear costs.
+The bottom panel of Figure Appendix A.1 compares a situation where only the merging ﬁrms have constant marginal costs to one where only the merging ﬁrms have linear marginal costs, and the distributions in these bottom panels are largely the same as those in the top panels.
+
+
+
+Figure C.1
+Figure Appendix C.1 depicts the analogous results as in Figures 2, but for total welfare. The patterns for total welfare are like those for consumer welfare, but with a larger tendency towards harm. Figure Appendix C.1 details that most simulated upstream, downstream, and integrated mergers are harmful. 
+
+
+
+Figure C.2
+Figure Appendix C.2 depicts the analogous results as in Figures 3, but for total welfare. The patterns for total welfare are like those for consumer welfare, but with a larger tendency towards harm, except for in the case of upstream mergers. Figure Appendix C.2 shows that net beneﬁcial mergers typically only occur when wholesalers have relatively more bargaining power.
+
+
+
+
+
+
+
+
+
+
+
+
