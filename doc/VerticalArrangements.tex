@@ -1,7 +1,7 @@
 \documentclass[12pt]{article}
 %\documentclass[12pt,review,authoryear]{elsarticle}
 %\usepackage{ecrc}       % needed for elsarticle
-%\usepackage{chicago}    % bibliography package
+\usepackage{chicago}    % bibliography package
 \usepackage{graphicx}   % insert PostScript figures
 \usepackage{setspace}   % controls line spacing
 \usepackage{amsmath,amsthm,amssymb,amstext} % controls equation entry and symbols
@@ -183,7 +183,7 @@ Wholesale prices are set via Nash Bargaining between retailers and wholesalers. 
 \end{equation}
 where $\lambda \in [0,1]$ captures the bargaining power of the retailer relative to the wholesaler.  The $\Delta s_{tx}(\mathbb{W}^r \setminus \{w\}) \equiv s_{tx}(\mathbb{W}^r \setminus \{w\}) - s_{tx}$ is the difference in the share of good $x$ sold by retailer $t$ when good $w$ is not offered by retailer $r$ versus when good $w$ is offered by retailer $r$.  Thus, the wholesale price $p_{rw}$ is set such that the payoff to wholesaler $w$ when it sells to retailer $r$ less the payoff when it does not (that is, the gains from trade or ``GFT''), divided by the payoff to retailer $r$ when it buys from wholesaler $w$ less the payoff when it does not, equals the ratio of wholesaler to retailer bargaining power.
 
-Together the series of downstream and upstream first order conditions determine market equilibrium.  This model can be solved and calibrated as described in \cite{ST2021}.  In our baseline configuration, we assume that wholesale and retail marginal costs are constant.  We allow for linear increasing marginal costs as a robustness check that appears in \ref{app:mc}.
+Together the series of downstream and upstream first order conditions determine market equilibrium.  This model can be solved and calibrated as described in \cite{ST2021}.  In our baseline configuration, we assume that wholesale and retail marginal costs are constant.  We allow for linear increasing marginal costs as a robustness check that appears in Appendix \ref{app:mc}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Mergers}
@@ -384,8 +384,8 @@ However, we of course have the caveat that our results are specific to our model
 % Bibliography
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-%\bibliographystyle{chicago}
-\bibliographystyle{elsarticle-harv}
+\bibliographystyle{chicago}
+%\bibliographystyle{elsarticle-harv}
 \bibliography{master-bib}
 \clearpage
 
@@ -463,7 +463,7 @@ However, we of course have the caveat that our results are specific to our model
 \numberwithin{table}{section}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Increasing Marginal Costs\label{app:mc}}
+\section{Appendix: Increasing Marginal Costs\label{app:mc}}
 
 Here, we explore the role that the constant marginal cost assumption plays in driving our results by comparing our simulations to an alternative set that allows costs to increase linearly. Figure \ref{fig:surplussumcost} displays box and whisker plots for the net effect on consumer and total welfare under four different scenarios: constant marginal costs for all firms (top row, blue), linear marginal costs for all firms (top row, orange), constant marginal costs for the merging parties' products but linear costs for the non-merging parties' products (bottom row, blue), and linear marginal costs for the merging parties' products but constant costs for the non-merging parties' products (bottom row, orange).
 
