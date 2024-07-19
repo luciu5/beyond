@@ -22,7 +22,7 @@ simpath <- "./data"
 #profiler <- microbenchmark::microbenchmark(times=1,{
 #Rprof(filename = "Rprof.out", append = FALSE, interval = 2, line.profiling=TRUE)
 
-cl <- makeCluster(mc <- getOption("cl.cores", 30))
+cl <- makeCluster(mc <- getOption("cl.cores", 20))
 ## to make this reproducible
 clusterSetRNGStream(cl, 3141519)
 
@@ -30,7 +30,18 @@ clusterEvalQ(cl,{
              if(require(RevoUtilsMath)) setMKLthreads(1)
 })
 
-samples <- 1e3 #1e3
+
+landfill_hhi <- c(424,	2339,	3372,	4360,	5052,	5563,	6640,	7603,	8537,	9418,	9999)
+names(landfill_hhi) <- seq(0,100,10)
+landfill_eff <- ceiling(round(1e4/landfill_hhi,2))
+
+landfill_eff["0"]=4
+landfill_eff <- table(landfill_eff)
+landfill_eff <-as.data.frame(landfill_eff)
+
+landfill_eff <- rename(landfill_eff,up=landfill_eff) %>% mutate(up=as.integer(up))
+
+samples <- 1e2 #1e3
 ndfirms <- 2:5
 nufirms <- ndfirms
 nvfirms <- 0:4
@@ -47,7 +58,7 @@ relleveragePre <-  (1-bargparm)/bargparm
 
 
 
-genMkts <- function(x,y,z,t,m,n, b,c,a, large=TRUE){
+genMkts <- function(x,y,z,t,m,n, b,c,a, large=TRUE,preference=TRUE){
 
 
 
@@ -57,16 +68,17 @@ genMkts <- function(x,y,z,t,m,n, b,c,a, large=TRUE){
                                                       nfirms.down = y,
                                                       nfirms.up = x,
                                                       nfirms.vert = as.numeric(as.character(z)),
-                                                      #outMargin = runif(1,2,9),
+                                                      #outMargin = runif(1,20,30),
                                                       outMargin=5,
                                                       nestParm = n,
-                                                      shareOutDown = .15 ,
-                                                      mcshare.up =rep(.25,x*y),
+                                                      shareOutDown = 0.15,
+                                                      mcshare.up =rep(0.25,x*y),
                                                       mcshare.down = rep(.1,x*y),
                                                       bargparm = rep(b,x*y),
                                                       ownerPost = m,
                                                       M=1,cost_type=as.character(c),
                                                       largeMerger = large,
+                                                      preference=TRUE,
                                                       bargpreset = as.character(a))
                  ,silent=TRUE)
 
@@ -166,7 +178,7 @@ return(list(
   summary=thissum,
   res=unique(thisres)))}
 
-repMkts <- function(x,y,z,t,m,n,b,c,a,large=TRUE){replicate(samples, genMkts(x,y,z,t,m,n,b,c,a,large),simplify = "list")}
+repMkts <- function(x,y,z,t,m,n,b,c,a,f,large=TRUE){replicate(samples*f, genMkts(x,y,z,t,m,n,b,c,a,large),simplify = "list")}
 
 clusterExport(cl,varlist = setdiff(ls(),c("cl")))
 
@@ -176,7 +188,7 @@ clusterExport(cl,varlist = setdiff(ls(),c("cl")))
 
 ## Monte Carlos fixing the number of wholesalers and retailers, but changing the bargaining parameters
 
-res.nests <- expand.grid(up=ndfirms,
+res.nests_plan <- expand.grid(up=ndfirms,
                          down =nufirms ,
                          vert=nvfirms,
                          nestParm=nestParm,
@@ -186,8 +198,9 @@ res.nests <- expand.grid(up=ndfirms,
                          mc=mc,
                          preset=assym)
 
+res.nests_plan <- inner_join(res.nests_plan,landfill_eff)
 #res.nests <- (filter(res.nests, down==1))
-res.nests <- mutate(res.nests, type=as.character(type),
+res.nests_plan <- mutate(res.nests_plan, type=as.character(type),
                     merger=as.character(merger)) %>%
   filter(!(merger %in% c("up") & (up ==1))) %>%
   filter(!(merger %in% c("down") & (down ==1))) %>%
@@ -196,13 +209,14 @@ res.nests <- mutate(res.nests, type=as.character(type),
   filter(!(preset %in% c("diag1","diag0") & mc !="constant"))
 
 
-mkts.nests <- clusterMap(cl, repMkts,
-                         res.nests$up,res.nests$down,res.nests$vert, res.nests$type,res.nests$merger,res.nests$nestParm,
-                         res.nests$barg,res.nests$mc,res.nests$preset, SIMPLIFY = FALSE,
+mkts.nests <- with(res.nests_plan,
+                   clusterMap(cl, repMkts,
+                         up,down,vert, type,merger,nestParm,
+                         barg,mc,preset,Freq, SIMPLIFY = FALSE,
                          .scheduling = "dynamic"
+  )
 )
-
-names(mkts.nests) <- with(res.nests,as.character(interaction(up,down,vert,type,merger,nestParm,barg,mc,preset)))
+names(mkts.nests) <- with(res.nests_plan,as.character(interaction(up,down,vert,type,merger,nestParm,barg,mc,preset)))
 
 
 res.nests <-  lapply(mkts.nests, function(x){

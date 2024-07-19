@@ -22,6 +22,10 @@ market<-function(nfirms.down=3, # # of downstream firms
                  # rival: set non-party bargparm to 0.5, allow others to vary
                  # diag1: Vertical only. set party pre-merger bargparm to 1 ,allow others to vary
                  # diag0: Vertical only. set party pre-merger bargparm to 0 ,allow others to vary
+                 preference=FALSE, # if TRUE vertically integrated firms prefer themselves:
+                             # downstream integrated
+                             # component only transacts with upstream component. Upstream component
+                             # can still transact with rival downstream component
                  mcshare.up=runif(nfirms.up*nprods.up), # share of upstream costs
                  mcshare.down=runif(nfirms.down*nprods.down), # share of wholesale price
                  ownerPost = c("up","down","vertical","both"), # simulate an upstream horizontal merger, downstream horizontal merger,
@@ -179,7 +183,23 @@ if(missing(nests) && max(nestParm,na.rm=TRUE)>0){
 
   if(largeMerger){
     sharesDown <- sort(sharesDown, decreasing = TRUE)
-    if (ownerPost =="down") {sharesDown <- sharesDown[order(ids$up.firm,ids$down.firm)]}  #assign first two upstream products largest share
+    sameFirm <- as.character(ids$up.firm)==as.character(ids$down.firm)
+    if(preference) {
+      largestShares <- sharesDown[1:nfirms.up]
+      integratedShares <- sharesDown[sameFirm]
+      sharesDown[1:nfirms.up] <- integratedShares
+      sharesDown[sameFirm] <- largestShares
+      }
+    if (ownerPost %in% c("down","both")) {
+      sharesDown <- sharesDown[order(ids$up.firm,ids$down.firm)]
+    if(preference) {
+      largestShares <- sharesDown[1:nfirms.down]
+      integratedShares <- sharesDown[sameFirm]
+      sharesDown[1:nfirms.down] <- integratedShares
+      sharesDown[sameFirm] <- largestShares
+    }
+
+    }  #assign first two upstream products largest share
   }
   sharesDown <- sharesDown * (1-shareOutDown)
 
@@ -232,11 +252,12 @@ if(missing(nests) && max(nestParm,na.rm=TRUE)>0){
 
 
       ## integrated retailer bargains with other wholesalers
-      vertrowsDown <-ids$up.firm  != v  & ids$down.firm  == v
+      #if(!exclusive){
+        vertrowsDown <-ids$up.firm  != v  & ids$down.firm  == v
 
       ownerPre.up[vertrowsDown, ids$up.firm == v] <- -(1-bargparm[vertrowsDown])/bargparm[vertrowsDown]
       ownerPost.up[vertrowsDown, ids$up.firm == v] <- -(1-bargparmPost[vertrowsDown])/bargparmPost[vertrowsDown]
-
+}
       ## set integrated margin disagreement payoff to 0
       ownerPre.up[!(ids$up.firm==v & ids$down.firm==v)
                   , ids$up.firm==v & ids$down.firm==v]=0
@@ -252,7 +273,7 @@ if(missing(nests) && max(nestParm,na.rm=TRUE)>0){
                    ,!(ids$up.firm==v & ids$down.firm==v)]=0
 
       #ownerBargUpVertPre[vertrowsDown, ids$up.firm  == v] <- -(1-bargparm[vertrowsDown])/bargparm[vertrowsDown]
-    }
+    #}
 
 
 
@@ -261,6 +282,7 @@ if(missing(nests) && max(nestParm,na.rm=TRUE)>0){
 
     for( v in vertFirms){
 
+      ## integrated wholesaler bargains with other retailers
       vertrowsUp <-  ids$up.firm == v  & ids$down.firm != v
 
       ## only change downstream matrix when firms are playing Bertrand
