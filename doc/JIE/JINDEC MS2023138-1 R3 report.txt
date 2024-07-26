@@ -1,0 +1,22 @@
+Journal of Industrial Economics (JINDEC)
+
+Referee report of "Beyond "Horizontal" and "Vertical": The Welfare Effects of Complex Integration" by M. Loudermilky, G. Sheu, C. Taragin
+
+Summary
+
+The paper studies the welfare impacts of mergers when some firms are vertically integrated. It performs numerical simulations of several types of mergers and then presents a calibration/simulation motivated by the Republic/Santek merger. The paper finds that the simulated mergers could harm consumers. 
+
+
+Comments
+
+1. I could not find a contribution that would merit publication at the Journal of Industrial Economics. The paper is very similar to Sheu and Taragin (2021). The model and simulation are essentially the same. At times, the paper reads as an appendix of the previous article. 
+
+2. The paper claims to simulate the welfare effects in a new set of mergers called "complex mergers." Complex mergers are standard vertical and horizontal mergers where a firm is vertically integrated. They have been previously studied by Ho and Lee (2017) and Crawford et al. (2018), among others. (The related literature also needs to be improved.) So, the paper uses a stylized model to simulate standard mergers. 
+
+3. Some of the modeling assumptions are very restrictive. For instance, the logit demand system, simultaneous bargaining-Bertrand game, and the linear fees in the bargaining model. While these assumptions seem reasonable for a policy paper for practitioners, they are too strong for the JINDEC, as they hinder the credibility of the main exercises in the paper. The logit demand, in particular, is unnecessarily restrictive in terms of substitution patterns and could be driving the welfare results. For example, vertically and non-vertically integrated firms are clearly different from the consumers' perspective. One would expect consumers self-selecting into the firms' types, which would affect the compensating variation computation. To the very least, random coefficients on price and on whether the firm is vertically integrated are necessary to obtain more credible results. 
+
+4. The RRC discussion was perplexing. What the paper calls "RRC" differs from the classic RRC in the literature in Salop and Scheffman (1983). In the model, it arises due to the greater bargaining power of the integrated firms. But the paper's assumption that "negotiation for a given input price treats other input prices and all downstream prices as given" (p. 6) rules out the possibility of a standard RRC effect. So the paper contradicts Crawford et al. (2018) footnote 62. Is this an error? It is paramount that this issue is clarified in the future, even at a different journal. Please include the profit functions and derivations in the Appendix (e.g. equation 5 and subsequent).
+
+5. The simulation exercise in Section 3 does not implement the simulation of the model in Section 2. What is the mapping between the two? How do you ensure market shares are consistent with equation 1 and firm pricing decisions? The paper states that: "we calibrate the price coefficient \alpha assuming that in the pre-merger world, there is a vertically integrated outside option that sets its Bertrand equilibrium price to $5, has 15% market share, and has zero marginal costs. All other goods are differenced." But how are prices consistent with the demand and profit maximization computed? Specifically, I could not understand how such a procedure fits the bargaining game upstream. They seem to be inconsistent. For instance, how do you ensure downstream (upstream) prices are consistent with equation 2 (3)? For these reasons, I could not follow the details of the simulation exercise. 
+
+6. Finally, I found the calibration exercise in Section 4 hard to follow. At times it reads as if the paper is collecting data. But it is closer to a calibration/simulation exercise motivated by the merger. But there is no estimation and the data is minimal. The theoretical model does not fit the setting in the case. First, the bargaining model is not present nor discussed in the DOJ Lawsuit. Second, the RRC discussed in the DOJ lawsuit refers to foreclosure/exclusionary conduct concerns. This feature could typically has different welfare implications. See, e.g., Ordover et al. (1990) and the references therein. I found the analysis in this section not credible. 
