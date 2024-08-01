@@ -79,19 +79,20 @@ for (v in vertFirms){
 
 }
 
-sharesNoOut <- with(simdata,collection_paired_share)
-div <- tcrossprod(1/(1-sharesNoOut),sharesNoOut)*sharesNoOut
-diag(div) <- -sharesNoOut
 
 
 
 
-minD <- function(theta,is2nd=FALSE,margins=FALSE){
+
+minD <- function(theta,is2nd=FALSE,margins=FALSE,nests,nestParm=0,relevant){
 
   alpha <- theta[1]
-  barg <- theta[-1]
+  theta <- theta[-1]
+  barg <- theta
   nprods <- nrow(simdata)
 
+
+  pricesDown <- simdata$disposal_price
   marginsUp <- simdata$disposal_dollar_margin
   marginsDown <- simdata$collection_dollar_margin
   sharesDown   <- simdata$collection_paired_share
@@ -107,9 +108,11 @@ minD <- function(theta,is2nd=FALSE,margins=FALSE){
 
 
   #b[simdata$ownerPreUp != simdata$ownerPreDown] <- barg
+  if(missing(relevant)){
   b[simdata$ownerPreUp=="Santek" & simdata$ownerPreDown!="Santek"] <- barg[1]
   b[simdata$ownerPreUp=="WasteConn" & simdata$ownerPreDown!="WasteConn"] <- barg[2]
-
+  }
+  else{ b[relevant] <- barg}
   #b[simdata$ownerPreUp!="Republic" & simdata$ownerPreDown=="Republic"] <- barg[1]
   #b[simdata$ownerPreUp!="WM_ADS" & simdata$ownerPreDown=="WM_ADS"] <- barg[2]
   #b[simdata$ownerPreUp!="Regional" & simdata$ownerPreDown=="Regional"] <- barg[3]
@@ -161,11 +164,54 @@ minD <- function(theta,is2nd=FALSE,margins=FALSE){
   else{marginsCandDown <- simdata$marginDown_bert * simdata$alpha_bert[1]/alpha}
 
 
+  if(!missing(nests)){
+    nestMat <- tcrossprod(model.matrix(~-1+nests))
+  sharesBetween <- as.vector(tapply(sharesDown, nests, sum))
+  sharesBetween <- sharesBetween[nests]
+  sharesWithin <- sharesDown/sharesBetween
+
+
+  elastDiff.down <- -alpha*tcrossprod(sharesDown)
+  elastSame.down <- -alpha*tcrossprod(sharesDown*(1 + nestParm[nests] /( 1-nestParm[nests] )*(1/sharesBetween)),sharesDown)
+
+  elast <- elastSame.down*nestMat + elastDiff.down*(1-nestMat)
+  diag(elast) <- alpha/(1-nestParm[nests])*sharesDown*(1-nestParm[nests]*sharesWithin - (1-nestParm[nests])*sharesDown)
+  elast.inv <- solve(ownerPreDownMat * elast)
+  marginsCandDown = - as.vector(elast.inv %*% sharesDown)  #compute downstream margins
+
+
+  divSameNest <- (1-sharesWithin)^nestParm[nests]*(1 - sharesBetween + sharesBetween * (1- sharesWithin)^(1-nestParm[nests]) )
+  divSameNest <-  tcrossprod((1/divSameNest - 1), sharesDown)
+  ##    matrix(shares * (1/divSameNest - 1), nrow = nprods,ncol=nprods,byrow=TRUE)
+  divDiffNest <- sharesBetween * (1 - (1- sharesWithin)^(1-nestParm[nests]) )
+  divDiffNest <-  1/divDiffNest - 1
+  divDiffNest <-  tcrossprod(1/divDiffNest, sharesDown)
+  ##   matrix(shares/divDiffNest, nrow=nprods, ncol=nprods, byrow=TRUE)
+
+  div <- divSameNest * nestMat + divDiffNest*(1-nestMat)
+  div[is.na(div)] <- 0
+  diag(div) <- -sharesDown
+
+
+
+
+
+  }
+
+
+  else{
+
+
+    div <- tcrossprod(1/(1-sharesDown),sharesDown)*sharesDown
+    diag(div) <- -sharesDown
+
 
     elast <-  -alpha*tcrossprod(sharesDown)
     diag(elast) <- alpha*sharesDown + diag(elast)
     elast.inv <- try(solve(ownerPreDownMat * elast),silent=TRUE)
     if(any(class(elast.inv) == "try-error")){elast.inv <- MASS::ginv(ownerPreDownMat * elast)}
+  }
+
 
     upMarginPart <-  solve(ownerPreUpMat * div) %*% (ownerBargDownVert * div)
     marginsCandUp <- solve(diag(nprods) + (upMarginPart %*% elast.inv %*%  (ownerDownMatVertical* elast)))
@@ -318,27 +364,27 @@ simres_vert <- with(simdata,
 ## bargaining parameters are not being recovered properly. Figure out why
 
 #minBarg_bert$par[2:3] <- 0.9
-simres_vert@up@bargpowerPre[simdata$disposal_firm_name=="Santek" & simdata$collection_firm_name!="Santek"] <- minBarg_bert$par[2]
-simres_vert@up@bargpowerPost[simdata$disposal_firm_name=="Santek" & simdata$collection_firm_name!="Santek"] <- minBarg_bert$par[2]
-simres_vert@up@bargpowerPre[simdata$disposal_firm_name=="WasteConn" & simdata$collection_firm_name!="WasteConn"] <- minBarg_bert$par[3]
-simres_vert@up@bargpowerPost[simdata$disposal_firm_name=="WasteConn" & simdata$collection_firm_name!="WasteConn"] <- minBarg_bert$par[3]
-simres_vert@up@bargpowerPost["Santek:Republic"] <- 1
-
-simres_vert@down@slopes$alpha <- simdata$alpha_bert[1]
-simres_vert@down@slopes$meanval <- log(simres_vert@down@shares) - log(simres_vert@down@shares)[1]  - simres_vert@down@slopes$alpha *(simres_vert@down@prices - simres_vert@down@prices[1])
-simres_vert <- ownerToMatrix(simres_vert, preMerger = TRUE)
-simres_vert <- ownerToMatrix(simres_vert, preMerger = FALSE)
-mcPre <- calcMC(simres_vert, TRUE)
-mcPost <- calcMC(simres_vert, FALSE)
-
-## Set Santek:Santek marginal costs equal to the calibrated costs of other Santek Products
-mcPre$up["Santek:Santek"] <- mcPre$up["Santek:Regional"]
-mcPost$up["Santek:Santek"] <- mcPost$up["Santek:Regional"]
-
-simres_vert@down@mcPre <- mcPre$down
-simres_vert@down@mcPost <- mcPost$down
-simres_vert@up@mcPre <- mcPre$up
-simres_vert@up@mcPost <- mcPost$up
+# simres_vert@up@bargpowerPre[simdata$disposal_firm_name=="Santek" & simdata$collection_firm_name!="Santek"] <- minBarg_bert$par[2]
+# simres_vert@up@bargpowerPost[simdata$disposal_firm_name=="Santek" & simdata$collection_firm_name!="Santek"] <- minBarg_bert$par[2]
+# simres_vert@up@bargpowerPre[simdata$disposal_firm_name=="WasteConn" & simdata$collection_firm_name!="WasteConn"] <- minBarg_bert$par[3]
+# simres_vert@up@bargpowerPost[simdata$disposal_firm_name=="WasteConn" & simdata$collection_firm_name!="WasteConn"] <- minBarg_bert$par[3]
+# simres_vert@up@bargpowerPost["Santek:Republic"] <- 1
+#
+# simres_vert@down@slopes$alpha <- simdata$alpha_bert[1]
+# simres_vert@down@slopes$meanval <- log(simres_vert@down@shares) - log(simres_vert@down@shares)[1]  - simres_vert@down@slopes$alpha *(simres_vert@down@prices - simres_vert@down@prices[1])
+# simres_vert <- ownerToMatrix(simres_vert, preMerger = TRUE)
+# simres_vert <- ownerToMatrix(simres_vert, preMerger = FALSE)
+# mcPre <- calcMC(simres_vert, TRUE)
+# mcPost <- calcMC(simres_vert, FALSE)
+#
+# ## Set Santek:Santek marginal costs equal to the calibrated costs of other Santek Products
+# mcPre$up["Santek:Santek"] <- mcPre$up["Santek:Regional"]
+# mcPost$up["Santek:Santek"] <- mcPost$up["Santek:Regional"]
+#
+# simres_vert@down@mcPre <- mcPre$down
+# simres_vert@down@mcPost <- mcPost$down
+# simres_vert@up@mcPre <- mcPre$up
+# simres_vert@up@mcPost <- mcPost$up
 
 simres_vert_nodown <- simres_vert_noup <- simres_vert
 
@@ -531,9 +577,10 @@ kable(vert_sum,format = "latex",
   #collapse_rows(1:2,row_group_label_position="stack")
 sink()
 
+vert_sum <- mutate(vert_sum,Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
+                    Name=reorder(Name,`Post-merger`* as.numeric(Effect=="Prices") * as.numeric(Level=="Collection")))
 
-firmplot <- ggplot(data=  vert_sum %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
-                                  Name=reorder(Name,`Post-merger`* as.numeric(Effect=="Prices") * as.numeric(Level=="Collection"))) %>%
+firmplot <- ggplot(data=  vert_sum  %>%
          mutate(Change=`Post-merger` - `Pre-merger`)
 
                 %>%
@@ -634,11 +681,12 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
    #     target=="Republic" && acquirer=="Santek"){return(thissim)}
 
 
-   #if(unintegrated !="Base"){
+   if(unintegrated !="Base"){
 
-   # smallestBarg <- min(thissim@up@bargpowerPre)
-   #  thissim@up@bargpowerPre[thissim@up@ownerPost==thissim@down@ownerPost] <- smallestBarg
-   #}
+   smallestBarg <- min(thissim@up@bargpowerPre)
+   thissim@up@bargpowerPre[thissim@up@ownerPre==thissim@down@ownerPre] <- smallestBarg
+   thissim@up@bargpowerPost<-   thissim@up@bargpowerPre
+   }
 
    thissim@up@ownerPost <- thissim@up@ownerPre
    thissim@down@ownerPost <- thissim@down@ownerPre
@@ -650,8 +698,12 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      thissim@down@ownerPre <- paste0(thissim@down@ownerPre,"Ind")
      thissim@down@ownerPost <- paste0(thissim@down@ownerPost,"Ind")
      if(partial){
-       thissim@down@ownerPre[thissim@down@ownerPre == paste0(acquirer,"Ind")] <- acquirer
-       thissim@down@ownerPost[thissim@down@ownerPost == paste0(acquirer,"Ind")] <- acquirer
+       isIntegratedPre <- thissim@down@ownerPre == paste0(acquirer,"Ind")
+       isIntegratedPost <- thissim@down@ownerPost == paste0(acquirer,"Ind")
+       thissim@down@ownerPre[isIntegratedPre] <- acquirer
+       thissim@down@ownerPost[isIntegratedPost] <- acquirer
+       thissim@up@bargpowerPre[isIntegratedPre] <- 1
+       thissim@up@bargpowerPost[isIntegratedPost] <- 1
      }
    }
    else if(unintegrated=="Down"){
@@ -662,6 +714,12 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      if(partial){
        thissim@up@ownerPre[thissim@up@ownerPre == paste0(acquirer,"Ind")] <- acquirer
        thissim@up@ownerPost[thissim@up@ownerPost == paste0(acquirer,"Ind")] <- acquirer
+       isIntegratedPre <- thissim@up@ownerPre == paste0(acquirer,"Ind")
+       isIntegratedPost <- thissim@up@ownerPost == paste0(acquirer,"Ind")
+       thissim@up@ownerPre[isIntegratedPre] <- acquirer
+       thissim@up@ownerPost[isIntegratedPost] <- acquirer
+       thissim@up@bargpowerPre[isIntegratedPre] <- 1
+       thissim@up@bargpowerPost[isIntegratedPost] <- 1
      }
    }
    else if(unintegrated=="Vertical"){
@@ -669,6 +727,7 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      thissim@down@ownerPost[isAcquired] <- acquirer
      thissim@down@ownerPre[!isAcquired] <- paste0(thissim@down@ownerPre[!isAcquired],"Ind")
      thissim@down@ownerPost[!isAcquired] <- paste0(thissim@down@ownerPost[!isAcquired],"Ind")
+     thissim@up@bargpowerPost[ thissim@down@ownerPost==acquirer & isAcquired] <- 1
 
    }
    else if(unintegrated=="Base"){
@@ -689,7 +748,7 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
    thissim@isHorizontal=isHorizontal
    thissim@isUpstream=isUpstream
 
-   thissim@up@bargpowerPost<-   thissim@up@bargpowerPre
+   thissim@up@bargpowerPre[thissim@up@ownerPre==thissim@down@ownerPre] <- 1
    thissim@up@bargpowerPost[thissim@up@ownerPost==thissim@down@ownerPost] <- 1
    thissim <- ownerToMatrix(thissim, preMerger = TRUE)
    thissim <- ownerToMatrix(thissim, preMerger = FALSE)
@@ -748,6 +807,11 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      thisfirmsum$Unintegrated=z
      thisfirmsum$Product=rownames(thisfirmsum)
      thisfirmsum$Partial=ifelse(p,"Partial ","")
+     thisfirmsum$alpha=res@down@slopes$alpha
+     thisfirmsum$mcDown=calcMC(res,preMerger=TRUE)$down
+     thisfirmsum$mcUp=calcMC(res,preMerger=TRUE)$up
+     thisfirmsum$bargPre=res@up@bargpowerPre
+     thisfirmsum$bargPost=res@up@bargpowerPost
 
      return(list(sum=sumres,firm=thisfirmsum))
 
@@ -786,31 +850,87 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
    theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +geom_hline(yintercept=0,linetype="dashed")
 
 ggsave("./output/trashfakemerger.png",trashfakemergerplot,height = 7,width = 7)
+
+trashinterestingmergerbar <- ggplot(data=filter(mkt_mergersweep,Unintegrated=="Base" &
+                                                  name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")) %>% rename(Type=name) %>%
+                                      mutate(Merger=paste(Acquirer,Target,sep="/") ) %>%
+                                      filter(Merger %in% c("Republic/Santek","Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Merger,x=value,fill=Type)) +
+  #facet_grid(~Type,scales = "fixed") +
+  geom_bar(stat="identity",#fill="lightgrey",
+                                                         position=position_dodge()
+                                                         #position="stack"
+  )  +
+   xlab("% of Pre-merger Expenditures") + geom_vline(xintercept = 0,linetype="dashed",color="goldenrod") +
+  scale_fill_brewer(type="qual",palette = "YlGnBu",direction=-1) +#scale_fill_grey(start = .9, end = .1) +
+  geom_text(aes(label=round(value,1)),hjust=1.1,color="black",
+   position=position_dodge(width=.9),size =3) +
+  theme_bw() +
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_discrete(limits=rev)
+
+ggsave(filename="./output/trashinterestingmergerbar.png",trashinterestingmergerbar,width = 6,height=4)
+
+mkt_mergersweep_firm$Product <- rownames(mkt_mergersweep_firm )
+mkt_mergersweep_firm$Product <- gsub("\\..*$","",mkt_mergersweep_firm$Product,perl=TRUE)
+mkt_mergersweep_firm$Product <- gsub(":","/",mkt_mergersweep_firm$Product,perl=TRUE)
+
+trashinterestingfirmbar <- ggplot(data= filter(mkt_mergersweep_firm,Unintegrated=="Base" ) %>%
+                                    mutate(Merger=paste(Acquirer,Target,sep="/")) %>%
+                                    filter(Merger %in% c(#"Republic/Santek",
+                                      "Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")) %>%
+                                    select(-priceUpDelta,-priceDownDelta,-outputDelta,-isParty) %>%
+                                  pivot_longer(c(priceUpPre ,priceUpPost , priceDownPre, priceDownPost, sharesPre, sharesPost)) %>%
+                                    mutate(Level=ifelse(grepl("Up",name),"Disposal","Collection"),
+                                           Pre=ifelse(grepl("Pre",name),"Pre-merger","Post-merger"),
+                                           name=gsub("Pre|Post|Up|Down","",name)) %>%
+                                    rename(Effect=name) %>%
+                                    pivot_wider(values_from=value,names_from=Pre) %>%
+                                    mutate(`Change (%)`=(`Post-merger`/`Pre-merger` - 1)*100,
+                                           Effect=factor(Effect, labels=c("Prices","Shares")),
+                                           Level=factor(Level,levels=rev(sort(unique(Level))))) %>%
+                                    #arrange(Level,Effect,Disposal,desc(`Change (%)`)) %>%
+                                    mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect) %>%
+                                    mutate( Product=factor(Product,levels=levels(vert_sum$Name))) %>%
+                                    pivot_longer(c(`Pre-merger`,`Post-merger`#,`Change (%)`
+                                                   )) %>% rename(Type=name) %>%
+                                    mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger"))),
+                   aes(x=Product,y=value,fill=Type,label=value)) +
+  facet_grid(Merger~Level+Effect,scales = "free_x") + geom_bar(stat="identity",
+                                                         position=position_dodge()
+                                                         #position="stack"
+  )  +
+  xlab("Disposal/Collector") + ylab("Equilibrium Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
+  scale_fill_brewer(type="qual",palette = "Paired") +#scale_fill_grey(start = .9, end = .1) +
+  geom_text( #color=ifelse(Type=="Post-merger","white","black"),
+    hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggsave(filename="./output/trashinterestingfirmbar.png",trashinterestingfirmbar,width=7,height=7)
 write_csv(mkt_mergersweep,"./trash/mkt_mergersweep.csv",na="")
 write_csv(mkt_mergersweep_firm,"./trash/mkt_mergersweep_firm.csv",na="")
 
-mkt_interesting <- filter(mkt_mergersweep,
-                          (Acquirer=="Republic" & Target =="Santek" & Unintegrated %in% c("Base","Up","Down","Vertical")) |
-                            (Acquirer=="Santek" & Target =="WasteConn" & Unintegrated %in% c("Base")) |
-                               (Acquirer=="Santek" & Target =="WM-ADS" & Unintegrated %in% c("Base")   ) )
+# mkt_interesting <- filter(mkt_mergersweep,
+#                           (Acquirer=="Republic" & Target =="Santek" & Unintegrated %in% c("Base","Up","Down","Vertical")) |
+#                             (Acquirer=="Santek" & Target =="WasteConn" & Unintegrated %in% c("Base")) |
+#                                (Acquirer=="Santek" & Target =="WM-ADS" & Unintegrated %in% c("Base")   ) )
+#
+# mkt_interesting_firm <- filter(mkt_mergersweep_firm,
+#                                Acquirer=="Republic" & Target =="Santek" & Unintegrated %in% c("Base","Up","Down","Vertical") |
+#   (Acquirer=="Santek" & Target =="WasteConn" & Unintegrated %in% c("Base")) |
+#   (Acquirer=="Santek" & Target =="WM-ADS" & Unintegrated %in% c("Base")   )
+# ) %>%
+#   mutate(Unintegrated=factor(Unintegrated,levels=c("Base","Down","Vertical","Up")),
+#          Unintegrated=interaction(Partial,Unintegrated,drop = TRUE,sep=""))
 
-mkt_interesting_firm <- filter(mkt_mergersweep_firm,
-                               Acquirer=="Republic" & Target =="Santek" & Unintegrated %in% c("Base","Up","Down","Vertical") |
-  (Acquirer=="Santek" & Target =="WasteConn" & Unintegrated %in% c("Base")) |
-  (Acquirer=="Santek" & Target =="WM-ADS" & Unintegrated %in% c("Base")   )
-) %>%
-  mutate(Unintegrated=factor(Unintegrated,levels=c("Base","Down","Vertical","Up")),
-         Unintegrated=interaction(Partial,Unintegrated,drop = TRUE,sep=""))
 
-
-trashinterestingplot <- ggplot(data=na.omit(filter(mkt_interesting,
-                                                    name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))),aes(x=interaction(Acquirer,Target,sep=":",drop=TRUE),y=value,color=name,group=name))+
-  geom_point()+geom_line()+ facet_grid(~Unintegrated,scales="free_x") +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Merger") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +geom_hline(yintercept=0,linetype="dashed")
-
-ggsave("./output/trashinterestingmerger.png",trashinterestingplot,height = 7,width = 7)
-write_csv(mkt_interesting,"./trash/mkt_interesting.csv",na="")
-write_csv(mkt_interesting_firm,"./trash/mkt_interesting_firm.csv",na="")
+# trashinterestingplot <- ggplot(data=na.omit(filter(mkt_interesting,
+#                                                     name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))),aes(x=interaction(Acquirer,Target,sep=":",drop=TRUE),y=value,color=name,group=name))+
+#   geom_point()+geom_line()+ facet_grid(~Unintegrated,scales="free_x") +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Merger") +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +geom_hline(yintercept=0,linetype="dashed")
+#
+# ggsave("./output/trashinterestingmerger.png",trashinterestingplot,height = 7,width = 7)
+# write_csv(mkt_interesting,"./trash/mkt_interesting.csv",na="")
+# write_csv(mkt_interesting_firm,"./trash/mkt_interesting_firm.csv",na="")
 
 
  bargsweep <- function(thissim,barg=0.5,who=c("Santek:Republic","WasteConn:Republic","All","Base")){
@@ -822,16 +942,21 @@ write_csv(mkt_interesting_firm,"./trash/mkt_interesting_firm.csv",na="")
    relevantPre <- switch(who,
                          "Santek:Republic"=names(thissim@up@bargpowerPre)=="Santek:Republic",
                          "WasteConn:Republic"=names(thissim@up@bargpowerPre)=="WasteConn:Republic",
-                         All=thissim@up@bargpowerPre !=1
+                         #All=thissim@up@bargpowerPre !=1
+                         All=thissim@up@ownerPre!=thissim@down@ownerPre
    )
 
    relevantPost <- switch(who,
                           "Santek:Republic"=names(thissim@up@bargpowerPost)=="Santek:Republic",
                           "WasteConn:Republic"=names(thissim@up@bargpowerPost)=="WasteConn:Republic",
-                          All=thissim@up@bargpowerPost !=1
+                          #All=thissim@up@bargpowerPost !=1
+                          All=thissim@up@ownerPost!=thissim@down@ownerPost
    )
 
-
+   ## fix bargaining power parameters at barg and solve for new alpha
+   minBarg_bert<- optimize(function(x){minD(c(x,barg),relevant = relevantPre)},lower=-1e4,upper=-1e-4)
+   thissim@down@slopes$alpha <- minBarg_bert$minimum
+   thissim@down@slopes$meanval <- log(thissim@down@shares) - log(thissim@down@shares)[1] -  thissim@down@slopes$alpha*(simres_vert@down@prices - simres_vert@down@prices[1])
    thissim@up@bargpowerPre[relevantPre] <- barg
    thissim@up@bargpowerPost[relevantPost] <- barg
    thissim <- ownerToMatrix(thissim, preMerger = TRUE)
@@ -869,6 +994,7 @@ write_csv(mkt_interesting_firm,"./trash/mkt_interesting_firm.csv",na="")
                                                   thissum = summary(z,market=TRUE)
 
                                                   thissum$mktSize <- with(thisfirmsum,sum(priceDownPre*sharesPre*z@down@mktSize/100))
+                                                  thissum$alpha <- z@down@slopes$alpha
                                                   #isMkt <- try(HypoMonTest(z,1:nrow(thisfirmsum)),silent=TRUE)
                                                   #if(class(isMkt)=="try-error") isMkt <- NA
                                                   #thissum$isMkt <- isMkt
@@ -900,25 +1026,35 @@ write_csv(mkt_interesting_firm,"./trash/mkt_interesting_firm.csv",na="")
           name=relevel(name,"Consumer Harm")
    )
 
- trashbargplot <- ggplot(data=na.omit(filter(mkt_bargsweep,name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))),aes(x=barg,y=value,color=name,group=name))+
-   geom_point()+geom_line()+ facet_grid(~scenario) +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Bargaining Power") +
+ trashbargplot <- ggplot(data=na.omit(filter(mkt_bargsweep,name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))),aes(x=barg,y=value,
+                                                                                                                                      color=scenario,
+                                                                                                                                      group=scenario
+                                                                                                                                      #color=name,group=name
+                                                                                                                                      ))+
+   geom_point()+geom_line()+ facet_grid(name~.,scales = "free") +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Bargaining Power") +
    theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +
    geom_hline(data=mkt_bargsweep %>%
-                filter(scenario=="Base" & name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")) %>%
-                select(-scenario) %>% expand_grid(scenario=levels(factor(mkt_bargsweep$scenario))) %>% filter(scenario!="Base")
-              ,aes(yintercept = value,color=name,group=name),linetype="dashed") + labs(title="The Effect of Changing Bargaining Power on Simulation Outcomes",
-                                                                                       subtitle="Dashed horizontal lines depict base case.")
+                filter(scenario=="Base" & name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))
+              ,aes(yintercept = value),linetype="dashed") +# labs(title="The Effect of Changing Bargaining Power on Simulation Outcomes",
+                                                                                       #subtitle="Dashed horizontal lines depict base case.")
+ scale_color_brewer(type="seq",palette = "YlGnBu",direction=-1)
 
  ggsave("./output/trashbarg.png",trashbargplot,height = 7,width = 7)
 
 
- elastsweep <- function(thissim,shareOut=0,priceOut=0){
+ elastsweep <- function(thissim,shareOut=0,priceOut=0,multiplier=1){
 
 
    if(shareOut==0){return(thissim)}
 
+
+
    thissim@down@normIndex <- NA
-   thissim@down@slopes$meanval <- log(thissim@down@shares) - log(shareOut) -  thissim@down@slopes$alpha*(simres_vert@down@prices - priceOut)
+   thissim@down@shareInside <- 1-shareOut
+   thissim <- calcSlopes(thissim)
+   #thissim@down@slopes$alpha <- multiplier*thissim@down@slopes$alpha
+   #thissim@down@slopes$meanval <- log(thissim@down@shares) - log(shareOut) -  thissim@down@slopes$alpha*(simres_vert@down@prices - priceOut)
+
 
    thissim <- ownerToMatrix(thissim, preMerger = TRUE)
    thissim <- ownerToMatrix(thissim, preMerger = FALSE)
@@ -943,12 +1079,12 @@ write_csv(mkt_interesting_firm,"./trash/mkt_interesting_firm.csv",na="")
  }
 
 
- mkt_elastsweep <- lapply(seq(0,0.9,0.1),
+ mkt_elastsweep <- lapply(seq(0,0.9,0.05),
                           function(x){
                             res_elastsweep=elastsweep(simres_vert,shareOut = x)})
 
 
- names(mkt_elastsweep ) <- seq(0,0.9,0.1)
+ names(mkt_elastsweep ) <- seq(0,0.9,0.05)
 
 
  mkt_elastsweep=bind_rows(lapply(mkt_elastsweep,
@@ -956,6 +1092,8 @@ write_csv(mkt_interesting_firm,"./trash/mkt_interesting_firm.csv",na="")
                                    thisfirmsum =summary(z,market=FALSE,revenue=FALSE)
                                    thissum = summary(z,market=TRUE)
                                    thissum$mktSize <- with(thisfirmsum,sum(priceDownPre*sharesPre*z@down@mktSize/100))
+                                   thissum$mktElast <- elast(z,market=TRUE)
+                                   thissum$alpha <- z@down@slopes$alpha
                                    isMkt <- try(HypoMonTest(z,1:nrow(thisfirmsum),ssnip=.05),silent=TRUE)
                                    if(class(isMkt)=="try-error") isMkt <- NA
                                    thissum$isMkt <- isMkt
@@ -975,13 +1113,26 @@ write_csv(mkt_interesting_firm,"./trash/mkt_interesting_firm.csv",na="")
           name=relevel(name,"Consumer Harm")
    )
 
- trashelastplot <- ggplot(data=na.omit(filter(mkt_elastsweep,name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))),aes(x=factor(as.numeric(shareOut)*100),y=value,color=name,group=name))+
-   geom_point()+geom_line() +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Outside Share (%)") +
-   theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") + labs(title="The Effect of Changing Outside Share on Simulation Outcomes",
-                                                                                                                         subtitle="Outside share of 0 depicts base case.")
+ mkt_elastsweep$shareElast <- factor(paste0(as.numeric(mkt_elastsweep$shareOut)*100,"\n","(",abs(round(mkt_elastsweep$mktElast,1)),")"))
+ mkt_elastsweep$shareElast <- relevel( mkt_elastsweep$shareElast, ref="5\n(0.3)")
+ mkt_elastsweep$shareElast <- relevel( mkt_elastsweep$shareElast, ref= "0\n(0)")
+
+ trashelastplot <- ggplot(data=na.omit(filter(mkt_elastsweep,name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))),aes(x=shareElast,y=value,color=name,group=name))+
+   geom_point()+geom_line() +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("% Outside Share (Market Elasticity)") +
+   theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +
+   #labs(title="The Effect of Changing Outside Share on Simulation Outcomes",
+
+   #subtitle="Outside share of 0 depicts base case.") +
+   scale_color_brewer(type="seq",palette = "YlGnBu",direction=-1) +
+   scale_x_discrete( breaks=levels(mkt_elastsweep$shareElast)[seq(1,length(levels(mkt_elastsweep$shareElast)),by=2)])
 
 ggsave("./output/trashelast.png",trashelastplot,width = 7,height=7)
 
+trashelastplot_alt <- ggplot(data=na.omit(filter(mkt_elastsweep,name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))),aes(x=factor(abs(round(as.numeric(mktElast),2))),y=value,color=name,group=name))+
+  geom_point()+geom_line() +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Elasticity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") + labs(title="The Effect of Changing Outside Share on Simulation Outcomes",
+                                                                                                                        subtitle="Outside share of 0 depicts base case.")+
+  scale_color_brewer(type="seq",palette = "YlGnBu",direction=-1)
 
 
 
@@ -989,6 +1140,7 @@ ggsave("./output/trashelast.png",trashelastplot,width = 7,height=7)
 nestsweep <- function(thissim,nestParm=1, nests=c("integrated","landfill")){
 
   nests <- match.arg(nests)
+
 
   if(nestParm==1){return(thissim)}
 
@@ -998,8 +1150,18 @@ nestsweep <- function(thissim,nestParm=1, nests=c("integrated","landfill")){
                   landfill = factor(simdata$ownerPreUp)
                   )
 
+  sigma=rep(nestParm,nlevels(nests))
+  names(sigma) <- levels(nests)
+
+  #nestCnt      <- as.numeric(table(nests))
+  #isSingletonNest <- nestCnt==1
+  #sigma[isSingletonNest] <- 0
+
   upNest <- thissim@up
   upNest@pricePre <-upNest@pricePost <- numeric()
+  barg <- unique(upNest@bargpowerPre)
+  barg <- barg[barg!=1]
+  barg <- barg[1:min(2,length(barg))]
   downNest <-
     new("LogitNests",
         prices=thissim@down@prices, shares=thissim@down@shares,
@@ -1031,20 +1193,20 @@ nestsweep <- function(thissim,nestParm=1, nests=c("integrated","landfill")){
   )
 
 
-  thissim_nests@down@slopes <- thissim@down@slopes
+  #thissim_nests@down@slopes <- thissim@down@slopes
+
+  minParm<- optim(c(-1,rep(.6,2)),minD,nests=nests,nestParm=1-sigma,method="L-BFGS-B",lower=c(-1e3,rep(.1,2)),upper=c(-1e-4,rep(1,2)))
+  #minParm<- optimize(function(x){minD(c(x,rep(barg,2)),nests=nests,nestParm=1-sigma,)},lower=-1e4,upper=-1e-4)
+  #sigma[isSingletonNest] <- 1
+  thissim_nests@down@slopes <- list(sigma=sigma)
 
 
-
-  thissim_nests@down@slopes$sigma <- rep(nestParm,nlevels(nests))
-
-  nestCnt      <- as.numeric(table(nests))
-  isSingletonNest <- nestCnt==1
-  thissim_nests@down@slopes$sigma[isSingletonNest] <- 1
-  names(thissim_nests@down@slopes$sigma) <- levels(nests)
+  #names(thissim_nests@down@slopes$sigma) <- levels(nests)
+  #
   # meanval <-
-  #   log(thissim_nests@down@shares)- log(shareOut) -
-  #         thissim_nests@down@slopes$alpha*(thissim_nests@down@prices - thissim_nests@down@priceOutside) +
-  #         (thissim_nests@down@slopes$sigma-1)*log(sharesNests)
+  #    log(thissim_nests@down@shares)- log(shareOut) -
+  #          thissim_nests@down@slopes$alpha*(thissim_nests@down@prices - thissim_nests@down@priceOutside) +
+  #          (thissim_nests@down@slopes$sigma-1)*log(sharesNests)
   #
   #
   #       names(meanval)   <- object@labels
@@ -1052,8 +1214,7 @@ nestsweep <- function(thissim,nestParm=1, nests=c("integrated","landfill")){
 
   shares <- thissim_nests@down@shares
   prices <- thissim_nests@down@prices
-  alpha <- thissim_nests@down@slopes$alpha
-  nestParm <- thissim_nests@down@slopes$sigma
+  alpha <- thissim_nests@down@slopes$alpha <- minParm$par[1]
   sharesBetween <- as.vector(tapply(shares,nests,sum)[nests])
 
   if(is.na(thissim_nests@down@normIndex)){
@@ -1065,17 +1226,17 @@ nestsweep <- function(thissim,nestParm=1, nests=c("integrated","landfill")){
     shareOut <- shares[idx]
     shareOutBetween <- sharesBetween[idx]
     priceOut <- prices[idx]
-    nestOut <- nestParm[nests]
+    nestOut <- sigma[nests]
     nestOut <- nestOut[idx]
   }
 
   #thissim_nests@down@slopes$meanval=(1-nestParm[nests])*(log(shares)-log(shareOut))- alpha*(prices - priceOut) + nestParm[nests]*(log(sharesBetween) - log(shareOut))
   meanval <-
-    (log(shares)  - log(shareOut)) -
-    alpha*(prices/nestParm[nests] - priceOut/nestOut) -
-    ((nestParm[nests]-1)*log(sharesBetween) - (nestOut-1)*log(shareOutBetween))
+    sigma[nests]*(log(shares)  - log(shareOut)) -
+    alpha*(prices/sigma[nests] - priceOut/nestOut) -
+    ((sigma[nests]-1)*log(sharesBetween) - (nestOut-1)*log(shareOutBetween))
 
-  thissim_nests@down@slopes$meanval <- nestParm[nests]*meanval
+  thissim_nests@down@slopes$meanval <- meanval
 
 
   thissim_nests<- ownerToMatrix(thissim_nests, preMerger = TRUE)
@@ -1118,15 +1279,17 @@ mkt_nestsweep <- mapply(
     thisfirmsum =summary(res,market=FALSE,revenue=FALSE)
     sumres = summary(res,market=TRUE)
     sumres$mktSize <- with(thisfirmsum,sum(priceDownPre*sharesPre*res@down@mktSize/100))
+    sumres$alpha=res@down@slopes$alpha
     sumres$nestParm=x
     sumres$nest=y
 
     thisfirmsum$mktSize <- with(thisfirmsum,sum(priceDownPre*sharesPre*res@down@mktSize/100))
     thisfirmsum$nestParm=x
     thisfirmsum$nest=y
+    thisfirmsum$alpha=res@down@slopes$alpha
     thisfirmsum$mcDown=calcMC(res,preMerger=TRUE)$down
     thisfirmsum$mcUp=calcMC(res,preMerger=TRUE)$up
-
+    thisfirmsum$barg=res@up@bargpowerPre
 
     return(list(sum=sumres,firm=thisfirmsum))
 
@@ -1136,7 +1299,7 @@ mkt_nestsweep <- mapply(
   SIMPLIFY=FALSE)
 
 
-mkt_nestsweep_firm <- bind_rows(lapply(mkt_nestsweep,function(x){return(x$firm)}))
+mkt_nestsweep_firm <- bind_rows(lapply(mkt_nestsweep,function(x){return(x$firm %>% mutate(product=rownames(x$firm)))}))
 mkt_nestsweep <- bind_rows(lapply(mkt_nestsweep,function(x){return(x$sum)}))
 
 mkt_nestsweep <-  mutate(mkt_nestsweep,across(contains("$"),~.x/mktSize*100)) %>%
@@ -1150,10 +1313,12 @@ mkt_nestsweep <-  mutate(mkt_nestsweep,across(contains("$"),~.x/mktSize*100)) %>
          )
 
 
+mkt_nestsweep$nest <- factor(mkt_nestsweep$nest)
+mkt_nestsweep$nest <- factor(mkt_nestsweep$nest,levels=levels(mkt_nestsweep$nest),labels=stringr::str_to_title(levels(mkt_nestsweep$nest)))
 trashnestplot <- ggplot(data=filter(mkt_nestsweep,
                                             name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")),aes(x=nestParm,y=value,color=name,group=name))+
   geom_point()+geom_line()+ facet_grid(~nest) +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Nesting Parameter") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +geom_hline(yintercept=0,linetype="dashed")
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +geom_hline(yintercept=0,linetype="dashed") + scale_color_brewer(type="seq",palette = "YlGnBu",direction=-1)
 
 ggsave("./output/trashnest.png",trashnestplot,height = 7,width = 7)
 mkt_nestsweep_firm$nestParm <- 1-mkt_nestsweep_firm$nestParm

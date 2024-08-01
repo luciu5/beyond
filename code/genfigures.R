@@ -537,7 +537,7 @@ pfirmsdown_all.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="down") , a
 
 
 pfirmsvert_all.bw <- ggplot(filter(ungroup(res.nests.logit),merger =="vertical" & Wholesalers != "1")%>%
-                              mutate(Retailers=factor(Retailers, labels=paste0("Retailers: ", levels(Retailers)))), aes(y=Outcome_value/mktrev.pre*100,
+                              mutate(Retailers=factor(Retailers, labels=paste0("Retailers: ", levels(droplevels(Retailers))))), aes(y=Outcome_value/mktrev.pre*100,
                                                                      #avgpricedelta/mktrev.pre*100,
                                                                      x=Wholesalers,color=Cost)) +
   #geom_boxplot(outlier.alpha = 0.1) +
@@ -1361,3 +1361,4 @@ dev.off()
 png("output/pprofits_barg.png",width = 10, height = 7, units = "in", res=300)
 print(pprofits_barg)
 dev.off()
+
