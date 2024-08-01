@@ -1,0 +1,65 @@
+\documentclass[12pt]{article}
+%\documentclass[12pt,review,authoryear]{elsarticle}
+%\usepackage{ecrc}       % needed for elsarticle
+\usepackage{chicago}    % bibliography package
+\usepackage{graphicx}   % insert PostScript figures
+\usepackage{setspace}   % controls line spacing
+\usepackage{amsmath,amsthm,amssymb,amstext} % controls equation entry and symbols
+\usepackage{rotating}   % rotates graphics
+\usepackage{soul}       % controls hyphenation
+\usepackage{epsfig}     % helps with including graphics
+\usepackage{pdflscape}  % helps with displaying rotated graphics in PDFs
+\usepackage{lscape}     % helps with rotating pages
+\usepackage{caption}    % controls  captions
+\usepackage{adjustbox}  % shrink tables
+\usepackage[margin=1in]{geometry} % margins
+\usepackage{hyperref}   % displays URLs
+%packages for kable tables
+ \usepackage{booktabs}
+ \usepackage{longtable}
+ \usepackage{array}
+ \usepackage{multirow}
+ \usepackage{wrapfig}
+ \usepackage{float}
+ \usepackage{colortbl}
+ \usepackage{pdflscape}
+ \usepackage{tabu}
+ \usepackage{threeparttable}
+ \usepackage{threeparttablex}
+ \usepackage[normalem]{ulem}
+ \usepackage{makecell}
+ \usepackage{xcolor}
+
+\graphicspath{{../output/}}
+
+\interfootnotelinepenalty=10000
+
+\parskip     2.0mm       % space between paragraphs
+
+\alph{footnote}         % make title footnotes alpha-numeric
+
+\captionsetup[figure]{labelsep=space,labelfont=bf} % remove colon from figure name
+
+
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Appendix: Increasing Marginal Costs\label{app:mc}}
+
+Here, we explore the role that the constant marginal cost assumption plays in driving our results by comparing our simulations to an alternative set that allows costs to increase linearly. Figure \ref{fig:surplussumcost} displays box and whisker plots for the net effect on consumer and total welfare under four different scenarios: constant marginal costs for all firms (top row, blue), linear marginal costs for all firms (top row, orange), constant marginal costs for the merging parties' products but linear costs for the non-merging parties' products (bottom row, blue), and linear marginal costs for the merging parties' products but constant costs for the non-merging parties' products (bottom row, orange).
+
+In theory, having linear marginal costs rather than constant costs could result in fewer gains from EDM, as efforts to increase sales due to a wholesale price reduction would be counteracted by rising costs. Likewise, in theory, RRC could be more profitable for the merging parties under linear compared to constant marginal costs, as linear marginal costs could cause input prices to increase more rapidly or downstream rival retailers to reduce output more quickly. Because impacts from EDM are plausibly less under linear marginal costs while those from RRC are plausibly more, one might expect that on net mergers are more harmful under linear rather than constant marginal costs.
+
+Our simulations confirm this hypothesis.  See the top two panels in Figure \ref{fig:surplussumcost}, which compare a scenario where all firms have constant marginal costs to one where they all have linear marginal costs.  Overall, harm is greater for mergers with linear costs. The difference is largest for vertical mergers.  When all firms have constant marginal costs, vertical mergers increase consumer surplus in about 55\% of simulations and total surplus in about 29\% of simulations, but only increase consumer surplus in about 36\% of simulations and total surplus in about 2\% of simulations when all firms have linear costs.
+
+The bottom panel of Figure \ref{fig:surplussumcost} compares a situation where only the merging firms have constant marginal costs to one where only the merging firms have linear marginal costs.  We see that the distributions in these bottom panels are largely the same as those in the top panels.  Thus, it appears that the key driver of our results is whether or not the merging parties have constant marginal costs.  When the merging firms' marginal costs are constant, the distribution of outcomes moves towards less harm.
+
+\begin{sidewaysfigure}
+\centering
+\includegraphics[scale=0.9]{output/surplussum_cost.png}
+\caption{The figure displays box and whisker plots summarizing the extent to which merger outcomes change according to 4 different cost scenarios. The boxes in the top row (``All") either assume all firms face either constant marginal costs (blue, left) or linear marginal costs (orange, right). The boxes in the bottom row (``Party") either assume that the merging parties face constant marginal costs while other firms face linear marginal costs (blue, left), or the merging parties face linear marginal costs while other firms face constant marginal costs (orange, right). Whiskers depict the $5^{th}$ and $95^{th}$ percentiles of a particular outcome, boxes depict the $25^{th}$ and $75^{th}$ percentiles, and the solid horizontal line depicts the median. }
+\label{fig:surplussumcost}
+\end{sidewaysfigure}
+
+\end{document}
