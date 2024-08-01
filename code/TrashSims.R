@@ -12,7 +12,7 @@ library(ggplot2)
 ## Load Data:
 
 library(readr)
-paired_data_4_22 <- read_csv("~/Projects/bargaining_convex/trash/paired_data_4_22.csv")
+paired_data_4_22 <- read_csv("~/Projects/bargaining_convex/output/paired_data_4_22.csv")
 
 disposal_price_republic <-  96 # source: 4/26 correspondence with Peggy
 
@@ -906,8 +906,8 @@ trashinterestingfirmbar <- ggplot(data= filter(mkt_mergersweep_firm,Unintegrated
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
 
 ggsave(filename="./output/trashinterestingfirmbar.png",trashinterestingfirmbar,width=7,height=7)
-write_csv(mkt_mergersweep,"./trash/mkt_mergersweep.csv",na="")
-write_csv(mkt_mergersweep_firm,"./trash/mkt_mergersweep_firm.csv",na="")
+write_csv(mkt_mergersweep,"./output/mkt_mergersweep.csv",na="")
+write_csv(mkt_mergersweep_firm,"./output/mkt_mergersweep_firm.csv",na="")
 
 # mkt_interesting <- filter(mkt_mergersweep,
 #                           (Acquirer=="Republic" & Target =="Santek" & Unintegrated %in% c("Base","Up","Down","Vertical")) |
@@ -929,8 +929,8 @@ write_csv(mkt_mergersweep_firm,"./trash/mkt_mergersweep_firm.csv",na="")
 #   theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +geom_hline(yintercept=0,linetype="dashed")
 #
 # ggsave("./output/trashinterestingmerger.png",trashinterestingplot,height = 7,width = 7)
-# write_csv(mkt_interesting,"./trash/mkt_interesting.csv",na="")
-# write_csv(mkt_interesting_firm,"./trash/mkt_interesting_firm.csv",na="")
+# write_csv(mkt_interesting,"./output/mkt_interesting.csv",na="")
+# write_csv(mkt_interesting_firm,"./output/mkt_interesting_firm.csv",na="")
 
 
  bargsweep <- function(thissim,barg=0.5,who=c("Santek:Republic","WasteConn:Republic","All","Base")){
@@ -1322,5 +1322,5 @@ trashnestplot <- ggplot(data=filter(mkt_nestsweep,
 
 ggsave("./output/trashnest.png",trashnestplot,height = 7,width = 7)
 mkt_nestsweep_firm$nestParm <- 1-mkt_nestsweep_firm$nestParm
-write_csv(mkt_nestsweep_firm,"./trash/mkt_nestsweep_firm.csv",na="")
+write_csv(mkt_nestsweep_firm,"./output/mkt_nestsweep_firm.csv",na="")
 
