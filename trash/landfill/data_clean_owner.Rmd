@@ -1,0 +1,714 @@
+---
+title: "Landfill Geographic Analysis: Owner Level"
+output: html_document
+date: "2024-01-11"
+author: Charles Taragin and Romeo Ignacio
+---
+
+```{r setup, include=FALSE}
+library(tidycensus)
+library(tidyverse)
+library(sf)
+library(dplyr)
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(vtable)
+library(stringr)
+library(gtsummary)
+
+knitr::opts_chunk$set(echo = F, message = F)
+```
+
+
+### Summary Statistics
+
+
+```{r map_data, results = 'hide'}
+### Step 1: Read in and graph data
+csa_shp <- get_acs(
+  geography = "combined statistical area",
+  variables = "B19013_001",
+  geometry = TRUE,
+  survey = "acs1",
+  year = 2019
+) %>%
+  select(GEOID,NAME,geometry) 
+
+cbsa_shp <- get_acs(
+  geography = "cbsa",
+  variables = "B19013_001",
+  geometry = TRUE,
+  survey = "acs1",
+  year = 2019
+) %>%
+  select(GEOID,NAME,geometry) 
+
+# Deleted option: cbsa
+
+county_shp <- get_acs(
+  geography = "county",
+  variables = "B19013_001",
+  geometry = TRUE,
+  survey = "acs1",
+  year = 2019
+) %>%
+  select(GEOID,NAME,geometry)
+
+raw <- read_xlsx("/fsr/project4/Charles/bargaining_convex/trash/Copy of WBJ_Disposal_Sites_2019.xlsx",skip=3)
+
+## Clean up raw file names
+
+raw_uniq_own_nms <- raw %>% 
+  filter(Type=="LF"|Family=="LF"|Type=="TS"|Family=="TS") %>%
+  select(`Owner Code`,`Owner Entity`,Type,Family) %>%
+  unique() %>%
+  mutate(`Owner Full Name`= ifelse(is.na(`Owner Code`),"",`Owner Entity`),
+    `Owner Code`=ifelse(is.na(`Owner Code`),`Owner Entity`,`Owner Code`),
+    ) %>%
+  group_by(`Owner Code`)  %>%
+  select(`Owner Code`) %>%
+  arrange(`Owner Code`) %>%
+  group_by(`Owner Code`) %>%
+  summarise(count=n())
+
+write.csv(raw_uniq_own_nms,"/fsr/project4/Charles/bargaining_convex/trash/owner_nms_raw.csv")
+
+### This is for names of entities that did not get assigned an owner code for checks
+
+## New way to check data:  Have a flag regarding is_na, check if replaced operator name is similiar to owner name and vice versa
+
+  
+# 3492 obe
+raw_uniq_op_nms <- raw %>% 
+  filter(Type=="LF"|Family=="LF"|Type=="TS"|Family=="TS") %>%
+  select(`Operator Code`,`Operator Entity`,Type,Family) %>%
+  unique() %>%
+  mutate(
+    `Operator Code`=ifelse(is.na(`Operator Code`),`Operator Entity`,`Operator Code`)) %>%
+  group_by(`Operator Code`)  %>%
+  select(`Operator Code`) %>%
+  arrange(`Operator Code`) %>%
+  group_by(`Operator Code`) %>%
+  summarise(count=n() )
+
+tmp <- raw %>% 
+  left_join(raw_uniq_op_nms) %>%
+  filter(is.na(count))
+
+write.csv(raw_uniq_op_nms,"/fsr/project4/Charles/bargaining_convex/trash/operator_nms_raw.csv")
+
+# Clean for owner
+# Original count 3787
+raw_uniq_own_nms <- raw %>% 
+  filter(Type=="LF"|Family=="LF"|Type=="TS"|Family=="TS") %>%
+  select(`Owner Code`,`Owner Entity`,Type,Family,Ownership) %>%
+  unique() %>%
+  mutate(`Owner Code`=ifelse(is.na(`Owner Code`),`Owner Entity`,`Owner Code`)) %>%
+  group_by(`Owner Code`) %>%
+  select(`Owner Code`,Ownership) %>%
+  mutate(`Owner Code`=str_replace_all(`Owner Code`,"Tidewater Fiber Corp","Tidewater Fibre Corp"),
+         `Owner Code`=str_replace_all(`Owner Code`,"Town of Bethleham","Town of Bethlehem"),
+         `Owner Code`=str_replace_all(`Owner Code`,regex("ABC Disposal Systems"),"ABC"),
+         `Owner Code`=toupper(`Owner Code`),
+         `Owner Code`=str_replace_all(`Owner Code`,"\\.",""),
+         `Owner Code`=str_replace_all(`Owner Code`,"\\,",""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" inc\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" corp\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" co\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" company\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" corporation\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" LLC\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" & "),"&"),
+         `Owner Code`=str_replace_all(`Owner Code`,regex("LP\\b"),""),
+         `Owner Code`=str_squish(`Owner Code`)) %>%
+  unique() %>%
+  mutate(dup=n())
+
+  #Clean up certain strings
+ 
+
+
+raw <- raw %>%
+  mutate(`Operator Code`=ifelse(is.na(`Operator Code`),`Operator Entity`,`Operator Code`)) %>%
+  mutate(`Operator Code`=str_replace_all(`Operator Code`,"Tidewater Fiber Corp","Tidewater Fibre Corp"),
+         `Operator Code`=str_replace_all(`Operator Code`,"Angelo's Recycled Materials - Tampa Recycling Facility","Angelo's Recycled Materials"),
+         `Operator Code`=str_replace_all(`Operator Code`,regex("ABC Disposal Systems"),"ABC"),
+         `Operator Code`=str_replace_all(`Operator Code`,regex("Athens Services"),"ATHEN"),
+         `Operator Code`=str_replace(`Operator Code`,"Monadnock Disposal Service Inc.",	
+"Monadnock Disposal Services"),
+         `Operator Code`=str_replace(`Operator Code`,"Southern Disposal Services","Southern Disposal Service"),
+         `Operator Code`=str_replace(`Operator Code`,"Vogel Disposal Service","Vogel Disposal"),
+         `Operator Code`=str_replace(`Operator Code`,"Strategic Materials","Strategic Material"),
+         `Operator Code`=toupper(`Operator Code`),
+         `Operator Code`=str_replace_all(`Operator Code`,"\\.",""),
+         `Operator Code`=str_replace_all(`Operator Code`,"\\,",""),
+         `Operator Code`=str_replace_all(`Operator Code`,"-"," "),
+         `Operator Code`=str_replace_all(`Operator Code`,regex(" inc\\b",ignore_case=T),""),
+         `Operator Code`=str_replace_all(`Operator Code`,regex(" corp\\b",ignore_case=T),""),
+         `Operator Code`=str_replace_all(`Operator Code`,regex(" co\\b",ignore_case=T),""),
+         `Operator Code`=str_replace_all(`Operator Code`,regex(" company\\b",ignore_case=T),""),
+         `Operator Code`=str_replace_all(`Operator Code`,regex(" corporation\\b",ignore_case=T),""),
+         `Operator Code`=str_replace_all(`Operator Code`,regex(" LLC\\b",ignore_case=T),""),
+         `Operator Code`=str_replace_all(`Operator Code`,regex(" & "),"&"),
+         `Operator Code`=str_replace_all(`Operator Code`,regex("LP\\b"),""),
+         `Operator Code`=str_squish(`Operator Code`)) 
+  
+raw <- raw %>%
+  mutate(`Owner Code`=ifelse(is.na(`Owner Code`),`Owner Entity`,`Owner Code`)) %>%
+  mutate(`Owner Code`=str_replace_all(`Owner Code`,"Tidewater Fiber Corp","Tidewater Fibre Corp"),
+         `Owner Code`=str_replace_all(`Owner Code`,"Town of Bethleham","Town of Bethlehem"),
+         `Owner Code`=str_replace_all(`Owner Code`,regex("ABC Disposal Systems"),"ABC"),
+         `Owner Code`=toupper(`Owner Code`),
+         `Owner Code`=str_replace_all(`Owner Code`,"\\.",""),
+         `Owner Code`=str_replace_all(`Owner Code`,"\\,",""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" inc\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" corp\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" co\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" company\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" corporation\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" LLC\\b",ignore_case=T),""),
+         `Owner Code`=str_replace_all(`Owner Code`,regex(" & "),"&"),
+         `Owner Code`=str_replace_all(`Owner Code`,regex("LP\\b"),""),
+         `Owner Code`=str_squish(`Owner Code`)) 
+## Look at names for data cleaning
+# 1056 missing owner firms
+own_count <- raw %>%
+  group_by(`Owner Code`) %>%
+  summarise(count=n())
+# 622 missing operator firms
+op_count <- raw %>%
+  group_by(`Operator Code`) %>%
+  summarise(count=n())
+# 10 missing firms
+own_r_op_count <- raw %>%
+  mutate(is_na_own = is.na(`Owner Code`),
+         `Owner Code` = ifelse(is.na(`Owner Code`),`Operator Code`,`Owner Code`)) %>%
+  group_by(`Owner Code`) %>%
+  summarise(count=n())
+# 10 missing firms
+op_r_own_count <- raw %>%
+  mutate(is_na_op = is.na(`Operator Code`),
+         `Operator Code` = ifelse(is.na(`Operator Code`),`Owner Code`,`Operator Code`)) %>%
+  group_by(`Operator Code`,is_na_op) %>%
+  summarise(count=n())
+
+raw <- raw %>%
+  mutate(`Operator Code` = ifelse(is.na(`Operator Code`),`Owner Code`,`Operator Code`),
+         `Owner Code` = ifelse(is.na(`Owner Code`),`Operator Code`,`Owner Code`),
+         `Operator Code` = ifelse(is.na(`Operator Code`),`Facility Name`,`Operator Code`),
+         `Owner Code` = ifelse(is.na(`Owner Code`),`Facility Name`,`Owner Code`))
+
+tmp <- raw %>%
+  filter(is.na(`Operator Code`) & is.na(`Owner Code`))
+
+#Bestway Disposal (Different owner???)
+#Monadnock Disposal Services (Diferent owner???)
+#Texas Disposal Systems vs Texas Disposal Systems Inc.
+operator_names <- raw %>%
+  filter(Type=="LF"|Family=="LF"|Type=="TS"|Family=="TS") %>%
+  select(`Operator Entity`) %>%
+  unique()
+#Willimantic Waste Paper Co For operator (Different operator???)
+#Bestway Disposal (Different operator???)
+# 9499 observations before
+disposal_df <- raw %>%
+  select(Code,Location,City,County,State,Zip,Longitude,Latitude,Code,Type,Family,`Waste Shed`,`Owner Code`,`Total of All Wastes (tons/day)`,Operation) %>% # Make changes to entity type here
+  mutate(st_cnty=paste(County,State,sep = ":")) %>%
+  rename(Waste_Shed = `Waste Shed`,
+         Owner_Code = `Owner Code`)  
+
+## Determine level of aggregation
+
+
+```
+
+
+
+
+```{r}
+### Step 2: Merge in shape files
+## Merge all disposal data
+disposal_df_shp <- st_as_sf(disposal_df,coords=c("Longitude","Latitude"), crs=4326) %>% #crs=4269)
+  st_transform(crs=4269)
+############### CSA ###############
+intersect_df <- st_join(disposal_df_shp,csa_shp,left=T,join=st_intersects) %>%
+    rename(cbsa=NAME) %>%
+    mutate(st_cnty=paste(County,State,sep = ":"),
+    market=ifelse(is.na(cbsa),st_cnty,cbsa),
+    iscsa=!is.na(cbsa)) %>%
+    st_drop_geometry()
+############### CBSA ###############
+cbsa_intersect_df <- st_join(disposal_df_shp,cbsa_shp,left=T,join=st_intersects) %>%
+    rename(cbsa=NAME) %>%
+    mutate(st_cnty=paste(County,State,sep = ":"),
+    market=ifelse(is.na(cbsa),st_cnty,cbsa),
+    iscbsa=!is.na(cbsa)) %>%
+    st_drop_geometry()
+
+############### County ###############
+county_intersect_df <- st_join(disposal_df_shp,county_shp) %>%
+  st_drop_geometry() %>%
+  rename(county_shp=NAME) %>%
+  mutate(county_same = str_detect(county_shp,County)) %>%
+  relocate(county_shp,County,county_same) 
+
+# prop.table(table(county_intersect_df$county_same==1))
+
+## Create crosswalk
+crosswalk_disposal_df <- intersect_df %>%
+  select(Code,market)
+
+write.csv(crosswalk_disposal_df,"/fsr/project4/Charles/bargaining_convex/trash/cbsa_disposal_cross.csv",row.names = F)
+```
+
+```{r, results ="hide"}
+## Clean up data
+
+intersect_df %>% filter(Type == "LF" & market == "Chattanooga, TN-GA Metro Area")
+
+landfill_csa_df <- intersect_df %>%
+  st_drop_geometry() %>%
+  filter(Type=="LF"|Family=="LF"|Type=="TS"|Family=="TS") %>% # Step 1: Keep only LF basde on either Type or Family
+  filter(Waste_Shed!="Exclusive or Captive"|is.na(Waste_Shed)) %>% # Step 2: Drop all observations labelled "Exclusive or Captive" (1619 Observations)
+  mutate(firm_name="") %>%
+  select(Owner_Code,market,st_cnty,County,State,`Total of All Wastes (tons/day)`,iscsa) %>% # Change this line
+  group_by(Owner_Code,market,st_cnty,County,State,`Total of All Wastes (tons/day)`,iscsa) %>% # Change this line
+  summarise(`Total of All Wastes (tons/day)`=sum(`Total of All Wastes (tons/day)`)) 
+
+# Inquire about wasteshed and what to do if NA???
+# Old observation count 7193
+# New observation number 6823
+landfill_csa_df <- intersect_df %>%
+  st_drop_geometry() %>%
+  filter(Type=="LF"|Family=="LF"|Type=="TS"|Family=="TS") %>% # Step 1: Keep only LF basde on either Type or Family
+  filter(Waste_Shed!="Exclusive or Captive"|is.na(Waste_Shed)) %>% # Step 2: Drop all observations labelled "Exclusive or Captive" (1619 Observations)
+  mutate(firm_name="") %>%
+  select(Owner_Code,market,st_cnty,County,State,`Total of All Wastes (tons/day)`,iscsa,Operation) %>% # Change this line
+  ungroup()
+
+# Old observation count 1703
+landfill_cbsa_df <- cbsa_intersect_df %>%
+  st_drop_geometry() %>%
+  filter(Type=="LF"|Family=="LF") %>% # Step 1: Keep only LF based on either Type or Family
+  filter(Waste_Shed!="Exclusive or Captive"|is.na(Waste_Shed)) %>% # Step 2: Drop all observations labelled "Exclusive or Captive" (1619 Observations)
+  select(Owner_Code,market,st_cnty,County,State,`Total of All Wastes (tons/day)`,iscbsa) %>% # Change this line
+  ungroup()
+
+```
+
+```{r}
+### Get number of landsfill sights that don't match
+sum_landfill_all <- landfill_csa_df %>%
+  mutate(coor_exis=ifelse(market!=st_cnty,"CSA","County")) %>%
+  st_drop_geometry() #%>%
+  # select(market,coor_exis) %>% # New line, can delete to get old calculation
+  # unique()  # New line, can delete to get old calculation
+  
+sum_landfill <- sum_landfill_all  %>%
+  select(coor_exis) %>%
+  group_by(coor_exis) %>%
+  summarise(count=n()) %>%
+  ungroup() %>%
+  mutate(per_count=100*prop.table(count))
+
+
+```
+
+This analysis is done on the Owner Code level or Owner Entity name if Owner Code does not exist.  Let's first look at number of markets that are in a CSA and number of markets that are county based as they do not fall in a CSA.  We see that only `r paste0(round(sum_landfill$per_count[1],0),"%")` of landfills are CSA market based
+```{r}
+
+
+#market!=st_cnty
+sum_landfill %>%
+  kbl(col.names=c("Type","Count","Percent"),
+      digits=0,
+      caption = "# Landfills by Markets") %>%
+  kable_classic_2(full_width = F)
+
+```
+```{r}
+## Create summary statistics (On MSA-Owner-Operator Lvl)
+landfill_sum_csa <- landfill_csa_df %>%
+  ungroup() %>%
+  group_by(market,Owner_Code) %>%
+  summarise(count=n(),
+            total_waste=sum(`Total of All Wastes (tons/day)`), .groups="keep")
+
+write.csv(landfill_sum_csa,"/fsr/project4/Charles/bargaining_convex/trash/landfill_final.csv",row.names = F)
+
+# On CSA Level
+landfill_mkt_cnt_csa <- landfill_sum_csa %>%
+  ungroup() %>%
+  group_by(market) %>%
+  summarise(count=n())
+
+landfill_prop_csa <- landfill_mkt_cnt_csa %>%
+  ungroup %>%
+  mutate(several_markets=ifelse(count>1,"Several Landfills","One Landfill"))
+
+
+# Get summary statistics of landfills
+sum_landfill <- landfill_csa_df %>%
+  mutate(coor_exis=ifelse(market!=st_cnty,"CSA","County")) %>%
+  st_drop_geometry() %>%
+  select(coor_exis) %>%
+  group_by(coor_exis) %>%
+  summarise(count=n()) %>%
+  ungroup() %>%
+  mutate(per_count=100*prop.table(count))
+
+sum_landfill_prop <- landfill_prop_csa %>%
+  group_by(several_markets) %>%
+  summarise(count=n()) %>%
+  mutate(per_count=100*prop.table(count)) 
+
+
+ 
+```
+
+Now Let's decompose markets that have 1 landfill and > 1 landfill.  We see about `r paste0(round(sum_landfill_prop$per_count[1],0),"%")` of markets have only one landfill.  
+
+```{r}
+sum_landfill_prop %>% 
+  kbl(col.names=c("Type","Count","Percent"),
+      digits=0,
+      format.args = list(big.mark = ","),
+      caption="Markets with as least one Landfill") %>%
+  kable_classic_2(full_width = F)
+```
+
+```{r}
+## Create HHI Level data
+### On CSA Level ###
+landfill_shrs_csa <- landfill_csa_df %>%
+  ungroup() %>%
+  group_by(Owner_Code,market,iscsa) %>% # Aggregate on Market level, Owner Entity, Operator level
+  summarise(waste_own = sum(`Total of All Wastes (tons/day)`), .groups="keep") %>%
+  ungroup() %>%
+  group_by(market) %>% # Aggregate on Market
+  mutate(total_waste = sum(waste_own),
+         waste_shr = 100*(waste_own/total_waste),
+         waste_hhi = sum(waste_shr^2))
+### On CBSA Level ###
+landfill_shrs_cbsa <- landfill_cbsa_df %>%
+  ungroup() %>%
+  group_by(Owner_Code,market,iscbsa) %>% # Aggregate on Market level, Owner Entity, Operator level
+  summarise(waste_own = sum(`Total of All Wastes (tons/day)`), .groups="keep") %>%
+  ungroup() %>%
+  group_by(market) %>% # Aggregate on Market
+  mutate(total_waste = sum(waste_own),
+         waste_shr = 100*(waste_own/total_waste),
+         waste_hhi = sum(waste_shr^2)) ## Have NA remove option
+
+chat <- filter(intersect_df,grepl("Chattanooga",market))
+
+write.csv(chat,"/fsr/project4/Charles/bargaining_convex/trash/chat.csv",row.names = F)
+
+### CSA ### (921 markets)
+landfill_hhi_csa_df  <- landfill_shrs_csa %>% 
+  select(market,waste_hhi,iscsa) %>% # Keep market level information and filter out duplicates
+  unique() 
+
+write.csv(landfill_hhi_csa_df,"/fsr/project4/Charles/bargaining_convex/trash/landfill_hhi_final.csv",row.names = F)
+
+### Export Chatanooga CSA ###
+chat_shrs <- landfill_shrs_csa %>%
+  filter(market=="Chattanooga-Cleveland-Dalton, TN-GA CSA")
+
+write.csv(chat_shrs,"/fsr/project4/Charles/bargaining_convex/trash/chat_share.csv",row.names=F)
+
+### CBSA ### (1088 markets)
+landfill_hhi_cbsa_df <- landfill_shrs_cbsa %>% 
+  select(market,waste_hhi,iscbsa) %>% # Keep market level information and filter out duplicates
+  unique()
+
+```
+
+Now we will look at summary stats of HHI landfill data on the CSA level.  We have `r nrow(landfill_hhi_csa_df)` total markets on the CSA level in the dataset but only `r sum(!is.na(landfill_hhi_csa_df$waste_hhi))` analyzed.  This can be explained as `r sum(is.na(landfill_hhi_csa_df$waste_hhi))` markets have no waste produced, which produces NAs when calculating for HHI. 
+
+```{r message=FALSE, warning=F}
+graph_data <- landfill_hhi_csa_df %>% select(market,waste_hhi)
+st(graph_data,out="kable",labels=c("Waste HHI"),
+   summ=c('notNA(x)','min(x)','pctile(x)[25]' ,'median(x)','pctile(x)[75]', 'max(x)','mean(x)', 'sd(x)'),
+   summ.names=c('N','Min','Pctile[25]' ,'Median','Pctile[75]', 'Max','Mean', 'Sd'),
+   title = "CSA HHI Summary Statistics") %>%
+  kable_classic_2(full_width = F)
+  
+
+
+```
+Now we will look at summary stats of HHI conditional on if the market is in a CSA or if it's not.
+
+```{r}
+
+csa_grp_landfill <- landfill_hhi_csa_df %>% 
+  mutate(`Type`=ifelse(iscsa==1,"CSA","County")) %>%
+  group_by(Type) %>%
+  drop_na %>%
+  summarise(`N`=n(),
+  `Min`=min(waste_hhi),
+  `Pctile[25]`=pctile(waste_hhi)[25],
+  `Median`=median(waste_hhi),
+  `Pctile[75]`=pctile(waste_hhi)[75],
+  `Max`=max(waste_hhi),
+  `Mean`=mean(waste_hhi),
+  `Sd`=sd(waste_hhi)) %>%
+  kbl(digits=2,
+      caption = "Market Types") %>%
+  kable_classic_2(full_width = F)
+
+csa_grp_landfill
+
+# csa_grp_landfill <- landfill_hhi_csa_df
+# st(csa_grp_landfill,group = "In CSA",group.long=T,out="kable",labels=c("Waste HHI"),title="CSA vs County HHIs Summary Statistics",summ=c('min(x)','pctile(x)[25]' ,'median(x)','pctile(x)[75]', 'max(x)','mean(x)', 'sd(x)'),factor.numeric=T) %>%
+#   kable_classic_2(full_width = F)
+```
+
+
+
+```{r}
+
+csa_grp_landfill <- landfill_hhi_csa_df %>% rename(`In CSA`=iscsa)
+
+# tapply(landfill_hhi_csa_df$waste_hhi,landfill_hhi_csa_df$iscsa,summary)
+```
+Now let's look at the deciles of HHIs on the CSA level below:
+```{r}
+
+# quantile(landfill_hhi_csa_df$waste_hhi,seq(0,1,0.1),na.rm=T)
+
+# quantile(landfill_hhi_cbsa_df$waste_hhi,seq(0,1,0.1),na.rm=T)
+df_1 <- landfill_hhi_csa_df %>%
+  mutate(`Type`="CSA") %>%
+  select(-iscsa) %>%
+  left_join(landfill_prop_csa) 
+
+landfill_csa <- df_1
+
+# Table for HHIs on CSA level
+landfill_csa %>%
+  group_by(`Type`) %>%
+  summarise(q=list(quantile(waste_hhi,seq(0,1,0.1),na.rm=T))) %>%
+  unnest_wider(q) %>% 
+  arrange(desc(`Type`)) %>%
+  kbl(full_wdith=F,
+      digits=0,
+      caption = "CSA HHIs") %>%
+  kable_classic_2(full_width = F)
+
+
+
+
+
+```
+
+The count of markets on the CSA level is `r nrow(landfill_hhi_csa_df)`  (including county level markets if no CSA exists).
+
+Now let's look at the HHIs of only markets with several landfills.  
+```{r}
+non_mono_landfill_csa_df <- landfill_csa %>%
+  filter(several_markets=="Several Landfills") %>%
+  filter(waste_hhi<10000 & Type == "CSA")
+
+non_mono_landfill_csa_df %>%
+  group_by(`Type`) %>%
+  summarise(q=list(quantile(waste_hhi,seq(0,1,0.1),na.rm=T))) %>%
+  unnest_wider(q) %>% 
+  arrange(desc(`Type`)) %>%
+  kbl(full_wdith=F,
+      digits=0,
+      caption = "CSA HHIs") %>%
+  kable_classic_2(full_width = F)
+```
+
+The count of markets with more than one landfill that produce waste is `r nrow(non_mono_landfill_csa_df)`  (including CSA markets and county level markets if no CSA exists).
+
+```{r}
+
+## Data check if all percentages in a market equal 1
+chk_lf_df <- landfill_shrs_csa %>% 
+  group_by(market) %>%
+  mutate(chk_per=sum(waste_shr)) %>%
+  ungroup() %>%
+  select(chk_per) %>%
+  unique()
+```
+### Chatanooga County
+
+```{r}
+chat_sum <- chat_shrs %>%
+  ungroup() %>%
+  select(Owner_Code,waste_own,waste_shr,waste_hhi)
+
+```
+
+For an example case, let's look at the share of waste by owner in this market.  The HHI of this market is  `r chat_sum$waste_hhi[1] `
+
+```{r}
+chat_sum %>%
+  select(Owner_Code,waste_own,waste_shr) %>%
+  arrange(desc(waste_shr)) %>%
+  kbl(col.names=c("Owner Code","Total Waste","Waste Share"),
+      digits=0,
+      caption = "# Landfills by Markets") %>%
+  kable_classic_2(full_width = F)
+```
+
+### Graphs of landfills
+```{r}
+## Count of firms
+cnt_landfill_csa <- landfill_shrs_csa %>% 
+  ungroup() %>%
+  group_by(market) %>%
+  summarise(landfills_cnt = n())
+
+## CSA level bar chart data
+bar_csa_freq <- landfill_shrs_csa %>% 
+  ungroup() %>%
+  group_by(market) %>%
+  summarise(landfills_cnt = n()) %>%
+  ungroup() %>%
+  group_by(landfills_cnt) %>%
+  summarise(freq=n()) %>%
+  mutate(grp_lbls = ifelse(landfills_cnt>=10,"10+",landfills_cnt)) %>%
+  ungroup() %>%
+  group_by(grp_lbls) %>%
+  summarise(freq=sum(freq)) %>%
+  mutate(lvl="CSA",
+         var="Freq.")
+bar_csa_prop <- landfill_shrs_csa %>% 
+  ungroup() %>%
+  group_by(market) %>%
+  summarise(landfills_cnt = n()) %>%
+  group_by(landfills_cnt) %>%
+  summarise(freq=n()) %>%
+  mutate(grp_lbls = ifelse(landfills_cnt>=10,"10+",landfills_cnt)) %>%
+  ungroup() %>%
+  mutate(prop=100*freq/sum(freq)) %>%
+  group_by(grp_lbls) %>%
+  summarise(freq=sum(prop)) %>%
+  mutate(lvl="CSA",
+         var="Prop.")
+
+## CBSA level bar chart data
+bar_cbsa <- landfill_shrs_cbsa %>% 
+  ungroup() %>%
+  group_by(market) %>%
+  summarise(landfills_cnt = n()) %>%
+  ungroup() %>%
+  group_by(landfills_cnt) %>%
+  summarise(freq=n()) %>%
+  mutate(grp_lbls = ifelse(landfills_cnt>=10,"10+",landfills_cnt)) %>%
+  ungroup() %>%
+  group_by(grp_lbls) %>%
+  summarise(freq=sum(freq)) %>%
+  mutate(lvl="CBSA")
+
+# combine_csa_cbsa <- bind_rows(bar_csa,bar_cbsa)
+combine_freq_prop <- bind_rows(bar_csa_prop,bar_csa_freq) %>% 
+  mutate(var=factor(var, levels=c('Prop.','Freq.')))
+  
+
+```
+
+Below is a bar-chart of frequency of landfills across markets.  About `r max(bar_csa_freq$freq)` markets across a CSA only have 1 landfill that serves the market.  The highest number of firms in a market is `r max(cnt_landfill_csa$landfills_cnt)` in the New York-Newark CSA.  `r  sum(cnt_landfill_csa$landfills_cnt>=20)` of these markets have a firm count greater than 20.
+
+```{r,fig.width=14}
+positions = c(seq(1,9,1),"10+")
+ggplot(bar_csa_prop,aes(x=grp_lbls,y=freq)) +
+  geom_bar(stat="identity") +
+  theme_bw() + 
+  geom_text(aes(label = paste0(round(100*freq/sum(freq),0),"%")), hjust = -0.05, colour = "black") +
+  geom_hline(yintercept=0,color="gold",linetype='dashed') +
+  coord_flip() +  
+  scale_x_discrete(limits = positions) +
+  xlab("Landfill Counts") +
+  ylab("Frequency") + 
+  ggtitle("Freq. of Landfills by CSA Based Market") +
+  theme(plot.caption = element_text(hjust = 0),
+        plot.margin = unit(c(0.15, 0.15, 0.15, 0.15), 
+                                "inches")) +
+  labs(caption = "Source: Waste Business Journal's: Directory of Waste Processing & Disposal Sites 2019")
+## Bar chart CSA
+
+# ggplot(data=bar_csa, aes(x=grp_lbls,y=freq)) +
+#   geom_bar(stat="identity") + 
+#   ggtitle("CSA Freq. of Landfills by Market") +
+#   xlab("Landfill Counts") +
+#   ylab("Frequency") + 
+#   scale_x_discrete(limits = positions) + 
+#   theme_bw()
+```
+
+### Cross tabulation of firms
+
+```{r}
+### Check to see if they are the same
+chk_vertical <- disposal_df %>%
+  filter(Type=="LF"|Family=="LF"|Type=="TS"|Family=="TS") %>%
+  mutate(is_municp=grepl("COUNTY|CITY|TOWN|VILLAGE",Owner_Code),
+         is_municp_pub=ifelse(Operation=="Public",TRUE,FALSE),
+         is_equal=is_municp==is_municp_pub) 
+
+landfill_shrs_csa_operation <- landfill_csa_df %>%
+  ungroup() %>%
+  group_by(Owner_Code,market,iscsa,Operation) %>% # Aggregate on Market level, Owner Entity, Operator level
+  summarise(waste_own = sum(`Total of All Wastes (tons/day)`), .groups="keep") %>%
+  ungroup() %>%
+  group_by(market) %>% # Aggregate on Market
+  mutate(total_waste = sum(waste_own),
+         waste_shr = 100*(waste_own/total_waste),
+         waste_hhi = sum(waste_shr^2))
+```
+
+Now we will do a cross tabulation of number of vertically and non-vertically integrated firms per market.  Let's first look at the two different ways we determined which firm is vertically integrated and how correlated they are.  The first way we identified vertically integrated firms was through key words such as "Town", "City", "County" or "Village" in their operating code name.  The other way we identified vertically integrated firms is through the a variable "Operation" that classified firms as public or private.  We see the correlation between these two measures is `r round(cor(chk_vertical$is_municp,chk_vertical$is_municp_pub),2)`.  
+```{r}
+
+vertical_firms <- landfill_shrs_csa %>%
+  mutate(is_municp=grepl("COUNTY|CITY|TOWN|VILLAGE",Owner_Code)) %>%
+  group_by(is_municp,market) %>%
+  summarise(freq=n()) %>%
+  mutate(is_municp= factor(is_municp,levels=c(TRUE,FALSE),labels=c("Vertically Integrated","Non-Vertically Integrated"))) %>%
+  pivot_wider(names_from=is_municp, values_from=freq) %>%
+  mutate(`Non-Vertically Integrated`=ifelse(is.na(`Non-Vertically Integrated`),0,`Non-Vertically Integrated`),
+         `Vertically Integrated`=ifelse(is.na(`Vertically Integrated`),0,`Vertically Integrated`),
+         `Non-Vertically Integrated`=factor(ifelse(`Non-Vertically Integrated`>=10,"10+",`Non-Vertically Integrated`),levels=c(seq(0,9),"10+"),labels=paste(c(seq(0,9),"10+"))),
+         `Vertically Integrated`=factor(ifelse(`Vertically Integrated`>=10,"10+",`Vertically Integrated`),levels=c(seq(0,9),"10+"),labels=paste(c(seq(0,9),"10+"))))
+```
+
+```{r}
+# tab1 <- 100*prop.table(table(vertical_firms$`Non-Vertically Integrated`)) %>% round(4)
+# data.frame(tab1) %>% 
+#   pivot_wider(names_from=Var1,values_from=Freq) %>%
+#   kbl(caption = "Proportions of Non-Vertically Integrated Firms") %>%
+#   kable_classic_2(full_width = F) 
+```
+
+```{r}
+# tab2 <- 100*prop.table(table(vertical_firms$`Vertically Integrated`)) %>% round(4)
+# data.frame(tab2) %>%
+#   pivot_wider(names_from=Var1,values_from=Freq) %>%
+#   kbl(caption = "Proportions of Vertically Integrated Firms") %>%
+#   kable_classic_2(full_width = F)
+```
+
+```{r}
+tab3 <- 100*addmargins(prop.table(table(vertical_firms$`Vertically Integrated`,vertical_firms$`Non-Vertically Integrated`))) %>% round(2) 
+
+write.csv(tab3,"/fsr/project4/Charles/bargaining_convex/trash/vertical_nonvertical_firms_operator.csv")
+tab3 %>%
+  kbl(caption = "Proportions of Vertically Integrated and Non-Vertically Integrated Firms",
+      ) %>%
+  pack_rows("Vertically", start_row = 1, end_row = 12,bold=T) %>% 
+  add_header_above(c(" " = 1,"Non-Vertically" = 12),bold=T) %>%
+  kable_classic_2(full_width = F) 
+
+
+
+```
+```{r}
+# 100*addmargins(prop.table(table(vertical_firms$`Non-Vertically Integrated`,vertical_firms$`Vertically Integrated`)))[1,]
+```
+
+
