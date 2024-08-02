@@ -12,7 +12,7 @@ library(ggplot2)
 ## Load Data:
 
 library(readr)
-paired_data_4_22 <- read_csv("~/Projects/bargaining_convex/output/paired_data_4_22.csv")
+paired_data_4_22 <- read_csv("~/Projects/bargaining_convex/trash/paired_data_4_22.csv")
 
 disposal_price_republic <-  96 # source: 4/26 correspondence with Peggy
 
