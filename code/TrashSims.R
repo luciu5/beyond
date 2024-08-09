@@ -612,7 +612,8 @@ compareplot <- ggplot(data=  filter(compare,Effect!="Shares" &
                                       !(Level=="Disposal" & Model=="Downstream-only") &
                                       !(Level=="Collection" & Model =="Upstream-only")) %>%
                         mutate(Model=ifelse(Type=="Pre-merger","Pre-merger",as.character(Model)),
-                               Model=factor(Model,levels=c("Pre-merger","Full","Upstream-only","Downstream-only"))),
+                               Model=factor(Model,levels=c("Pre-merger","Full","Upstream-only","Downstream-only")),
+                               Name=factor(as.character(Name))),
                    aes(x=Name,y=value,fill=Model,label=value)) +
   facet_grid(~Level,scales = "free_x") + geom_bar(stat="identity",
                                                          position=position_dodge2(reverse = TRUE)
@@ -623,7 +624,8 @@ compareplot <- ggplot(data=  filter(compare,Effect!="Shares" &
   geom_text( #color=ifelse(Type=="Post-merger","white","black"),
     hjust=1.5, position=position_dodge2(width=.9,reverse=TRUE),size =3) +  coord_flip()+ theme_bw() +
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(fill="")
+  labs(fill="")+
+  scale_x_discrete(limits=rev)
 
 compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="Disposal" & Effect=="Prices") &
                                       Model!="Upstream-only"),
