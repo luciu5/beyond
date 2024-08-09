@@ -615,13 +615,13 @@ compareplot <- ggplot(data=  filter(compare,Effect!="Shares" &
                                Model=factor(Model,levels=c("Pre-merger","Full","Upstream-only","Downstream-only"))),
                    aes(x=Name,y=value,fill=Model,label=value)) +
   facet_grid(~Level,scales = "free_x") + geom_bar(stat="identity",
-                                                         position=position_dodge()
+                                                         position=position_dodge2(reverse = TRUE)
                                                          #position="stack"
   )  +
   xlab("Disposal/Collector") + ylab("Equilibrium Prices") + #geom_hline(yintercept = 0,linetype="dashed") +
   scale_fill_brewer(type="seq",palette = "YlGnBu",direction=-1) +#scale_fill_grey(start = .9, end = .1) +
   geom_text( #color=ifelse(Type=="Post-merger","white","black"),
-    hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
+    hjust=1.5, position=position_dodge2(width=.9,reverse=TRUE),size =3) +  coord_flip()+ theme_bw() +
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(fill="")
 
