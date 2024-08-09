@@ -581,23 +581,22 @@ vert_sum <- mutate(vert_sum,Name=interaction(Disposal,Collector,drop=TRUE,sep="/
                     Name=reorder(Name,`Post-merger`* as.numeric(Effect=="Prices") * as.numeric(Level=="Collection")))
 
 firmplot <- ggplot(data=  vert_sum  %>%
-         mutate(Change=`Post-merger` - `Pre-merger`)
-
-                %>%
+         mutate(Change=`Post-merger` - `Pre-merger`)%>%
          pivot_longer(c(`Pre-merger` ,`Post-merger`),names_to = "Type",values_to = "value") %>%
-         mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger"))) %>%
-         filter(!grepl("Change",Type)),
+         mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger")),
+                Name=factor(as.character(Name))) %>%
+         filter(!grepl("Change",Type)) %>% arrange(Name),
 aes(x=Name,y=value,fill=Type,label=value)) +
   facet_grid(~Level+Effect,scales = "free_x") + geom_bar(stat="identity",
-                                                             position=position_dodge()
+                                                             position=position_dodge2(reverse=TRUE)
                                                              #position="stack"
                                                          )  +
   xlab("Disposal/Collector") + ylab("Equilibrium Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
   scale_fill_brewer(type="qual",palette = "Paired") +#scale_fill_grey(start = .9, end = .1) +
   geom_text( #color=ifelse(Type=="Post-merger","white","black"),
-                hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
-  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
-
+                hjust=1.5, position=position_dodge2(width=.9,reverse=TRUE),size =3) +  coord_flip()+ theme_bw() +
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_x_discrete(limits=rev)
 
 
 compare <- compare %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
@@ -890,20 +889,21 @@ trashinterestingfirmbar <- ggplot(data= filter(mkt_mergersweep_firm,Unintegrated
                                            Level=factor(Level,levels=rev(sort(unique(Level))))) %>%
                                     #arrange(Level,Effect,Disposal,desc(`Change (%)`)) %>%
                                     mutate(across(where(is.numeric),round)) %>% relocate(Level,Effect) %>%
-                                    mutate( Product=factor(Product,levels=levels(vert_sum$Name))) %>%
+                                    mutate( Product=factor(Product)) %>%
                                     pivot_longer(c(`Pre-merger`,`Post-merger`#,`Change (%)`
                                                    )) %>% rename(Type=name) %>%
                                     mutate(Type=factor(Type,levels=c("Pre-merger","Post-merger"))),
                    aes(x=Product,y=value,fill=Type,label=value)) +
   facet_grid(Merger~Level+Effect,scales = "free_x") + geom_bar(stat="identity",
-                                                         position=position_dodge()
+                                                         position=position_dodge2(reverse = TRUE)
                                                          #position="stack"
   )  +
   xlab("Disposal/Collector") + ylab("Equilibrium Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
   scale_fill_brewer(type="qual",palette = "Paired") +#scale_fill_grey(start = .9, end = .1) +
   geom_text( #color=ifelse(Type=="Post-merger","white","black"),
-    hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
-  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))
+    hjust=1.5, position=position_dodge2(width=.9,reverse=TRUE),size =3) +  coord_flip()+ theme_bw() +
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_x_discrete(limits=rev)
 
 ggsave(filename="./output/trashinterestingfirmbar.png",trashinterestingfirmbar,width=7,height=7)
 write_csv(mkt_mergersweep,"./output/mkt_mergersweep.csv",na="")
@@ -1026,18 +1026,23 @@ write_csv(mkt_mergersweep_firm,"./output/mkt_mergersweep_firm.csv",na="")
           name=relevel(name,"Consumer Harm")
    )
 
- trashbargplot <- ggplot(data=na.omit(filter(mkt_bargsweep,name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))),aes(x=barg,y=value,
-                                                                                                                                      color=scenario,
+ trashbargplot <- ggplot(data=na.omit(filter(mkt_bargsweep,scenario=="All" & name %in% c("Consumer Harm"#,"Disposal Benefit","Collection Benefit"
+                                                                       ))),aes(x=barg,y=value,
+                                                                                                                                      #color=scenario,
                                                                                                                                       group=scenario
                                                                                                                                       #color=name,group=name
                                                                                                                                       ))+
-   geom_point()+geom_line()+ facet_grid(name~.,scales = "free") +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Bargaining Power") +
+   geom_point()+geom_line()+
+   #facet_grid(name~.,scales = "free") +
+   theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Bargaining Power") +
    theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +
    geom_hline(data=mkt_bargsweep %>%
-                filter(scenario=="Base" & name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))
+                filter(scenario=="Base" & name %in% c("Consumer Harm"#,"Disposal Benefit","Collection Benefit"
+                                                      ))
               ,aes(yintercept = value),linetype="dashed") +# labs(title="The Effect of Changing Bargaining Power on Simulation Outcomes",
                                                                                        #subtitle="Dashed horizontal lines depict base case.")
- scale_color_brewer(type="seq",palette = "YlGnBu",direction=-1)
+ scale_color_brewer(type="seq",palette = "YlGnBu",direction=-1) +
+   scale_y_continuous(breaks=c(round((mkt_bargsweep %>%filter(scenario=="Base" & name %in% c("Consumer Harm")))$value,1),seq(-10,20,5)))
 
  ggsave("./output/trashbarg.png",trashbargplot,height = 7,width = 7)
 
@@ -1117,7 +1122,13 @@ write_csv(mkt_mergersweep_firm,"./output/mkt_mergersweep_firm.csv",na="")
  mkt_elastsweep$shareElast <- relevel( mkt_elastsweep$shareElast, ref="5\n(0.3)")
  mkt_elastsweep$shareElast <- relevel( mkt_elastsweep$shareElast, ref= "0\n(0)")
 
- trashelastplot <- ggplot(data=na.omit(filter(mkt_elastsweep,name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit"))),aes(x=shareElast,y=value,color=name,group=name))+
+ trashelastplot <- ggplot(data=na.omit(filter(mkt_elastsweep,name %in% c("Consumer Harm"
+                                                                         #,"Disposal Benefit","Collection Benefit"
+                                                                         )
+                                                )
+                                              ),aes(x=shareElast,y=value,#color=name,
+                                                    group=name
+                                                    ))+
    geom_point()+geom_line() +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("% Outside Share (Market Elasticity)") +
    theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +
    #labs(title="The Effect of Changing Outside Share on Simulation Outcomes",
@@ -1316,8 +1327,14 @@ mkt_nestsweep <-  mutate(mkt_nestsweep,across(contains("$"),~.x/mktSize*100)) %>
 mkt_nestsweep$nest <- factor(mkt_nestsweep$nest)
 mkt_nestsweep$nest <- factor(mkt_nestsweep$nest,levels=levels(mkt_nestsweep$nest),labels=stringr::str_to_title(levels(mkt_nestsweep$nest)))
 trashnestplot <- ggplot(data=filter(mkt_nestsweep,
-                                            name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")),aes(x=nestParm,y=value,color=name,group=name))+
-  geom_point()+geom_line()+ facet_grid(~nest) +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Nesting Parameter") +
+                                            #nest=="All" &
+                                            name %in% c("Consumer Harm"
+                                                        #,"Disposal Benefit","Collection Benefit"
+                                                        )),aes(x=nestParm,y=value,color=nest,
+                                                               group=nest))+
+  geom_point()+geom_line()+
+  #facet_grid(~nest) +
+theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Nesting Parameter") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +geom_hline(yintercept=0,linetype="dashed") + scale_color_brewer(type="seq",palette = "YlGnBu",direction=-1)
 
 ggsave("./output/trashnest.png",trashnestplot,height = 7,width = 7)
