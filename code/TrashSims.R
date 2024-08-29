@@ -67,6 +67,23 @@ ownerPreUpMat=tcrossprod(ownerPreUpMat)
 ownerPreDownMat=model.matrix(~-1+ownerPreDown,data=simdata)
 ownerPreDownMat=tcrossprod(ownerPreDownMat)
 
+#disposal HHI
+hhiPreUp <- HHI(owner=ownerPreUpMat,shares=simdata$collection_paired_share)
+#collection HHI
+hhiPreDown <- HHI(owner=ownerPreDownMat,shares=simdata$collection_paired_share)
+#WM-ADS/Regional HHI Delta
+hhiDeltawmads_regional <- tapply(simdata$collection_paired_share*100,simdata$collection_firm_name,sum,na.rm=TRUE)
+hhiDeltawmads_regional <- 2*prod(hhiDeltawmads_regional[c("Regional","WM-ADS")])
+#WM-ADS/Santek HHI Delta
+hhiDeltawmads_santek <- tapply(simdata$collection_paired_share*100,simdata$collection_firm_name,sum,na.rm=TRUE)
+hhiDeltawmads_santek <- 2*prod(hhiDeltawmads_santek[c("Santek","WM-ADS")])
+#WasteConn/Santek HHI Delta
+hhiDeltaUpwasteconn_santek <- tapply(simdata$collection_paired_share*100,simdata$disposal_firm_name,sum,na.rm=TRUE)
+hhiDeltaUpwasteconn_santek  <- 2*prod(hhiDeltaUpwasteconn_santek [c("Santek","WasteConn")])
+hhiDeltaDownwasteconn_santek <- tapply(simdata$collection_paired_share*100,simdata$collection_firm_name,sum,na.rm=TRUE)
+hhiDeltaDownwasteconn_santek  <- 2*prod(hhiDeltaDownwasteconn_santek [c("Santek","WasteConn")])
+
+
 vertFirms <- intersect(simdata$ownerPreUp,simdata$ownerPreDown)
 
 for (v in vertFirms){
