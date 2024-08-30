@@ -685,7 +685,7 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
 
 
  mergersweep <- function(thissim,acquirer=c("Republic","Santek","WasteConn","WM-ADS"),
-                         target=c("Santek","WasteConn","WM-ADS","Regional"),
+                         target=c("Republic","Santek","WasteConn","WM-ADS","Regional"),
                          unintegrated=c("Base","Vertical","Up","Down"),
                          partial=FALSE){
 
@@ -702,7 +702,8 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
    if(unintegrated !="Base"){
 
    smallestBarg <- min(thissim@up@bargpowerPre)
-   thissim@up@bargpowerPre[thissim@up@ownerPre==thissim@down@ownerPre] <- smallestBarg
+   #thissim@up@bargpowerPre[thissim@up@ownerPre==thissim@down@ownerPre] <- smallestBarg
+   thissim@up@bargpowerPre <- rep(smallestBarg,length(thissim@up@bargpowerPre))
    thissim@up@bargpowerPost<-   thissim@up@bargpowerPre
    }
 
@@ -716,11 +717,10 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      thissim@down@ownerPre <- paste0(thissim@down@ownerPre,"Ind")
      thissim@down@ownerPost <- paste0(thissim@down@ownerPost,"Ind")
      if(partial){
-       isIntegratedPre <- thissim@down@ownerPre == paste0(acquirer,"Ind")
-       isIntegratedPost <- thissim@down@ownerPost == paste0(acquirer,"Ind")
+       isIntegratedPost <- isIntegratedPre <- thissim@down@ownerPre == paste0(acquirer,"Ind") & thissim@up@ownerPre == acquirer
        thissim@down@ownerPre[isIntegratedPre] <- acquirer
        thissim@down@ownerPost[isIntegratedPost] <- acquirer
-       thissim@up@bargpowerPre[isIntegratedPre] <- 1
+       thissim@up@bargpowerPre[isIntegratedPre ] <- 1
        thissim@up@bargpowerPost[isIntegratedPost] <- 1
      }
    }
@@ -730,10 +730,7 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      thissim@up@ownerPre <- paste0(thissim@up@ownerPre,"Ind")
      thissim@up@ownerPost <- paste0(thissim@up@ownerPost,"Ind")
      if(partial){
-       thissim@up@ownerPre[thissim@up@ownerPre == paste0(acquirer,"Ind")] <- acquirer
-       thissim@up@ownerPost[thissim@up@ownerPost == paste0(acquirer,"Ind")] <- acquirer
-       isIntegratedPre <- thissim@up@ownerPre == paste0(acquirer,"Ind")
-       isIntegratedPost <- thissim@up@ownerPost == paste0(acquirer,"Ind")
+       isIntegratedPost <-isIntegratedPre <- thissim@up@ownerPre == paste0(acquirer,"Ind") & thissim@down@ownerPre == acquirer
        thissim@up@ownerPre[isIntegratedPre] <- acquirer
        thissim@up@ownerPost[isIntegratedPost] <- acquirer
        thissim@up@bargpowerPre[isIntegratedPre] <- 1
@@ -741,16 +738,18 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      }
    }
    else if(unintegrated=="Vertical"){
-     isAcquired <- thissim@down@ownerPost==target
+     isAcquired <-  thissim@up@ownerPost==acquirer & thissim@down@ownerPost==target
      thissim@down@ownerPost[isAcquired] <- acquirer
-     thissim@down@ownerPre[!isAcquired] <- paste0(thissim@down@ownerPre[!isAcquired],"Ind")
+     thissim@down@ownerPre <- paste0(thissim@down@ownerPre,"Ind")
      thissim@down@ownerPost[!isAcquired] <- paste0(thissim@down@ownerPost[!isAcquired],"Ind")
-     thissim@up@bargpowerPost[ thissim@down@ownerPost==acquirer & isAcquired] <- 1
+     thissim@up@bargpowerPost[isAcquired] <- 1
 
    }
    else if(unintegrated=="Base"){
      thissim@up@ownerPost[thissim@up@ownerPost==target] <- acquirer
      thissim@down@ownerPost[thissim@down@ownerPost==target] <- acquirer
+     thissim@up@bargpowerPre[thissim@up@ownerPre==thissim@down@ownerPre] <- 1
+     thissim@up@bargpowerPost[thissim@up@ownerPost==thissim@down@ownerPost] <- 1
    }
 
    preVert <- thissim@up@ownerPre == thissim@down@ownerPre
@@ -766,20 +765,19 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
    thissim@isHorizontal=isHorizontal
    thissim@isUpstream=isUpstream
 
-   thissim@up@bargpowerPre[thissim@up@ownerPre==thissim@down@ownerPre] <- 1
-   thissim@up@bargpowerPost[thissim@up@ownerPost==thissim@down@ownerPost] <- 1
+
    thissim <- ownerToMatrix(thissim, preMerger = TRUE)
    thissim <- ownerToMatrix(thissim, preMerger = FALSE)
 
-   if(unintegrated!="Base"){
-     mcPre <- calcMC(thissim, TRUE)
-     mcPost <- calcMC(thissim, FALSE)
-
-     thissim@down@mcPre <- mcPre$down
-     thissim@down@mcPost <- mcPost$down
-     thissim@up@mcPre <- mcPre$up
-     thissim@up@mcPost <- mcPost$up
-   }
+   # if(unintegrated!="Base"){
+   #   mcPre <- calcMC(thissim, TRUE)
+   #   mcPost <- calcMC(thissim, FALSE)
+   #
+   #   thissim@down@mcPre <- mcPre$down
+   #   thissim@down@mcPost <- mcPost$down
+   #   thissim@up@mcPre <- mcPre$up
+   #   thissim@up@mcPost <- mcPost$up
+   # }
 
    thissimsPre <- calcPrices(thissim, preMerger = TRUE)
    thissim@down@pricePre <- thissimsPre$down
@@ -795,9 +793,14 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
  }
 
 
- mergercases <- data.frame(acquirer=c(rep("Republic",4),rep("Santek",3),rep("WasteConn",2),"WM-ADS"),
+ mergercases_base <- data.frame(acquirer=c(rep("Republic",4),rep("Santek",3),rep("WasteConn",2),"WM-ADS"),
                            target=c("Santek","WasteConn","WM-ADS","Regional","WasteConn","WM-ADS","Regional","WM-ADS","Regional","Regional")
  )
+
+ mergercases <-  expand_grid(acquirer=c("Republic","Santek","WasteConn","WM-ADS"),
+                             target=c("Republic","Santek","WasteConn","WM-ADS","Regional","WasteConn")) %>%
+   filter(acquirer!=target & !(acquirer=="WM-ADS" & target!="Regional"))
+
  mergercases <- expand_grid(mergercases,
                             #unintegrated="Base"
                             unintegrated=c("Base","Vertical","Up","Down"),
@@ -806,7 +809,15 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
  ) %>%
    distinct() %>%
    filter(!(unintegrated %in% c("Base","Vertical") & partial) &
-            !((target=="Regional" |acquirer=="WM-ADS") & !unintegrated %in% c("Base","Down")))
+            !((target=="Regional" |acquirer=="WM-ADS") & (!unintegrated %in% c("Base","Down") | partial)) &
+            !(acquirer=="Republic" & unintegrated=="Vertical") &
+            !(acquirer=="Santek" & target=="WasteConn" & unintegrated=="Vertical")&
+            !(target=="Republic" & !unintegrated %in% c("Base","Vertical") & !partial))
+
+
+
+mergercases <- left_join(mergercases,mutate(mergercases_base,unintegrated="Base",keep=TRUE))
+mergercases <- filter(mergercases,unintegrated!="Base" | !is.na(keep)) %>% select(-keep)
 
  mkt_mergersweep <- mapply(
    function(x,y,z,p){
@@ -858,16 +869,28 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
           Unintegrated=interaction(Partial,Unintegrated,drop = TRUE,sep=""),
           Unintegrated=reorder(Unintegrated,ifelse(Acquirer=="Republic" & Target=="Santek" & name=="Consumer Harm",-value,NA),max,na.rm=TRUE),
           Acquirer=factor(Acquirer),
-          Target=factor(Target,levels=c("Santek","WasteConn","WM-ADS","Regional")),
+          Target=factor(Target,levels=c("Republic","Santek","WasteConn","WM-ADS","Regional")),
    )
 
 
- trashfakemergerplot <- ggplot(data=filter(mkt_mergersweep,Acquirer!="WM-ADS"& Target !="Regional" &#Acquirer=="Republic" & Target=="Santek" &
+ trashfakemergerplot <- ggplot(data=filter(mkt_mergersweep,Acquirer!="WM-ADS"& #Target !="Regional" &#Acquirer=="Republic" & Target=="Santek" &
                                                      name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")),aes(x=Unintegrated,y=value,color=name,group=name))+
-   geom_point()+geom_line()+ facet_grid(~Acquirer+Target) +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Merger") +
+   geom_point()+geom_line()+ facet_grid(Target~Acquirer,scales="free") +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Merger") +
    theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +geom_hline(yintercept=0,linetype="dashed")
 
 ggsave("./output/trashfakemerger.png",trashfakemergerplot,height = 7,width = 7)
+
+
+trashfakemergerplotalt <- ggplot(data=filter(mkt_mergersweep,Acquirer!="WM-ADS"& #Target !="Regional" &#Acquirer=="Republic" & Target=="Santek" &
+                                            name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")) %>%
+                                              mutate(Merger=paste(Acquirer,Target,sep=":"),
+                                                     Merger=reorder(Merger,ifelse(name=="Consumer Harm" & Unintegrated=="Base",-value,NA),max,na.rm=TRUE),
+                                                     Unintegrated=relevel(Unintegrated,"Base")),aes(x=Merger,y=value,color=name,group=name))+
+  geom_point()+geom_line()+ facet_grid(~Unintegrated,scales="free") +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Merger") +  scale_x_discrete(limits=rev) + coord_flip()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +geom_hline(yintercept=0,linetype="dashed")
+
+ggsave("./output/trashfakemergeralt.png",trashfakemergerplotalt,height = 7,width = 7)
+
 
 trashinterestingmergerbar <- ggplot(data=filter(mkt_mergersweep,Unintegrated=="Base" &
                                                   name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")) %>% rename(Type=name) %>%
