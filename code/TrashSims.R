@@ -809,9 +809,9 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
  ) %>%
    distinct() %>%
    filter(!(unintegrated %in% c("Base","Vertical") & partial) &
-            !((target=="Regional" |acquirer=="WM-ADS") & (!unintegrated %in% c("Base","Down") | partial)) &
+            !((target%in% c("Regional","WM-ADS") |acquirer=="WM-ADS") & (!unintegrated %in% c("Base","Down","Vertical") | partial)) &
             !(acquirer=="Republic" & unintegrated=="Vertical") &
-            !(acquirer=="Santek" & target=="WasteConn" & unintegrated=="Vertical")&
+            !(((acquirer=="Santek" & target=="WasteConn")|(target=="Santek" & acquirer=="WasteConn")) & unintegrated=="Vertical")&
             !(target=="Republic" & !unintegrated %in% c("Base","Vertical") & !partial))
 
 
