@@ -731,8 +731,9 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      thissim@up@ownerPost <- paste0(thissim@up@ownerPost,"Ind")
      if(partial){
        isIntegratedPost <-isIntegratedPre <- thissim@up@ownerPre == paste0(acquirer,"Ind") & thissim@down@ownerPre == acquirer
+       isIntegratedPost[thissim@up@ownerPre == paste0(acquirer,"Ind") & thissim@down@ownerPre == target] <- TRUE
        thissim@up@ownerPre[isIntegratedPre] <- acquirer
-       thissim@up@ownerPost[isIntegratedPost] <- acquirer
+       thissim@up@ownerPost <- thissim@up@ownerPre
        thissim@up@bargpowerPre[isIntegratedPre] <- 1
        thissim@up@bargpowerPost[isIntegratedPost] <- 1
      }
@@ -809,15 +810,18 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
  ) %>%
    distinct() %>%
    filter(!(unintegrated %in% c("Base","Vertical") & partial) &
-            !((target%in% c("Regional","WM-ADS") |acquirer=="WM-ADS") & (!unintegrated %in% c("Base","Down","Vertical") | partial)) &
+            !((target%in% c("Regional","WM-ADS") |acquirer=="WM-ADS") & (!unintegrated %in% c("Base","Down","Vertical"))) &
             !(acquirer=="Republic" & unintegrated=="Vertical") &
-            !(((acquirer=="Santek" & target=="WasteConn")|(target=="Santek" & acquirer=="WasteConn")) & unintegrated=="Vertical")&
-            !(target=="Republic" & !unintegrated %in% c("Base","Vertical") & !partial))
+            !((acquirer %in% c("Santek","WasteConn") & target %in% c("Santek","WasteConn")) & unintegrated=="Vertical")&
+            !(target=="Republic" & !unintegrated %in% c("Base","Vertical") & !partial) &
+            !(target=="Santek" & acquirer=="WasteConn" & unintegrated=="Up" & !partial) &
+            !(target=="Regional" & acquirer=="WM-ADS" & unintegrated=="Vertical")
+          )
 
 
 
-mergercases <- left_join(mergercases,mutate(mergercases_base,unintegrated="Base",keep=TRUE))
-mergercases <- filter(mergercases,unintegrated!="Base" | !is.na(keep)) %>% select(-keep)
+#mergercases <- left_join(mergercases,mutate(mergercases_base,unintegrated="Base",keep=TRUE))
+#mergercases <- filter(mergercases,unintegrated!="Base" | !is.na(keep)) %>% select(-keep)
 
  mkt_mergersweep <- mapply(
    function(x,y,z,p){
@@ -892,19 +896,23 @@ trashfakemergerplotalt <- ggplot(data=filter(mkt_mergersweep,Acquirer!="WM-ADS"&
 ggsave("./output/trashfakemergeralt.png",trashfakemergerplotalt,height = 7,width = 7)
 
 
-trashinterestingmergerbar <- ggplot(data=filter(mkt_mergersweep,Unintegrated=="Base" &
+trashinterestingmergerbar <- ggplot(data=filter(mkt_mergersweep,!(Acquirer=="Santek" & Target=="Republic" & Unintegrated == "Base") &
+                                                  !(Acquirer=="WM-ADS" & Target=="Regional" & Unintegrated == "Partial Down") & #Unintegrated=="Base" &
                                                   name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")) %>% rename(Type=name) %>%
-                                      mutate(Merger=paste(Acquirer,Target,sep="/") ) %>%
-                                      filter(Merger %in% c("Republic/Santek","Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Merger,x=value,fill=Type)) +
-  #facet_grid(~Type,scales = "fixed") +
+                                      mutate(Merger=paste(Acquirer,Target,sep="/"),Unintegrated=factor(Unintegrated, levels=rev(c("Base","Vertical","Up","Partial Up","Down","Partial Down")) )) %>%
+                                      filter(Merger %in% c("Republic/Santek","Santek/Republic","Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Unintegrated,x=value,fill=Type)) +
+  facet_grid(~Merger,scales = "free") +
   geom_bar(stat="identity",#fill="lightgrey",
                                                          position=position_dodge()
                                                          #position="stack"
   )  +
    xlab("% of Pre-merger Expenditures") + geom_vline(xintercept = 0,linetype="dashed",color="goldenrod") +
   scale_fill_brewer(type="qual",palette = "YlGnBu",direction=-1) +#scale_fill_grey(start = .9, end = .1) +
-  geom_text(aes(label=round(value,1)),hjust=1.1,color="black",
-   position=position_dodge(width=.9),size =3) +
+  geom_text(aes(label=round(value,1)),
+            #hjust=1.1,
+            vjust=0.9,
+            color="black",
+   position=position_dodge(width=.9),size =3) + coord_flip()+
   theme_bw() +
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_y_discrete(limits=rev)
