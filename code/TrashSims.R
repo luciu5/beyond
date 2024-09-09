@@ -899,9 +899,9 @@ ggsave("./output/trashfakemergeralt.png",trashfakemergerplotalt,height = 7,width
 trashinterestingmergerbar <- ggplot(data=filter(mkt_mergersweep,!(Acquirer=="Santek" & Target=="Republic" & Unintegrated == "Base") &
                                                   !(Acquirer=="WM-ADS" & Target=="Regional" & Unintegrated == "Partial Down") & #Unintegrated=="Base" &
                                                   name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")) %>% rename(Type=name) %>%
-                                      mutate(Merger=paste(Acquirer,Target,sep="/"),Unintegrated=factor(Unintegrated, levels=rev(c("Base","Vertical","Up","Partial Up","Down","Partial Down")) )) %>%
-                                      filter(Merger %in% c("Republic/Santek","Santek/Republic","Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Unintegrated,x=value,fill=Type)) +
-  facet_grid(~Merger,scales = "free") +
+                                      mutate(Merger=paste(Acquirer,Target,sep="/"),Unintegrated=factor(Unintegrated, levels=c("Base","Vertical","Up","Partial Up","Down","Partial Down")) ) %>%
+                                      filter(Merger %in% c("Republic/Santek","Santek/Republic","Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Merger,x=value,fill=Type)) +
+  facet_grid(~Unintegrated,scales = "free") +
   geom_bar(stat="identity",#fill="lightgrey",
                                                          position=position_dodge()
                                                          #position="stack"
@@ -912,12 +912,43 @@ trashinterestingmergerbar <- ggplot(data=filter(mkt_mergersweep,!(Acquirer=="San
             #hjust=1.1,
             vjust=0.9,
             color="black",
-   position=position_dodge(width=.9),size =3) + coord_flip()+
+   position=position_dodge(width=.9),size =3) +# coord_flip()+
   theme_bw() +
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_y_discrete(limits=rev)
 
 ggsave(filename="./output/trashinterestingmergerbar.png",trashinterestingmergerbar,width = 6,height=4)
+
+
+
+
+trashinterestingsantrep <- ggplot(data=filter(mkt_mergersweep,Acquirer %in% c("Santek","Republic") & Target %in% c("Santek","Republic") &
+                                                  name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit") &
+                                                !(Acquirer %in% c("Republic") & Target %in% c("Santek") & Unintegrated %in% c("Partial Up","Partial Down","Base")) ) %>% rename(Type=name) %>%
+                                      mutate(Merger=ifelse(Acquirer %in% c("Republic") & Target %in% c("Santek"),paste(Acquirer,Target,sep="/"),
+                                                           paste(Target,Acquirer,sep="/")),
+                                                           Unintegrated=reorder(Unintegrated,value*(Type=="Consumer Harm"))#,
+                                             #Unintegrated=factor(Unintegrated, levels=c("Base","Vertical","Up","Partial Up","Down","Partial Down"))
+                                             ) %>%
+                                      filter(Merger %in% c("Republic/Santek","Santek/Republic","Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Unintegrated,x=value#,fill=Type
+                                                                                                                                                           )) +
+  facet_grid(~Type,scales = "free") +
+  geom_bar(stat="identity",#fill="lightgrey",
+           position=position_dodge()
+           #position="stack"
+  )  +xlab("Merger Type")+
+  xlab("% of Pre-merger Expenditures") + geom_vline(xintercept = 0,linetype="dashed",color="goldenrod") +
+  scale_fill_brewer(type="qual",palette = "YlGnBu",direction=-1) +#scale_fill_grey(start = .9, end = .1) +
+  geom_text(aes(label=round(value,1)),
+            #hjust=1.1,
+            vjust=0.9,
+            color="black",
+            position=position_dodge(width=.9),size =3) +# coord_flip()+
+  theme_bw() +
+  theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_discrete(limits=rev)
+
+ggsave(filename="./output/trashinterestingsantrep.png",trashinterestingsantrep,width = 6,height=4)
 
 mkt_mergersweep_firm$Product <- rownames(mkt_mergersweep_firm )
 mkt_mergersweep_firm$Product <- gsub("\\..*$","",mkt_mergersweep_firm$Product,perl=TRUE)
