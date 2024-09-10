@@ -731,9 +731,9 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      thissim@up@ownerPre <- paste0(thissim@up@ownerPre,"Ind")
      thissim@up@ownerPost <- paste0(thissim@up@ownerPost,"Ind")
      if(partial){
-       isIntegratedPost <-isIntegratedPre <- thissim@up@ownerPre == paste0(acquirer,"Ind") & thissim@down@ownerPre %in% c(acquirer,target)
+       isIntegratedPost <-isIntegratedPre <- thissim@up@ownerPre == paste0(acquirer,"Ind") & thissim@down@ownerPre %in% c(acquirer)
        isIntegratedPost[thissim@up@ownerPre == paste0(acquirer,"Ind") & thissim@down@ownerPre == target] <- TRUE
-       thissim@up@ownerPre[isIntegratedPre] <- acquirer
+       thissim@up@ownerPre[isIntegratedPost] <- acquirer
        thissim@up@ownerPost <- thissim@up@ownerPre
        thissim@up@bargpowerPre[isIntegratedPre] <- 1
        thissim@up@bargpowerPost[isIntegratedPost] <- 1
