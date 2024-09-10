@@ -730,7 +730,7 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      thissim@up@ownerPre <- paste0(thissim@up@ownerPre,"Ind")
      thissim@up@ownerPost <- paste0(thissim@up@ownerPost,"Ind")
      if(partial){
-       isIntegratedPost <-isIntegratedPre <- thissim@up@ownerPre == paste0(acquirer,"Ind") & thissim@down@ownerPre == acquirer
+       isIntegratedPost <-isIntegratedPre <- thissim@up@ownerPre == paste0(acquirer,"Ind") & thissim@down@ownerPre %in% c(acquirer,target)
        isIntegratedPost[thissim@up@ownerPre == paste0(acquirer,"Ind") & thissim@down@ownerPre == target] <- TRUE
        thissim@up@ownerPre[isIntegratedPre] <- acquirer
        thissim@up@ownerPost <- thissim@up@ownerPre
@@ -951,7 +951,7 @@ trashinterestingsantrep <- ggplot(data=filter(mkt_mergersweep,Acquirer %in% c("S
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_y_discrete(limits=rev) +ylab("Pre-merger Arrangement")
 
-ggsave(filename="./output/trashinterestingsantrep.png",trashinterestingsantrep,width = 6,height=4)
+ggsave(filename="./output/trashinterestingsantrep.png",trashinterestingsantrep,width = 7,height=4)
 
 mkt_mergersweep_firm$Product <- rownames(mkt_mergersweep_firm )
 mkt_mergersweep_firm$Product <- gsub("\\..*$","",mkt_mergersweep_firm$Product,perl=TRUE)
