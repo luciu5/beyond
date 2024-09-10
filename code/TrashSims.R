@@ -897,12 +897,15 @@ ggsave("./output/trashfakemergeralt.png",trashfakemergerplotalt,height = 7,width
 
 
 trashinterestingmergerbar <- ggplot(data=filter(mkt_mergersweep,!(Acquirer=="Santek" & Target=="Republic" & Unintegrated == "Base") &
-                                                  !(Acquirer=="WM-ADS" & Target=="Regional" & Unintegrated == "Partial Down") & #Unintegrated=="Base" &
+                                                  !(Acquirer=="WM-ADS" & Target=="Regional" & Unintegrated == "Partial Down") & Unintegrated=="Base" &
                                                   name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")) %>% rename(Type=name) %>%
                                       mutate(Merger=paste(Acquirer,Target,sep="/"),Unintegrated=factor(Unintegrated, levels=c("Base","Vertical","Up","Partial Up","Down","Partial Down")) ) %>%
-                                      filter(Merger %in% c("Republic/Santek","Santek/Republic","Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Merger,x=value,fill=Type)) +
-  facet_grid(~Unintegrated,scales = "free") +
-  geom_bar(stat="identity",#fill="lightgrey",
+                                      filter(Merger %in% c("Republic/Santek",#"Santek/Republic",
+                                                           "Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Merger,x=value#,fill=Type
+                                                                                                                       )) +
+  #facet_grid(~Unintegrated,scales = "free") +
+  facet_grid(~Type,scales = "fixed") +
+  geom_bar(stat="identity",fill="lightgrey",
                                                          position=position_dodge()
                                                          #position="stack"
   )  +
@@ -927,13 +930,13 @@ trashinterestingsantrep <- ggplot(data=filter(mkt_mergersweep,Acquirer %in% c("S
                                                 !(Acquirer %in% c("Republic") & Target %in% c("Santek") & Unintegrated %in% c("Partial Up","Partial Down","Base")) ) %>% rename(Type=name) %>%
                                       mutate(Merger=ifelse(Acquirer %in% c("Republic") & Target %in% c("Santek"),paste(Acquirer,Target,sep="/"),
                                                            paste(Target,Acquirer,sep="/")),
-                                                           Unintegrated=reorder(Unintegrated,value*(Type=="Consumer Harm"))#,
+                                                           Unintegrated=reorder(Unintegrated,-1*value*(Type=="Consumer Harm"))#,
                                              #Unintegrated=factor(Unintegrated, levels=c("Base","Vertical","Up","Partial Up","Down","Partial Down"))
                                              ) %>%
                                       filter(Merger %in% c("Republic/Santek","Santek/Republic","Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Unintegrated,x=value#,fill=Type
                                                                                                                                                            )) +
-  facet_grid(~Type,scales = "free") +
-  geom_bar(stat="identity",#fill="lightgrey",
+  facet_grid(~Type,scales = "fixed") +
+  geom_bar(stat="identity",fill="lightgrey",
            position=position_dodge()
            #position="stack"
   )  +xlab("Merger Type")+
@@ -946,7 +949,7 @@ trashinterestingsantrep <- ggplot(data=filter(mkt_mergersweep,Acquirer %in% c("S
             position=position_dodge(width=.9),size =3) +# coord_flip()+
   theme_bw() +
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_y_discrete(limits=rev)
+  scale_y_discrete(limits=rev) +ylab("Pre-merger Arrangement")
 
 ggsave(filename="./output/trashinterestingsantrep.png",trashinterestingsantrep,width = 6,height=4)
 
