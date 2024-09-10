@@ -717,9 +717,10 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
      thissim@down@ownerPre <- paste0(thissim@down@ownerPre,"Ind")
      thissim@down@ownerPost <- paste0(thissim@down@ownerPost,"Ind")
      if(partial){
-       isIntegratedPost <- isIntegratedPre <- thissim@down@ownerPre == paste0(acquirer,"Ind") & thissim@up@ownerPre == acquirer
+       isIntegratedPost <- isIntegratedPre <- thissim@down@ownerPre == paste0(acquirer,"Ind") & thissim@up@ownerPre %in% c(acquirer,target)
+       isIntegratedPost[thissim@down@ownerPre == paste0(acquirer,"Ind") & thissim@up@ownerPre == target] <- TRUE
        thissim@down@ownerPre[isIntegratedPre] <- acquirer
-       thissim@down@ownerPost[isIntegratedPost] <- acquirer
+       thissim@down@ownerPost <- thissim@down@ownerPre
        thissim@up@bargpowerPre[isIntegratedPre ] <- 1
        thissim@up@bargpowerPost[isIntegratedPost] <- 1
      }
@@ -927,7 +928,9 @@ ggsave(filename="./output/trashinterestingmergerbar.png",trashinterestingmergerb
 
 trashinterestingsantrep <- ggplot(data=filter(mkt_mergersweep,Acquirer %in% c("Santek","Republic") & Target %in% c("Santek","Republic") &
                                                   name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit") &
-                                                !(Acquirer %in% c("Republic") & Target %in% c("Santek") & Unintegrated %in% c("Partial Up","Partial Down","Base")) ) %>% rename(Type=name) %>%
+                                                !(Acquirer %in% c("Republic") & Target %in% c("Santek") & Unintegrated %in% c("Partial Up","Partial Down","Base"))
+                                                #Acquirer %in% c("Republic") & Target %in% c("Santek")
+                                                ) %>% rename(Type=name) %>%
                                       mutate(Merger=ifelse(Acquirer %in% c("Republic") & Target %in% c("Santek"),paste(Acquirer,Target,sep="/"),
                                                            paste(Target,Acquirer,sep="/")),
                                                            Unintegrated=reorder(Unintegrated,-1*value*(Type=="Consumer Harm"))#,
