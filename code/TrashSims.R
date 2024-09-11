@@ -21,7 +21,7 @@ simdata <- filter(paired_data_4_22,collection_paired_share>0) %>%
   #mutate(disposal_volume=ifelse(disposal_firm_name != collection_firm_name,mean(disposal_volume[disposal_firm_name != collection_firm_name]),disposal_volume)) %>%
   ungroup() %>%
   mutate(#collection_paired_share=collection_paired_share/sum(collection_paired_share),
-         collection_firm_name=gsub("_","-",collection_firm_name),
+         collection_firm_name=gsub("_","",collection_firm_name),
          collection_paired_share=disposal_volume/sum(disposal_volume),
          disposal_dollar_margin=ifelse(disposal_firm_name=="Republic",
                                        disposal_percent_margin*disposal_price_republic,
@@ -71,12 +71,12 @@ ownerPreDownMat=tcrossprod(ownerPreDownMat)
 hhiPreUp <- HHI(owner=ownerPreUpMat,shares=simdata$collection_paired_share)
 #collection HHI
 hhiPreDown <- HHI(owner=ownerPreDownMat,shares=simdata$collection_paired_share)
-#WM-ADS/Regional HHI Delta
+#WMADS/Regional HHI Delta
 hhiDeltawmads_regional <- tapply(simdata$collection_paired_share*100,simdata$collection_firm_name,sum,na.rm=TRUE)
-hhiDeltawmads_regional <- 2*prod(hhiDeltawmads_regional[c("Regional","WM-ADS")])
-#WM-ADS/Santek HHI Delta
+hhiDeltawmads_regional <- 2*prod(hhiDeltawmads_regional[c("Regional","WMADS")])
+#WMADS/Santek HHI Delta
 hhiDeltawmads_santek <- tapply(simdata$collection_paired_share*100,simdata$collection_firm_name,sum,na.rm=TRUE)
-hhiDeltawmads_santek <- 2*prod(hhiDeltawmads_santek[c("Santek","WM-ADS")])
+hhiDeltawmads_santek <- 2*prod(hhiDeltawmads_santek[c("Santek","WMADS")])
 #WasteConn/Santek HHI Delta
 hhiDeltaUpwasteconn_santek <- tapply(simdata$collection_paired_share*100,simdata$disposal_firm_name,sum,na.rm=TRUE)
 hhiDeltaUpwasteconn_santek  <- 2*prod(hhiDeltaUpwasteconn_santek [c("Santek","WasteConn")])
@@ -594,7 +594,7 @@ kable(vert_sum,format = "latex",
   #collapse_rows(1:2,row_group_label_position="stack")
 sink()
 
-vert_sum <- mutate(vert_sum,Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
+vert_sum <- mutate(vert_sum,Name=interaction(Disposal,Collector,drop=TRUE,sep="-"),
                     Name=reorder(Name,`Post-merger`* as.numeric(Effect=="Prices") * as.numeric(Level=="Collection")))
 
 firmplot <- ggplot(data=  vert_sum  %>%
@@ -608,7 +608,7 @@ aes(x=Name,y=value,fill=Type,label=value)) +
                                                              position=position_dodge2(reverse=TRUE)
                                                              #position="stack"
                                                          )  +
-  xlab("Disposal/Collector") + ylab("Equilibrium Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
+  xlab("Disposal-Collector") + ylab("Equilibrium Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
   scale_fill_brewer(type="qual",palette = "Paired") +#scale_fill_grey(start = .9, end = .1) +
   geom_text( #color=ifelse(Type=="Post-merger","white","black"),
                 hjust=1.5, position=position_dodge2(width=.9,reverse=TRUE),size =3) +  coord_flip()+ theme_bw() +
@@ -616,7 +616,7 @@ aes(x=Name,y=value,fill=Type,label=value)) +
   scale_x_discrete(limits=rev)
 
 
-compare <- compare %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep="/"),
+compare <- compare %>% mutate(Name=interaction(Disposal,Collector,drop=TRUE,sep="-"),
            Name=reorder(Name,`Post-merger`*as.numeric(Model=="Full")*as.numeric(Effect=="Prices") * as.numeric(Level=="Collection"))) %>%
   mutate(Change=`Post-merger` - `Pre-merger`) %>%
   pivot_longer(c(`Pre-merger` ,`Post-merger`),names_to = "Type",values_to = "value") %>%
@@ -636,7 +636,7 @@ compareplot <- ggplot(data=  filter(compare,Effect!="Shares" &
                                                          position=position_dodge2(reverse = TRUE)
                                                          #position="stack"
   )  +
-  xlab("Disposal/Collector") + ylab("Equilibrium Prices") + #geom_hline(yintercept = 0,linetype="dashed") +
+  xlab("Disposal-Collector") + ylab("Equilibrium Prices") + #geom_hline(yintercept = 0,linetype="dashed") +
   scale_fill_brewer(type="seq",palette = "YlGnBu",direction=-1) +#scale_fill_grey(start = .9, end = .1) +
   geom_text( #color=ifelse(Type=="Post-merger","white","black"),
     hjust=1.5, position=position_dodge2(width=.9,reverse=TRUE),size =3) +  coord_flip()+ theme_bw() +
@@ -651,7 +651,7 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
                                                          position=position_dodge()
                                                          #position="stack"
   )  +
-  xlab("Disposal/Collector") + ylab("Equilibrium Post-merger Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
+  xlab("Disposal-Collector") + ylab("Equilibrium Post-merger Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
   scale_fill_brewer(type="qual",palette = "Paired") +#scale_fill_grey(start = .9, end = .1) +
   geom_text( #color=ifelse(Type=="Post-merger","white","black"),
     hjust=1.5, position=position_dodge(width=.9),size =3) +  coord_flip()+ theme_bw() +
@@ -684,8 +684,8 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
 
 
 
- mergersweep <- function(thissim,acquirer=c("Republic","Santek","WasteConn","WM-ADS"),
-                         target=c("Republic","Santek","WasteConn","WM-ADS","Regional"),
+ mergersweep <- function(thissim,acquirer=c("Republic","Santek","WasteConn","WMADS"),
+                         target=c("Republic","Santek","WasteConn","WMADS","Regional"),
                          unintegrated=c("Base","Vertical","Up","Down"),
                          partial=FALSE){
 
@@ -795,13 +795,13 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
  }
 
 
- mergercases_base <- data.frame(acquirer=c(rep("Republic",4),rep("Santek",3),rep("WasteConn",2),"WM-ADS"),
-                           target=c("Santek","WasteConn","WM-ADS","Regional","WasteConn","WM-ADS","Regional","WM-ADS","Regional","Regional")
+ mergercases_base <- data.frame(acquirer=c(rep("Republic",4),rep("Santek",3),rep("WasteConn",2),"WMADS"),
+                           target=c("Santek","WasteConn","WMADS","Regional","WasteConn","WMADS","Regional","WMADS","Regional","Regional")
  )
 
- mergercases <-  expand_grid(acquirer=c("Republic","Santek","WasteConn","WM-ADS"),
-                             target=c("Republic","Santek","WasteConn","WM-ADS","Regional","WasteConn")) %>%
-   filter(acquirer!=target & !(acquirer=="WM-ADS" & target!="Regional"))
+ mergercases <-  expand_grid(acquirer=c("Republic","Santek","WasteConn","WMADS"),
+                             target=c("Republic","Santek","WasteConn","WMADS","Regional","WasteConn")) %>%
+   filter(acquirer!=target & !(acquirer=="WMADS" & target!="Regional"))
 
  mergercases <- expand_grid(mergercases,
                             #unintegrated="Base"
@@ -811,12 +811,12 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
  ) %>%
    distinct() %>%
    filter(!(unintegrated %in% c("Base","Vertical") & partial) &
-            !((target%in% c("Regional","WM-ADS") |acquirer=="WM-ADS") & (!unintegrated %in% c("Base","Down","Vertical"))) &
+            !((target%in% c("Regional","WMADS") |acquirer=="WMADS") & (!unintegrated %in% c("Base","Down","Vertical"))) &
             !(acquirer=="Republic" & unintegrated=="Vertical") &
             !((acquirer %in% c("Santek","WasteConn") & target %in% c("Santek","WasteConn")) & unintegrated=="Vertical")&
             !(target=="Republic" & !unintegrated %in% c("Base","Vertical") & !partial) &
             !(target=="Santek" & acquirer=="WasteConn" & unintegrated=="Up" & !partial) &
-            !(target=="Regional" & acquirer=="WM-ADS" & unintegrated=="Vertical")
+            !(target=="Regional" & acquirer=="WMADS" & unintegrated=="Vertical")
           )
 
 
@@ -874,11 +874,11 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
           Unintegrated=interaction(Partial,Unintegrated,drop = TRUE,sep=""),
           Unintegrated=reorder(Unintegrated,ifelse(Acquirer=="Republic" & Target=="Santek" & name=="Consumer Harm",-value,NA),max,na.rm=TRUE),
           Acquirer=factor(Acquirer),
-          Target=factor(Target,levels=c("Republic","Santek","WasteConn","WM-ADS","Regional")),
+          Target=factor(Target,levels=c("Republic","Santek","WasteConn","WMADS","Regional")),
    )
 
 
- trashfakemergerplot <- ggplot(data=filter(mkt_mergersweep,Acquirer!="WM-ADS"& #Target !="Regional" &#Acquirer=="Republic" & Target=="Santek" &
+ trashfakemergerplot <- ggplot(data=filter(mkt_mergersweep,Acquirer!="WMADS"& #Target !="Regional" &#Acquirer=="Republic" & Target=="Santek" &
                                                      name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")),aes(x=Unintegrated,y=value,color=name,group=name))+
    geom_point()+geom_line()+ facet_grid(Target~Acquirer,scales="free") +theme_bw()+ylab("% of Pre-merger Expenditures")+ xlab("Merger") +
    theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.title=element_blank(),legend.position="bottom") +geom_hline(yintercept=0,linetype="dashed")
@@ -886,7 +886,7 @@ compareplot_noup <- ggplot(data=  filter(compare,Type!="Pre-merger" & !(Level=="
 ggsave("./output/trashfakemerger.png",trashfakemergerplot,height = 7,width = 7)
 
 
-trashfakemergerplotalt <- ggplot(data=filter(mkt_mergersweep,Acquirer!="WM-ADS"& #Target !="Regional" &#Acquirer=="Republic" & Target=="Santek" &
+trashfakemergerplotalt <- ggplot(data=filter(mkt_mergersweep,Acquirer!="WMADS"& #Target !="Regional" &#Acquirer=="Republic" & Target=="Santek" &
                                             name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")) %>%
                                               mutate(Merger=paste(Acquirer,Target,sep=":"),
                                                      Merger=reorder(Merger,ifelse(name=="Consumer Harm" & Unintegrated=="Base",-value,NA),max,na.rm=TRUE),
@@ -898,11 +898,11 @@ ggsave("./output/trashfakemergeralt.png",trashfakemergerplotalt,height = 7,width
 
 
 trashinterestingmergerbar <- ggplot(data=filter(mkt_mergersweep,!(Acquirer=="Santek" & Target=="Republic" & Unintegrated == "Base") &
-                                                  !(Acquirer=="WM-ADS" & Target=="Regional" & Unintegrated == "Partial Down") & Unintegrated=="Base" &
+                                                  !(Acquirer=="WMADS" & Target=="Regional" & Unintegrated == "Partial Down") & Unintegrated=="Base" &
                                                   name %in% c("Consumer Harm","Disposal Benefit","Collection Benefit")) %>% rename(Type=name) %>%
                                       mutate(Merger=paste(Acquirer,Target,sep="/"),Unintegrated=factor(Unintegrated, levels=c("Base","Vertical","Up","Partial Up","Down","Partial Down")) ) %>%
                                       filter(Merger %in% c("Republic/Santek",#"Santek/Republic",
-                                                           "Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Merger,x=value#,fill=Type
+                                                           "Santek/WasteConn","Santek/WMADS", "WMADS/Regional")),aes(y=Merger,x=value#,fill=Type
                                                                                                                        )) +
   #facet_grid(~Unintegrated,scales = "free") +
   facet_grid(~Type,scales = "fixed") +
@@ -936,7 +936,7 @@ trashinterestingsantrep <- ggplot(data=filter(mkt_mergersweep,Acquirer %in% c("S
                                                            Unintegrated=reorder(Unintegrated,-1*value*(Type=="Consumer Harm"))#,
                                              #Unintegrated=factor(Unintegrated, levels=c("Base","Vertical","Up","Partial Up","Down","Partial Down"))
                                              ) %>%
-                                      filter(Merger %in% c("Republic/Santek","Santek/Republic","Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")),aes(y=Unintegrated,x=value#,fill=Type
+                                      filter(Merger %in% c("Republic/Santek","Santek/Republic","Santek/WasteConn","Santek/WMADS", "WMADS/Regional")),aes(y=Unintegrated,x=value#,fill=Type
                                                                                                                                                            )) +
   facet_grid(~Type,scales = "fixed") +
   geom_bar(stat="identity",fill="lightgrey",
@@ -958,12 +958,12 @@ ggsave(filename="./output/trashinterestingsantrep.png",trashinterestingsantrep,w
 
 mkt_mergersweep_firm$Product <- rownames(mkt_mergersweep_firm )
 mkt_mergersweep_firm$Product <- gsub("\\..*$","",mkt_mergersweep_firm$Product,perl=TRUE)
-mkt_mergersweep_firm$Product <- gsub(":","/",mkt_mergersweep_firm$Product,perl=TRUE)
+mkt_mergersweep_firm$Product <- gsub(":","-",mkt_mergersweep_firm$Product,perl=TRUE)
 
 trashinterestingfirmbar <- ggplot(data= filter(mkt_mergersweep_firm,Unintegrated=="Base" ) %>%
                                     mutate(Merger=paste(Acquirer,Target,sep="/")) %>%
                                     filter(Merger %in% c(#"Republic/Santek",
-                                      "Santek/WasteConn","Santek/WM-ADS", "WM-ADS/Regional")) %>%
+                                      "Santek/WasteConn","Santek/WMADS", "WMADS/Regional")) %>%
                                     select(-priceUpDelta,-priceDownDelta,-outputDelta,-isParty) %>%
                                   pivot_longer(c(priceUpPre ,priceUpPost , priceDownPre, priceDownPost, sharesPre, sharesPost)) %>%
                                     mutate(Level=ifelse(grepl("Up",name),"Disposal","Collection"),
@@ -985,7 +985,7 @@ trashinterestingfirmbar <- ggplot(data= filter(mkt_mergersweep_firm,Unintegrated
                                                          position=position_dodge2(reverse = TRUE)
                                                          #position="stack"
   )  +
-  xlab("Disposal/Collector") + ylab("Equilibrium Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
+  xlab("Disposal-Collector") + ylab("Equilibrium Levels") + #geom_hline(yintercept = 0,linetype="dashed") +
   scale_fill_brewer(type="qual",palette = "Paired") +#scale_fill_grey(start = .9, end = .1) +
   geom_text( #color=ifelse(Type=="Post-merger","white","black"),
     hjust=1.5, position=position_dodge2(width=.9,reverse=TRUE),size =3) +  coord_flip()+ theme_bw() +
@@ -999,12 +999,12 @@ write_csv(mkt_mergersweep_firm,"./output/mkt_mergersweep_firm.csv",na="")
 # mkt_interesting <- filter(mkt_mergersweep,
 #                           (Acquirer=="Republic" & Target =="Santek" & Unintegrated %in% c("Base","Up","Down","Vertical")) |
 #                             (Acquirer=="Santek" & Target =="WasteConn" & Unintegrated %in% c("Base")) |
-#                                (Acquirer=="Santek" & Target =="WM-ADS" & Unintegrated %in% c("Base")   ) )
+#                                (Acquirer=="Santek" & Target =="WMADS" & Unintegrated %in% c("Base")   ) )
 #
 # mkt_interesting_firm <- filter(mkt_mergersweep_firm,
 #                                Acquirer=="Republic" & Target =="Santek" & Unintegrated %in% c("Base","Up","Down","Vertical") |
 #   (Acquirer=="Santek" & Target =="WasteConn" & Unintegrated %in% c("Base")) |
-#   (Acquirer=="Santek" & Target =="WM-ADS" & Unintegrated %in% c("Base")   )
+#   (Acquirer=="Santek" & Target =="WMADS" & Unintegrated %in% c("Base")   )
 # ) %>%
 #   mutate(Unintegrated=factor(Unintegrated,levels=c("Base","Down","Vertical","Up")),
 #          Unintegrated=interaction(Partial,Unintegrated,drop = TRUE,sep=""))
