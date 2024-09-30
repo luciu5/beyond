@@ -471,7 +471,9 @@ print(kable(select(simdata,disposal_firm_name,
                    disposal_price,
                    disposal_dollar_margin,
                    collection_dollar_margin,
-                   priceDown_repmargin_2nd
+                   #priceDown_repmargin_2nd
+                   `collection cost`
+
 ) %>%
 
               rename("Disposal Firm"=disposal_firm_name,
@@ -480,7 +482,8 @@ print(kable(select(simdata,disposal_firm_name,
                      "Disposal Price"=disposal_price,
                      "Disposal Margin"=disposal_dollar_margin,
                      "Collection Margin"=collection_dollar_margin,
-                     "Collection Price"=priceDown_repmargin_2nd
+                     #"Collection Price"=priceDown_repmargin_2nd
+                     "Collection Cost"=`collection cost`
                      ) %>%
   mutate(`Volume`=`Volume`/1e3) %>%
   mutate(across(where(is.numeric),round)),
