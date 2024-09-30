@@ -17,135 +17,157 @@
 \newcounter{para}
 \newcommand\mypara{\par\textbf{\stepcounter{para}\thepara)\space}}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Preliminaries
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Detailed Responses to the Referees for \\ ``Beyond Horizontal and Vertical'' \\MS 2023138}
+\author{Margaret Loudermilk, Gloria Sheu, and Charles Taragin}
+\date{October 2024}
 \begin{document}
+\maketitle
 
-\section{Response to Editor}
+We appreciate the opportunity to revise our paper, and we have made substantial changes in response to the suggestions from the editor and referees, which we found quite helpful.  The largest change is that we have removed the results for sampled mergers and now instead focus on the Republic/Santek merger example. In this document, the editor and referee comments are in italics, followed by our response.
 
-\subsection{Comments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Editor
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Response to the Editor}
+\emph{My biggest concern is that I don’t understand why the range (much less distribution) of parameters you consider is interesting. Therefore, I propose you combine Sections 3 and 4 using the Republic/Santek merger as a ``central'' point of calibration and exploring perturbations of that point to establish how changes to the underlying model assumptions impact outcomes of interest.}
 
+We understand the concern about the sampling distribution of our merger simulations in the previous draft of the paper.  In response, we took your suggestion of combining our simulation exercises into one section centered on the Republic/Santek example.  This is now Section 3 of the paper.
 
-\mypara Incidentally, this section imposes a logit assumption in (1), but
-is this really needed before turning to the simulation exercises in Sections 3 and 4?
+\emph{In particular, I will be looking for you to deliver on the following:}
+\begin{enumerate}
+\item  \emph{Be very clear on how the central point is parameterized/calibrated. Be clear about what data is used to pin down what parameters. Also note what parameters you will vary either because they are not well identified with available data or because you want to consider sensitivity.}
 
+We have created new Section 3.2 that explains our calibration.  We tie our explanation directly to the data inputs, which appear in Table 1, and to the set of equations we use for identification, which are the firm first order conditions in Section 2.  We have considered in Section 3.3 the sensitivity of our results to the share of the outside good/market elasticity, to adding a nesting parameter, and to the size of the bargaining parameter, which we discuss further below.
 
-\mypara In the end, I think R2 set a good bar for the simulations: the
-point of doing the simulation [is] to try and provide some qualitative results about the
-direction/nature of the net effect of the various countervailing forces and what this depends on?
-If you can convincingly deliver on this, then the paper can inform practitioners on the key
-elements to be sure to precisely capture in a merger simulation exercise.
+\item \emph{Be sure to compare simulations that allow for the complex nature of Republic/Santek versus the more vanilla simulations considered in ST (2021). This is important to capture this papers contribution.}
 
+This was an extremely useful comment in helping us focus our simulations on the most interesting cases.  We have added a new Section 3.5 that walks through examples of complex mergers alongside similar ``non-complex'' mergers like those in ST (2021).  For example, we show how our results change when moving from a pure vertical merger to a merger where both firms are already integrated and from a pure horizontal merger to a merger where one of the firms is already integrated.  This allows us to, for example, show how layering in additional vertical aspects to a horizontal merger can impact welfare.
 
-\mypara When presenting your results, please consider whether the simulations should be presented as the
-result of a statistical sampling (as is done now) or more in the vein of counterfactual analysis
-where you vary one parameter at a time. The argument for the statistical sampling approach is
-that parameters may interact---although you haven?t clearly established that in most of the
-current results. The argument for the one parameter at a time approach is that it can be more
-closely tied to the institution presented in the theory section. If you are tempted to do the
-sampling approach because there are many parameters to vary, consider whether you should
-instead focus the reader?s attention on the most important/illustrative results.
+\item \emph{Be sure to consider how the nature of bargaining and downstream diversion will impact the results. For the later, you would need to go beyond a multinational logit model, but a nested logit should be able to capture the intuition. I'm not asking you to estimate substitution in this context since it doesn't seem like you have the data to do so (although I'd love to be shown wrong on this point!). I do want to know whether varying substitution patterns which fit the data you do have are likely to alter the qualitative outcomes of the merger simulation.}
 
-\subsection{TO DOs}
-\setcounter{para}{0}
-\mypara Be very clear on how the central point is parameterized/calibrated. Be clear about what
-data is used to pin down what parameters. Also note what parameters you will vary
-either because they are not well identified with available data or because you want to
-consider sensitivity.
-\mypara Be sure to compare simulations that allow for the complex nature of Republic/Santek
-versus the more vanilla simulations considered in ST (2021). This is important to capture
-this papers contribution.
-\mypara Be sure to consider how the nature of bargaining and downstream diversion will
-impact the results. For the later, you would need to go beyond a multinational logit
-model, but a nested logit should be able to capture the intuition. I'm not asking you to
-estimate substitution in this context since it doesn?t seem like you have the data to do so
-(although I'd love to be shown wrong on this point!). I do want to know whether varying
-substitution patterns which fit the data you do have are likely to alter the qualitative
-outcomes of the merger simulation.
+We have added three new sensitivity analyses, at the end of Section 3.3, in order to address this point.  We show how our simulated consumer welfare results are impacted by (1) the extent of substitution outside the market, (2) the use of the logit versus the nested logit, and (3) the bargaining power of retailers vesus wholesalers.  In each of these exercises, we vary the relevant parameter in smooth increments and show how welfare changes relative to the baseline.  The other aspects of the simulations are held fixed, allowing for cleaner comparisons.  We find that our results change in an intuitive manner that we believe will help practitioners understand the impact of the key parameters on the model's conclusions.
 
+As part of this change, we removed the logit demand function from the theory discussion in Section 2, to make clear that the model can accommodate multiple forms of demand.  We introduce our baseline logit assumption and the alternative nested logit assumption later in Section 3 when we come to our specific empirical application.
 
+\end{enumerate}
+
+\emph{When presenting your results, please consider whether the simulations should be presented as the result of a statistical sampling (as is done now) or more in the vein of counterfactual analysis where you vary one parameter at a time. The argument for the statistical sampling approach is that parameters may interact---although you haven't clearly established that in most of the
+current results. The argument for the one parameter at a time approach is that it can be more closely tied to the institution presented in the theory section. If you are tempted to do the sampling approach because there are many parameters to vary, consider whether you should instead focus the reader's attention on the most important/illustrative results.}
+
+As mentioned in our responses above, we have shifted away from the statistical sampling approach.  In the sensitivity analysis, we vary one parameter at a time to facilitate comparisons.  In comparing across different mergers, we have chosen a set of illustrative cases that give the reader concrete examples to focus on.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% R1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Response to Referee 1}
-\setcounter{para}{0}
-\mypara I hope that the authors provide the code so that researchers can (a) run their own simulations
-and (b) use the code for their own research. The authors should follow the AER/ReStud
-guidelines that are becoming standard in the profession
-( \url{https://aeadataeditor.github.io/aea-de-guidance/preparing-for-data-deposit.html} ). Basically,
-make the code easily readable and post it to a code/data archive website like Zenodo (and link
-to it from the author's webpage and the paper).
-Note: Footnote 16 states that the antitrust R package contains the code to do the
-simulations. I could not easily find the relevant parts of the package. It would be great if this
-machinery was also added to antitrust , but I would like to see a stand-alone replication
-package.
-\mypara I think the authors could ditch the Republic/Santek example. The authors admit that the
-example is for ``illustrative" purposes. Instead of a single example, the authors could choose a
-few representative mergers and look at specific fake data that mimics those cases. Eg. many
-upstream and few downstream or vise versa.
-\mypara There is one thing I really like about Section 4: the comparison between a naive merger
-analysis (eg. downstream/upstream horizontal effects only) and the more comprehensive
-analysis that includes all of the vertical effects. I would like to see this type of analysis in Section
 
-\mypara I think that the authors overclaim a bit. In the abstract (and this sentiment is repeated in the
-paper, for example on page 2) the authors: ``In our model, we find that mergers with both
-horizontal and vertical characteristics typically harm consumers."
-First, I think the more important contribution is to point out that a naive analysis that ignores the
-vertical aspect of a merger can mis-quantify the effects of the merger (see point 3 above) or that
-the EDM benefits are typically small (a point already made).
-Second, mergers arise in nature (and are prosecuted) endogenously. The median pre-merger
-HHI in the simulations is between 2800 and 4300 and the median Delta HHI is over 1000. Most
-of the mergers analyzed would be presumed harmful based on the classic Cournot intuition or
-the more recent Nocke/Whinston intuition. I think the authors should avoid statements like in
-their abstract that make it seem they are drawing generic conclusions about merger
-enforcement.
-Smaller Comments
-\mypara  Table 1: It seems a bit suspicious that the price quantiles are all integers. Maybe I am missing
-something, but the domain should be some subset of the real number line, making integers very
-unlikely.
-\mypara  Simulation details. I don't understand why shares are drawn from a Dirichlet distribution (or
-any distribution), Shares are endogenous functions of model primitives. Do you mean that you
-sampled $\delta$ from a distribution?
-\mypara Simulation details. It might make more sense to calibrate to a market elasticity (for example
--1) instead of the way it is done in the paper.
-\mypara  It might make sense if a retailer and manufacturer had meaning in the model. One suggestion
-is to have $\delta$ be comprised of two components, and manufacturer effect, and a retailer effect,
-where the retailer effect is perfectly correlated across manufacturer products within a retailer,
-and the manufacturer effect is perfectly correlated across retailer for the same product. So
-something like  $\delta_{rw} = \delta_{r} + \delta_{w}$
-\mypara  In Section 2.2 (first paragraph), referencing a particular retailer with index r is confusing
-because r is the generic index for a retailer.
-\mypara In Equation 4, I think there is an additional effect in the first term that Luco and Marshall
-(2020) would call the Edgeworth-Salinger effect.
-\mypara  The authors mention on multiple occasions that a retailer could cease to trade with a
-wholesaler (eg. page 8). I don't see how this is a possibility in the model.
-\mypara  I don't think ``Vertical" and ``Horizontal" need to be quoted in the title.
+\begin{enumerate}
 
+    \item \emph{I hope that the authors provide the code so that researchers can (a) run their own simulations and (b) use the code for their own research. The authors should follow the AER/ReStud guidelines that are becoming standard in the profession (\footnotesize{\url{https://aeadataeditor.github.io/aea-de-guidance/preparing-for-data-deposit.html}}). Basically, make the code easily readable and post it to a code/data archive website like Zenodo (and link to it from the author's webpage and the paper).}
+
+    \emph{Note: Footnote 16 states that the antitrust R package contains the code to do the simulations. I could not easily find the relevant parts of the package. It would be great if this machinery was also added to antitrust , but I would like to see a stand-alone replication package.}
+
+     Much of the coding machinery we used has already been incorporated into the next version of the \texttt{antitrust} R package.  A new function, \texttt{vertical.barg}, has been added which uses observed shares, prices and some margins to calibrate demand parameters and simulate the effect of complex mergers. We understand that having a replication package would also be helpful for readers, and we are planning to post a package once the paper has been finalized. Aside from containing all the code and data needed to run all the simulations presented in the paper, the replication package will contain code that allows calibration when downstream costs but not prices are observed.
+
+    \item \emph{I think the authors could ditch the Republic/Santek example. The authors admit that the example is for ``illustrative" purposes. Instead of a single example, the authors could choose a few representative mergers and look at specific fake data that mimics those cases. Eg. many upstream and few downstream or vise versa.}
+
+    Based on feedback from the editor, we ended up removing the other simulations and focusing on the Republic/Santek example.  However, in the spirit of this comment, we chose a few representative mergers within the Republic/Santek context to provide the reader with additional intuition.
+
+    \item \emph{There is one thing I really like about Section 4: the comparison between a naive merger analysis (eg. downstream/upstream horizontal effects only) and the more comprehensive analysis that includes all of the vertical effects. I would like to see this type of analysis in Section 3.}
+
+    Thank you for your feedback.  We have kept that comparison with the downstream- and upstream-only models, and have moved it into Section 3 to go with the additional examples we have added for Republic/Santek.
+
+    \item \emph{I think that the authors overclaim a bit. In the abstract (and this sentiment is repeated in the paper, for example on page 2) the authors: ``In our model, we find that mergers with both horizontal and vertical characteristics typically harm consumers."}
+
+    \emph{First, I think the more important contribution is to point out that a naive analysis that ignores the vertical aspect of a merger can mis-quantify the effects of the merger (see point 3 above) or that the EDM benefits are typically small (a point already made).}
+
+    \emph{Second, mergers arise in nature (and are prosecuted) endogenously. The median pre-merger HHI in the simulations is between 2800 and 4300 and the median Delta HHI is over 1000. Most of the mergers analyzed would be presumed harmful based on the classic Cournot intuition or the more recent Nocke/Whinston intuition. I think the authors should avoid statements like in their abstract that make it seem they are drawing generic conclusions about merger enforcement.}
+
+    We understand this concern and have now removed those generic-sounding statements.  Any statements we make now are tied to the specific Republic/Santek example, and we have tried to make that clear in the text.
+
+\textbf{Smaller Comments}
+
+    \item \emph{Table 1: It seems a bit suspicious that the price quantiles are all integers. Maybe I am missing something, but the domain should be some subset of the real number line, making integers very unlikely.}
+
+    This occurred because we rounded all those numbers to integers.  Sometimes we make choices in the name of clarity that backfire.  That table has now been removed, since those simulations no longer appear in the paper.
+
+    \item \emph{Simulation details. I don't understand why shares are drawn from a Dirichlet distribution (or any distribution), Shares are endogenous functions of model primitives. Do you mean that you sampled $\delta$ from a distribution?}
+
+    We no longer include the simulations based on sampling, so the Dirichlet distribution is not used in this draft.  To clarify on the use of market shares (which we do still use to calibrate the Republic/Santek exercise), we agree that they are endogenous to the model but they are also the type of data that practitioners and researchers would observe about a market.  Therefore, shares are commonly used for calibration.  It is helpful to draw the analogy from the structural estimation context: in recovering the parameters for a structural demand system, an econometrician usually uses variation in market shares and prices (often along with other data for instrumental variables) in order to estimate the model, even though the shares and prices are also functions of the model.  For antitrust practitioners calibrating a model, they also use shares and prices.  In both cases, we are trying to find parameters of the model that are consistent with the market outcomes that we observe in the data.  We have provided some of this background in our calibration discussion in Section 3.2.
+
+    \item \emph{Simulation details. It might make more sense to calibrate to a market elasticity (for example -1) instead of the way it is done in the paper.}
+
+    Since we have removed the simulations that were formerly in Section 3, this part of the calibration is no longer used.  In the Republic/Santek example, we now start by assuming no substitution outside of the waste management market (due to the strict government regulations mandating that commercial customers dispose of waste in proper landfills), and then vary the market elasticity in a sensitivity check that appears in Section 3.3.
+
+    \item  \emph{It might make sense if a retailer and manufacturer had meaning in the model. One suggestion is to have $\delta$ be comprised of two components, and manufacturer effect, and a retailer effect, where the retailer effect is perfectly correlated across manufacturer products within a retailer, and the manufacturer effect is perfectly correlated across retailer for the same product. So something like  $\delta_{rw} = \delta_{r} + \delta_{w}$}
+
+    We tried something in this spirit in our nested logit sensitivity exercise for the Republic/Santek simulations.  We did one version where we grouped together all the products that use the same firm for collection and disposal (``integrated'' in Figure 4) and another version where we grouped together all products that use the same landfill (``landfill'' in Figure 4).
+
+    \item  \emph{In Section 2.2 (first paragraph), referencing a particular retailer with index r is confusing because r is the generic index for a retailer.}
+
+    We have shifted to referring to the merging firms in Section 2.2 using index $t$ for the retailer and $v$ for the wholesaler.
+
+    \item \emph{In Equation 4, I think there is an additional effect in the first term that Luco and Marshall (2020) would call the Edgeworth-Salinger effect.}
+
+    This is a good point.  We have added a footnote to the discussion of that equation (now equation ([8 XXXX])) mentioning the Salinger (1991) result and the Luco and Marshall (2020) paper.
+
+    \item \emph{The authors mention on multiple occasions that a retailer could cease to trade with a wholesaler (eg. page 8). I don't see how this is a possibility in the model.}
+
+    We agree that this is confusing and have removed those statements.  We now say near the beginning of Section 2.1 that we are taking the observed set of retailer-wholesaler combinations offered as given.
+
+    \item  \emph{I don't think ``Vertical" and ``Horizontal" need to be quoted in the title.}
+
+    We have removed the quotation marks from the title.
+
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% R2
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Response to Referee 2}
-I recommend that the paper be shortened in two ways. First I think that it should report
-the results for the simulations of complex mergers but should omit the results for the simulations
-of mergers where the number of pre-existing rivals (that do not participate in the merger)
-changes. That is, I think the authors should only include simulation results for the case when
-there are no pre-existing vertically integrated rivals that do not participate in the merger and
-report that the nature of the results does not change substantially when pre-existing vertically
-integrated rivals that do not participate in the merger are allowed to exist. In addition to
-shortening the paper, this will allow the authors to provide a simpler and much less confusing
-description of the set of examples they consider in their simulations. Second, I think that the
-material on generalizing the results to the case of increasing marginal costs should be omitted. I
-think this a somewhat separate issue that deserves separate treatment if substantial enough results
-can be derived.
+\emph{I recommend that the paper be shortened in two ways. First I think that it should report the results for the simulations of complex mergers but should omit the results for the simulations of mergers where the number of pre-existing rivals (that do not participate in the merger) changes. That is, I think the authors should only include simulation results for the case when
+there are no pre-existing vertically integrated rivals that do not participate in the merger and report that the nature of the results does not change substantially when pre-existing vertically integrated rivals that do not participate in the merger are allowed to exist. In addition to shortening the paper, this will allow the authors to provide a simpler and much less confusing description of the set of examples they consider in their simulations. Second, I think that the material on generalizing the results to the case of increasing marginal costs should be omitted. I think this a somewhat separate issue that deserves separate treatment if substantial enough results can be derived.}
+
+Thank you for this helpful feedback.  We have removed both sets of material, pivoted the draft to focusing on the Republic/Santek merger, which has greatly streamlined the paper.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% R3
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Response to Referee 3}
-\setcounter{para}{0}
-\mypara I could not find a contribution that would merit publication at the Journal of Industrial Economics. The paper is very similar to Sheu and Taragin (2021). The model and simulation are essentially the same. At times, the paper reads as an appendix of the previous article.
+\begin{enumerate}
+    \item \emph{I could not find a contribution that would merit publication at the Journal of Industrial Economics. The paper is very similar to Sheu and Taragin (2021). The model and simulation are essentially the same. At times, the paper reads as an appendix of the previous article.}
 
+    We agree that we could have been clearer in our last draft about the distinction between this paper and our previous research.  We believe that removing the old Section 3 and changing the focus to the Republic/Santek merger helps address this issue.  In the new Section 3, we show how moving from pure vertical and pure horizontal mergers (as appear in Sheu and Taragin (2021)) to complex mergers where one or both of the firms are already integrated prior to the merger (new for this paper) impacts the results.
 
-\mypara  The paper claims to simulate the welfare effects in a new set of mergers called ``complex mergers." Complex mergers are standard vertical and horizontal mergers where a firm is vertically integrated. They have been previously studied by Ho and Lee (2017) and Crawford et al. (2018), among others. (The related literature also needs to be improved.) So, the paper uses a stylized model to simulate standard mergers.
+    \item \emph{The paper claims to simulate the welfare effects in a new set of mergers called ``complex mergers." Complex mergers are standard vertical and horizontal mergers where a firm is vertically integrated. They have been previously studied by Ho and Lee (2017) and Crawford et al. (2018), among others. (The related literature also needs to be improved.) So, the paper uses a stylized model to simulate standard mergers.}
 
+    We agree that there has been past research on complex mergers, but we also believe that these mergers have been understudied relative to pure vertical and pure horizontal transactions.  Furthermore, we also believe that research showing how a more complicated structural model can be simplified for use by practitioners, keeping in mind the data and time constraints they face, is important.  We have personal experience with being told Crawford et al. (2018) was too complicated to be used as part of the court testimony we were preparing in a merger litigation.
 
-\mypara  Some of the modeling assumptions are very restrictive. For instance, the logit demand system, simultaneous bargaining-Bertrand game, and the linear fees in the bargaining model. While these assumptions seem reasonable for a policy paper for practitioners, they are too strong for the JINDEC, as they hinder the credibility of the main exercises in the paper. The logit demand, in particular, is unnecessarily restrictive in terms of substitution patterns and could be driving the welfare results. For example, vertically and non-vertically integrated firms are clearly different from the consumers' perspective. One would expect consumers self-selecting into the firms' types, which would affect the compensating variation computation. To the very least, random coefficients on price and on whether the firm is vertically integrated are necessary to obtain more credible results.
+    We have added to the literature review in Section 1 to make clear that there are past papers that have studied complex mergers, including the two you mention above.  We also have added a discussion of earlier theory literature on vertical integration to provide more context for our paper.
 
+    \item \emph{Some of the modeling assumptions are very restrictive. For instance, the logit demand system, simultaneous bargaining-Bertrand game, and the linear fees in the bargaining model. While these assumptions seem reasonable for a policy paper for practitioners, they are too strong for the JINDEC, as they hinder the credibility of the main exercises in the paper. The logit demand, in particular, is unnecessarily restrictive in terms of substitution patterns and could be driving the welfare results. For example, vertically and non-vertically integrated firms are clearly different from the consumers' perspective. One would expect consumers self-selecting into the firms' types, which would affect the compensating variation computation. To the very least, random coefficients on price and on whether the firm is vertically integrated are necessary to obtain more credible results.}
 
-\mypara  The RRC discussion was perplexing. What the paper calls ``RRC" differs from the classic RRC in the literature in Salop and Scheffman (1983). In the model, it arises due to the greater bargaining power of the integrated firms. But the paper's assumption that ``negotiation for a given input price treats other input prices and all downstream prices as given" (p. 6) rules out the possibility of a standard RRC effect. So the paper contradicts Crawford et al. (2018) footnote 62. Is this an error? It is paramount that this issue is clarified in the future, even at a different journal. Please include the profit functions and derivations in the Appendix (e.g. equation 5 and subsequent).
+    We have removed the discussion of logit demand from the theory explanation in Section 2, to make clear that it is not a necessary part of the model.  In our merger simulations in Section 3.3, we present both logit and nested logit results, the latter with one option where all the integrated products are in the same nest separate from the non-integrated products (in a similar idea to what you suggest in your comment) and a second option where products that use the same landfill are in the same nest.  We agree that the logit assumption is restrictive, but we also note that it is commonly used in antitrust contexts, as the logit fits with the antitrust emphasis on market shares.  We have added a discussion of these issues in Section 3.2.
 
+    \item \emph{The RRC discussion was perplexing. What the paper calls ``RRC" differs from the classic RRC in the literature in Salop and Scheffman (1983). In the model, it arises due to the greater bargaining power of the integrated firms. But the paper's assumption that ``negotiation for a given input price treats other input prices and all downstream prices as given" (p. 6) rules out the possibility of a standard RRC effect. So the paper contradicts Crawford et al. (2018) footnote 62. Is this an error? It is paramount that this issue is clarified in the future, even at a different journal. Please include the profit functions and derivations in the Appendix (e.g. equation 5 and subsequent).}
 
-\mypara  The simulation exercise in Section 3 does not implement the simulation of the model in Section 2. What is the mapping between the two? How do you ensure market shares are consistent with equation 1 and firm pricing decisions? The paper states that: ``we calibrate the price coefficient $\alpha$ assuming that in the pre-merger world, there is a vertically integrated outside option that sets its Bertrand equilibrium price to \$5, has 15\% market share, and has zero marginal costs. All other goods are differenced." But how are prices consistent with the demand and profit maximization computed? Specifically, I could not understand how such a procedure fits the bargaining game upstream. They seem to be inconsistent. For instance, how do you ensure downstream (upstream) prices are consistent with equation 2 (3)? For these reasons, I could not follow the details of the simulation exercise.
+    We understand the confusion around this point.  Our meaning of the term agrees with Crawford et al. (2018).  We use the term ``RRC'' in the way that they use it, to mean a shift in bargaining leverage that allows a vertically integrated firm to raise input prices to a downstream rival.  Crawford et al. (2018) refer to this as ``raising rivals' cost.'' See, for example, their discussion in Section 6.2.2, pages 934-936, of their paper.  Footnote 62 in their paper explains that this RRC effect is not motivated by the likelihood that downstream firms will raise their retail prices in response to higher wholesale prices.  The behavior is instead motivated by the possibility that consumers will switch who they purchase from, at fixed prices.  Additional discussion is provided in their footnote 36.  We and Crawford et al. (2018) do not use RRC to mean the incentive modeled by Salop and Scheffman (1983), where a dominant firm chooses an action in order to directly impact downstream retail prices.  We have added footnote [10 XXXX] in the discussion around equation ([9 XXXX]) to clarify this distinction.
 
+    We have included the profit functions in Section 2.1 and added an explanation for how they appear in the firm first order conditions.
 
-\mypara Finally, I found the calibration exercise in Section 4 hard to follow. At times it reads as if the paper is collecting data. But it is closer to a calibration/simulation exercise motivated by the merger. But there is no estimation and the data is minimal. The theoretical model does not fit the setting in the case. First, the bargaining model is not present nor discussed in the DOJ Lawsuit. Second, the RRC discussed in the DOJ lawsuit refers to foreclosure/exclusionary conduct concerns. This feature could typically has different welfare implications. See, e.g., Ordover et al. (1990) and the references therein. I found the analysis in this section not credible.
+    \item \emph{The simulation exercise in Section 3 does not implement the simulation of the model in Section 2. What is the mapping between the two? How do you ensure market shares are consistent with equation 1 and firm pricing decisions? The paper states that: ``we calibrate the price coefficient $\alpha$ assuming that in the pre-merger world, there is a vertically integrated outside option that sets its Bertrand equilibrium price to \$5, has 15\% market share, and has zero marginal costs. All other goods are differenced." But how are prices consistent with the demand and profit maximization computed? Specifically, I could not understand how such a procedure fits the bargaining game upstream. They seem to be inconsistent. For instance, how do you ensure downstream (upstream) prices are consistent with equation 2 (3)? For these reasons, I could not follow the details of the simulation exercise.}
+
+    We have removed those simulations from the paper.  All the simulations and calibration we have done rely on the first order conditions of the model in Section 2, to ensure that the resulting prices and market share are consistent with the theory.  We have added a discussion clarifying this point in Section 3.2.
+
+    \item \emph{Finally, I found the calibration exercise in Section 4 hard to follow. At times it reads as if the paper is collecting data. But it is closer to a calibration/simulation exercise motivated by the merger. But there is no estimation and the data is minimal. The theoretical model does not fit the setting in the case. First, the bargaining model is not present nor discussed in the DOJ Lawsuit. Second, the RRC discussed in the DOJ lawsuit refers to foreclosure/exclusionary conduct concerns. This feature could typically has different welfare implications. See, e.g., Ordover et al. (1990) and the references therein. I found the analysis in this section not credible.}
+
+    We have designed this exercise to closely mirror the types of data and calibration exercises that are frequently used by antitrust agencies and practitioners in merger review.  We have added an explanation of this purpose at the beginning of Section 3.
+
+    The DOJ complaint in Republic/Santek at paragraph 47 explains that the DOJ was alleging harm due to increased upstream disposal prices to rival downstream collection firms, not due to total exclusion or foreclosure of these collection firms.  Specifically, the complaint states that the merged firm would have an ``incentive to raise the MSW disposal costs of independent haulers because Republic---no longer confronting competition from Santek in SCCW collection---would capture more of the business lost by independent haulers in the SCCW collection market.''  We agree that the complaint does not put this story in terms of bargaining, but the incentive discussed in this passage is very similar to the mechanism that leads to increased bargaining leverage and hence higher wholesale prices in our model.  The knowledge that downstream customers have fewer independent rivals from which to purchase collection is what allows the merged firm to negotiate for a higher upstream disposal rate.
+
+\end{enumerate}
 
 \end{document}
