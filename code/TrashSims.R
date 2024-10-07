@@ -919,12 +919,12 @@ trashinterestingmergerbar <- ggplot(data=filter(mkt_mergersweep,!(Acquirer=="San
             #hjust=1.1,
             vjust=0.9,
             color="black",
-   position=position_dodge(width=.9),size =3) +# coord_flip()+
+   position=position_dodge(width=.9),size =2) +# coord_flip()+
   theme_bw() +
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_y_discrete(limits=rev)
 
-ggsave(filename="./output/trashinterestingmergerbar.png",trashinterestingmergerbar,width = 6,height=4)
+ggsave(filename="./output/trashinterestingmergerbar.png",trashinterestingmergerbar,width = 6.5,height=4.5)
 
 
 
@@ -955,7 +955,7 @@ trashinterestingsantrep <- ggplot(data=filter(mkt_mergersweep,Acquirer %in% c("S
             position=position_dodge(width=.9),size =3) +# coord_flip()+
   theme_bw() +
   theme(legend.position="bottom",axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_y_discrete(limits=rev) +ylab("Pre-merger Arrangement")
+  scale_y_discrete(limits=rev) +ylab("Merger Arrangement")
 
 ggsave(filename="./output/trashinterestingsantrep.png",trashinterestingsantrep,width = 7,height=4)
 
