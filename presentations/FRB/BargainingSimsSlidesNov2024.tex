@@ -1,0 +1,629 @@
+\pdfminorversion=6
+\documentclass{beamer}
+\usefonttheme{serif}		% font theme
+\usepackage{hyperref}   % displays URLs
+\usepackage{chicago}    % bibliography package
+\usepackage{graphicx}   % insert PostScript figures
+\usepackage{setspace}   % controls line spacing
+\usepackage{mathtools,amsthm,amssymb,amstext} % controls equation entry and symbols
+\usepackage{rotating}   % rotates graphics
+\usepackage{soul}       % controls hyphenation
+\usepackage{epsfig}     % helps with including graphics
+\usepackage{pdflscape}  % helps with displaying rotated graphics in PDFs
+\usepackage{lscape}     % helps with rotating pages
+\usepackage{setspace}   % controls line spacing
+\usepackage{bibentry}   % cite without bibliography
+\usepackage{anyfontsize}% font sizing
+\usepackage{newcent}		% font
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Theme
+\usetheme{Pittsburgh}
+\definecolor{mk}{rgb}{.64,.1,.1}
+\definecolor{gray}{rgb}{.6,.6,.6}
+\usecolortheme{orchid}
+\usenavigationsymbolstemplate{}
+\useoutertheme{infolines}
+\setbeamertemplate{footline}{
+\hspace*{.5cm}
+\scriptsize{\vspace*{2pt}
+\insertshortauthor \hfill \insertshorttitle\hfill\insertframenumber\hspace*{.5cm}	
+}
+}
+
+\setbeamercolor{footline}{fg=gray}
+
+\setbeamertemplate{frametitle}{
+\insertframetitle
+\par
+}
+
+\setbeamersize{text margin left=.7cm,text margin right=.7cm}
+\setbeamertemplate{itemize/enumerate body begin}{\footnotesize}
+\setbeamertemplate{itemize/enumerate subbody begin}{\tiny}
+
+\setbeamercolor{alerted text}{fg=mk}
+
+\renewcommand\thempfootnote{\arabic{mpfootnote}} % return footnotes numbers to numerals
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Title Slide Information
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\author[]{Margaret Loudermilk\inst{1} \and Gloria Sheu\inst{2} \and Charles Taragin\inst{3}}
+\institute[]{\inst{1} U.S. Department of Justice \and \inst{2}Federal Reserve Board of Governors \and \inst{3}Federal Reserve Board of Governors \bigbreak  \tiny{The analysis and conclusions set forth are those of the authors and do not indicate concurrence by other members of the Board research staff or by the Federal Reserve Board of Governors.  Furthermore, the views expressed here should not be purported to reflect those of the U.S. Department of Justice.} }
+\title[]{Beyond Horizontal and Vertical:\\ Measuring the Welfare Effects of Complex Integration}
+\date{November 2024}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Motivation}
+
+``Should the guidelines' traditional distinctions between horizontal and vertical mergers be revisited in light of recent economic trends in the modern economy? What aspects of modern market realities may be lost by focusing on these relationships categorically?'' \\
+\scriptsize{(\textit{Request for Information on Merger Enforcement}, Question 1g, DOJ and FTC, 2022)}
+
+\bigbreak \begin{itemize}
+	\item Few producers operate at only one level of a supply chain
+	\begin{itemize}
+			\item Mergers frequently combine firms that are already vertically integrated
+			\item Nevertheless, standard merger analysis often simplifies cases into purely horizontal and vertical categories
+		\end{itemize}
+	\item What happens when we incorporate some of these vertical relationships into a typical merger simulation model?
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Research Goals}
+
+\begin{enumerate}
+\item Incorporate additional vertical integration into the Sheu and Taragin (2021) merger simulation model
+	\begin{itemize}
+		\item Allow some merging parties to already be integrated, resulting in ``complex'' mergers
+		\item Model welfare effects for consumers accounting for elimination of double marginalization (EDM) and raising rivals' cost (RRC)
+	\end{itemize}
+\item Apply model to Republic/Santek merger (2021) in solid waste management
+	\begin{itemize}
+		\item Compare results to partial models that do not account for vertical aspects
+		\item Explore model implications for counterfactual mergers, comparing pure horizontal and pure vertical mergers to complex options
+	\end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Findings}
+
+\begin{itemize}
+	\item We simulate Republic/Santek using limited data inputs and generate realistic RRC and EDM effects.  We find net harm to consumers.  
+	\item Simulating Republic/Santek as separate upstream and downstream horizontal mergers using a partial model can greatly misrepresent the extent of harm
+	\item None of the counterfactual complex mergers we study result in net benefits to consumers
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Related Literature}
+
+\begin{itemize}
+	\item Merger simulation papers: Sheu and Taragin (2021); Werden and Froeb (1994); Werden and Froeb (2008)
+	\item Bargaining in vertical supply chains: Draganska, Klapper, and Villas-Boas (2010); Crawford, Lee, Whinston, and Yurukoglu (2018); Ho and Lee (2019)
+	\item Measuring impacts of vertical mergers: Moresi and Salop (2013); Rogerson (2014); DasVarma and De Stefano (2020); Rogerson (2020); Domnenko and Sibley (2023); De Stefano and Salinger (2024)
+\end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Part I: Theory
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+	\frametitle{Outline}
+	\small
+	
+	\begin{enumerate}
+		
+		\item \textbf{Theory}
+		\item Republic/Santek Application
+		\item Conclusion
+		
+	\end{enumerate}
+	
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Model Overview}
+
+\begin{itemize}
+  \item Each wholesaler $w$ in the set $\mathcal{W}$ offers a single product to retailers $r$ in the set $\mathcal{R}$,
+  who in turn sell to consumers
+  \begin{enumerate}
+    \item Upstream: Nash bargaining between wholesalers and retailers
+    \item Downstream: Bertrand differentiated products logit competition between retailers (nested logit for sensitivity analysis)
+  \end{enumerate}
+	\item All prices (upstream and downstream) assumed to be determined simultaneously
+	\item Calibration follows Sheu and Taragin (2021)
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Downstream Bertrand Logit}
+
+\begin{itemize}
+  \item Assume firms set prices in Bertrand Nash equilibrium
+	\item Market share of wholesaler $w$'s product purchased through retailer $r$ 
+  \begin{equation*}
+  s_{rw} = \frac{\exp(\delta_{rw} - \alpha p_{rw})}{1 + \sum_{x \in \mathcal{R}} \sum_{y \in \mathcal{W}^x} \exp(\delta_{xy}   - \alpha p_{xy})}
+  \end{equation*}
+  \item Profit function for retailer $r$ with wholesale fee $p^W_{rx}$ and other costs $c^R_{rx}$
+  \begin{equation*}
+  \pi^r = \sum_{x \in \mathcal{W}^r} [p_{rx} - p^W_{rx} - c^R_{rx}] s_{rx} M
+  \end{equation*}
+  \item First order conditions for downstream equilibrium prices
+  \begin{equation*}
+  \sum_{x \in \mathcal{W}^r} [p_{rx} - p^W_{rx} - c^R_{rx}] \frac{\partial s_{rx}}{\partial p_{rw}} + s_{rw} = 0
+  \end{equation*}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Upstream Nash Bargaining}
+
+\begin{itemize}
+  \item Assume a linear wholesale price set by Nash Bargaining with $\lambda_w$ bargaining power parameter
+  \begin{equation*}
+  \max_{p^W_{rw}} (\pi^r - d^r (\mathcal{W}^r \setminus \{w\}))^{\lambda_w} (\pi^w - d^w (\mathcal{R}^w \setminus \{r\}
+  ))^{1 - \lambda_w}
+  \end{equation*}
+  \item Profit function for wholesaler $w$ with marginal cost $c^W_{xw}$ 
+  \begin{equation*}
+  \pi^w = \sum_{x \in \mathcal{R}^w} [p^W_{xw} - c^W_{xw}] s_{xw} M
+  \end{equation*}
+	\item Profit for wholesaler $w$ if it does not sell to retailer $r$ 
+  \begin{equation*}
+  d^w (\mathcal{R}^w \setminus \{r\}) = \sum_{x \in \mathcal{R}^w \setminus \{r\}} [p^W_{xw} - c^W_{xw}] s_{xw}(\mathcal{W}^r   \setminus \{w\}) M
+  \end{equation*}
+  \item Profit for retailer $r$ if it does not buy from wholesaler $w$ 
+  \begin{equation*}
+  d^r (\mathcal{W}^r \setminus \{w\}) = \sum_{x \in \mathcal{W}^r \setminus \{w\}} [p_{rx} - p^W_{rx} - c^R_{rx}] s_{rx}
+  (\mathcal{W}^r \setminus \{w\}) M
+  \end{equation*}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Bargaining Equilibrium}
+
+\begin{itemize}
+	\item Given assumption of simultaneous pricing upstream and downstream, first order conditions have the form
+	\begin{equation*}
+	\begin{split}
+	&\overbrace{[p^W_{rw} - c^W_{rw}]s_{rw} - \sum_{x \in \mathcal{R}^w \setminus \{r\}} [p^W_{xw} - c^W_{xw}] \Delta s_{xw}(\mathcal{W}^r \setminus \{w\})}^{\text{wholesaler GFT}} = \\
+	&\frac{1-\lambda_w}{\lambda_w} \left(\underbrace{[p_{rw} - p^W_{rw} - c^R_{rw}]s_{rw} - \sum_{x \in \mathcal{W}^r \setminus \{w\}} [p_{rx} - p^W_{rx} - c^R_{rx}] \Delta s_{rx}(\mathcal{W}^r \setminus \{w\})}_{\text{retailer GFT}}\right)
+	\end{split}
+	\end{equation*}
+  \item A larger disagreement payoff increases bargaining leverage
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Integrated Firm Pricing: Retail}
+Assume that retailer $t$ merges with wholesaler $v$. Then $t$'s price downstream for product $v$ is determined by
+
+\begin{equation*}
+\begin{split}
+\sum_{x \in \mathcal{W}^t \setminus \{v\}} [p_{tx} - p^W_{tx} - c^R_{tx}]\frac{\partial s_{tx}}{\partial p_{tv}} &+ s_{tv}\\
+\underbrace{[p_{tv}-c^R_{tv}-c^W_{tv}]\frac{\partial s_{tv}}{\partial p_{tv}}}_\text{EDM effect} &+ \underbrace{\sum_{x \in \mathcal{R}^v \setminus \{t\}} [p^W_{xv} - c^W_{xv}] \frac{\partial s_{xv}}{\partial p_{tv}}}_\text{upstream UPP effect} = 0.
+\end{split}
+\end{equation*}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Integrated Firm Pricing: Wholesale Price to Rival Retailer}
+When wholesaler $v$ bargains with unaffiliated retailer $j$, the wholesale price is determined by
+
+\tiny
+\begin{equation*}
+\begin{split}
+&[p^W_{jv} - c^W_{jv}]s_{jv} - \sum_{x \in \mathcal{R}^v \setminus \{t,j\}} [p^W_{xv} - c^W_{xv}] \Delta s_{xv}(\mathcal{W}^j \setminus \{v\})\\
+& - \overbrace{\overbrace{[p_{tv}-c^W_{tv}-c^R_{tv}] \Delta s_{tv}(\mathcal{W}^j \setminus \{v\})}^{\text{indirect EDM effect}} - \sum_{x \in \mathcal{W}^t \setminus \{v\}} [p_{tx} - p^W_{tx} - c^R_{tx}] \Delta s_{tx}(\mathcal{W}^j \setminus \{v\})}^{\text{RRC effect}} =\\
+&\frac{1-\lambda_v}{\lambda_v} \left([p_{jv} - p^W_{jv} - c^R_{jv}]s_{jv} - \sum_{x \in \mathcal{W}^j \setminus \{v\}} [p_{jx} - p^W_{jx} - c^R_{jx}] \Delta s_{jx}(\mathcal{W}^j \setminus \{v\})\right)
+\end{split}
+\end{equation*}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Integrated Firm Pricing: Wholesale Price from Rival Wholesaler}
+When retailer $t$ bargains with unaffiliated wholesaler $k$, the wholesale price is determined by
+
+\tiny
+\begin{equation*}
+\begin{split}
+&[p^W_{tk} - c^W_{tk}]s_{tk} - \sum_{x \in \mathcal{R}^k \setminus \{t\}} [p^W_{xk} - c^W_{xk}] \Delta s_{xk}(\mathcal{W}^t \setminus \{k\}) = \\
+&\frac{1-\lambda_k}{\lambda_k} \left([p_{tk} - p^W_{tk} - c^R_{tk}]s_{tk} - \sum_{x \in \mathcal{W}^t \setminus \{v,k\}} [p_{tx} - p^W_{tx} - c^R_{tx}] \Delta s_{tx}(\mathcal{W}^t \setminus \{k\})\right.\\
+&\left.- \underbrace{[p_{tv} - c^W_{tv} - c^R_{tv}] \Delta s_{tv}(\mathcal{W}^t \setminus \{k\})}_{\text{EDM recapture effect}}-\underbrace{\sum_{x \in \mathcal{R}^v \setminus \{t\}} [p^W_{xv} - c^W_{xv}] \Delta s_{xv}(\mathcal{W}^t \setminus \{k\})}_{\text{wholesale recapture leverage effect}}\right)
+\end{split}
+\end{equation*}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Part II: Republic/Santek
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+	\frametitle{Outline}
+	\small
+	
+	\begin{enumerate}
+		
+		\item Theory
+		\item \textbf{Republic/Santek Application}
+		\item Conclusion
+		
+	\end{enumerate}
+	
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Merger Background}
+
+\begin{itemize}
+\item Republic Services bought Santek Environmental in 2021
+	\begin{itemize}
+		\item Both operated in waste collection (downstream) and waste disposal (upstream)
+	\end{itemize}
+\item Many major competitors also vertically integrated
+\item DOJ negotiated a settlement in both collection and disposal for the Chattanooga Area market
+	\begin{itemize}
+		\item Parties had 73 percent combined share in collection, 82 percent in disposal
+		\item Waste Connections only other disposal competitor, also competed in collection along with Waste Management-ADS (WMADS) and a regional company (Regional)
+	\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Market Diagram}
+
+\centering
+\includegraphics[width=4in]{output/chattanooga_tree.png}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Data Inputs}
+
+\centering{
+\includegraphics[width=4in]{output/siminputs.pdf}}
+
+\begin{itemize}
+	\item Data are for 2019
+	\item Data sources:
+		\begin{itemize}
+			\item Volumes/market shares from DOJ Competitive Impact Statement and Tennessee Department of Environmental Quality reports
+			\item Prices from Waste Business Journal
+			\item Margins from firm financial statements
+		\end{itemize}
+	\item Rely on public sources that may differ from information DOJ had access to
+	\item Assume no substitution outside of market, due to environmental regulations
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Results}
+
+\centering
+\only<1>{\includegraphics[height=2.8in]{output/TrashSimsFirm.png}}
+\only<2>{\includegraphics[height=2.8in]{output/TrashSimsFirm1.png}}
+\only<3>{\includegraphics[height=2.8in]{output/TrashSimsFirm2.png}}
+\only<4>{\includegraphics[height=2.8in]{output/TrashSimsFirm3.png}}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Results}
+
+\begin{itemize}
+	\item \$16.6 million annual harm to consumers
+	\item Average upstream prices decrease about 3\% (EDM)
+	\item Average downstream prices increase by 12.5\% (incomplete pass-through)
+\end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Comparing to Partial Models}
+
+\begin{itemize}
+	\item We compare our results from the full vertical model to two alternatives:
+		\begin{enumerate}
+			\item Downstream-Only: hold prices of upstream products fixed, simulate merger in downstream logit model
+			\item Upstream-Only: hold prices of downstream products fixed, simulate merger in upstream bargaining model
+		\end{enumerate}
+	\item Examine differences in prices and welfare
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Partial Model Results}
+\centering
+\only<1>{\includegraphics[height=2.8in]{output/TrashSimsCompareAll.png}}
+\only<2>{\includegraphics[height=2.8in]{output/TrashSimsCompareAll1.png}}
+\only<3>{\includegraphics[height=2.8in]{output/TrashSimsCompareAll2.png}}
+\only<4>{\includegraphics[height=2.8in]{output/TrashSimsCompareAll3.png}}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Partial Model Results}
+
+\begin{itemize}
+	\item Downstream-Only 
+		\begin{itemize}
+			\item \$10 million annual harm to consumers
+			\item Collection prices for Santek/WM-ADS, Santek/Regional too low (misses RRC)
+			\item Collection price for Santek/Republic somewhat too high (misses EDM)
+		\end{itemize}
+	\item Upstream-Only
+		\begin{itemize}
+			\item Average upstream prices increase by about 11\% 
+			\item Disposal prices for Santek/WM-ADS, Santek/Regional too high (overstates RRC)
+		\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Comparing to Counterfactual Mergers}
+
+\begin{itemize}
+	\item We compare welfare effects of Republic/Santek to three other merger options:
+		\begin{enumerate}
+			\item Santek/Waste Connections: two fully integrated firms that are not capacity constrained
+			\item Santek/WMADS: integrated firm with a collection-only firm
+			\item WMADS/Regional: horizontal merger between two collection-only firms
+		\end{enumerate}
+	\item Allows us to examine examples of different complex mergers
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Results for Other Mergers}
+
+\centering
+\includegraphics[height=2.8in]{output/trashinterestingmergerbar.png}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Results for Other Mergers}
+
+\centering
+\only<1>{\includegraphics[height=2.8in]{output/trashinterestingfirmbar.png}}
+\only<2>{\includegraphics[height=2.8in]{output/trashinterestingfirmbar1.png}}
+\only<3>{\includegraphics[height=2.8in]{output/trashinterestingfirmbar2.png}}
+\only<4>{\includegraphics[height=2.8in]{output/trashinterestingfirmbar3.png}}
+\only<5>{\includegraphics[height=2.8in]{output/trashinterestingfirmbar4.png}}
+\only<6>{\includegraphics[height=2.8in]{output/trashinterestingfirmbar5.png}}
+\only<7>{\includegraphics[height=2.8in]{output/trashinterestingfirmbar6.png}}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Comparing to Mergers of Counterfactual Firms}
+
+\begin{itemize}
+	\item Suppose we split the upstream and downstream components of Republic and Santek into independent entities
+	\item Simulate a new set of counterfactual mergers:
+		\begin{enumerate}
+			\item Non-complex: pure downstream horizontal, pure upstream horizontal, pure vertical
+			\item Complex with one merging firm being integrated: integrated Santek with Republic collection, integrated Santek with Republic disposal
+		\end{enumerate}
+	\item Allows us to study complex mergers that involve the most popular products (Republic-Republic and Santek-Santek)
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Results for Other Republic/Santek Mergers}
+
+\centering
+\only<1>{\includegraphics[height=2.5in]{output/trashinterestingsantrep.png}}
+\only<2>{\includegraphics[height=2.5in]{output/trashinterestingsantrep1.png}}
+\only<3>{\includegraphics[height=2.5in]{output/trashinterestingsantrep2.png}}
+\only<4>{\includegraphics[height=2.5in]{output/trashinterestingsantrep3.png}}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Results for Counterfactual Mergers}
+
+\begin{itemize}
+	\item Republic/Santek as proposed appears to have been one of the most harmful possiblities, due to the popularity of the Republic-Republic and Santek-Santek products
+	\item Any gains from EDM are outweighed by RRC and loss of horizontal competition.  
+		\begin{itemize}
+			\item Despite EDM decreases in upstream prices of over 60\%
+			\item Pure vertical merger between Santek disposal and Republic collection is the exception
+		\end{itemize}
+	\item The complex options tend to result in more consumer harm
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Part III: Conclusion
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+	\frametitle{Outline}
+	\small
+	
+	\begin{enumerate}
+		
+		\item Theory
+		\item Republic/Santek Application
+		\item \textbf{Conclusion}
+		
+	\end{enumerate}
+	
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Summary}
+
+\begin{itemize}
+\item We study the impacts of additional vertical integration on the welfare effects of mergers 
+\item Model shows the effects of EDM and RRC in Republic/Santek
+	\begin{itemize}
+		\item Partial model can understate or overstate effects
+		\item Despite substantial input price decreases from EDM, hard to find instances where consumers gain on net
+	\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+	
+\begin{center} Thank You!  \end{center} 	
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Sensitivity Analysis}
+
+We consider the way our results change in three sensitivity exercises
+\begin{enumerate}
+	\item Extent of substitution outside the market: vary share of outside good/market elasticity
+	\item Assumed demand substitution: switch to nested logit and vary nesting parameter
+		\begin{itemize}
+			\item Option 1: nest products by integrated vs. not
+			\item Option 2: nest products by disposal landfill provider
+		\end{itemize}
+	\item Bargaining power: vary $\lambda$
+		\begin{itemize}
+			\item Baseline calibration results in $\lambda_{Santek}=1$ and $\lambda_{WasteConn}=0.73$, so retailers have substantial advantage 
+		\end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Consumer Harm and Outside Good Share}
+
+\centering
+\includegraphics[height=2.8in]{output/trashelast.png}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Consumer Harm and Nested Logit}
+
+\centering
+\includegraphics[height=2.8in]{output/trashnest.png}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Consumer Harm and Bargaining Power}
+
+\centering
+\includegraphics[height=2.8in]{output/trashbarg.png}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Sensitivity Analysis Results}
+
+\begin{enumerate}
+	\item Consumer harm falls as substitution outside market increases.  Harm still above 5\% when 	market is unit elastic.
+	\item Consumer harm rises as preferences for integrated products increases, falls as preferences for landfills increases.  Harm still above 5\% when landfill nesting parameter is as high as 0.6.
+	\item Consumer harm falls as retailer bargaining power decreases.  Harm similar to baseline when bargaining power is as low as 0.4.  
+\end{enumerate}
+
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
