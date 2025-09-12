@@ -1,6 +1,6 @@
 
 ## load classes and methods from bargaining_calibrate
-source("../bargaining_calibrate/code/MonteCarlo.R")
+source("~m1cst00/Projects/bargaining_calibrate/code/MonteCarlo.R")
 
 
 

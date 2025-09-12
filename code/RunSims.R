@@ -31,34 +31,34 @@ clusterEvalQ(cl,{
 })
 
 
-landfill_hhi <- c(424,	2339,	3372,	4360,	5052,	5563,	6640,	7603,	8537,	9418,	9999)
-names(landfill_hhi) <- seq(0,100,10)
-landfill_eff <- ceiling(round(1e4/landfill_hhi,2))
-
-landfill_eff["0"]=4
-landfill_eff <- table(landfill_eff)
-landfill_eff <-as.data.frame(landfill_eff)
-
-landfill_eff <- rename(landfill_eff,up=landfill_eff) %>% mutate(up=as.integer(up))
+# landfill_hhi <- c(424,	2339,	3372,	4360,	5052,	5563,	6640,	7603,	8537,	9418,	9999)
+# names(landfill_hhi) <- seq(0,100,10)
+# landfill_eff <- ceiling(round(1e4/landfill_hhi,2))
+#
+# landfill_eff["0"]=4
+# landfill_eff <- table(landfill_eff)
+# landfill_eff <-as.data.frame(landfill_eff)
+#
+# landfill_eff <- rename(landfill_eff,up=landfill_eff) %>% mutate(up=as.integer(up))
 
 samples <- 1e2 #1e3
-ndfirms <- 2:5
+ndfirms <- seq(1,10,1)
 nufirms <- ndfirms
-nvfirms <- 0:4
+nvfirms <- unique(c(0,ndfirms-1))
 nestParm <- c(0)
 type=c("1st")
 merger=c("up","down", "vertical","both")
 bargparm <- seq(.1,.9,.1)
-assym <- c("none","diag1","diag0"
+assym <- c("none"#,"diag1","diag0"
            )
-mc=c("constant","linprod","lincons","conslin","consparty","linparty"#, "quadprod","linquad","quadlin"#,"linfirm"
+mc=c("constant"#,"linprod","lincons","conslin","consparty","linparty"#, "quadprod","linquad","quadlin","linfirm"
      )
 
 relleveragePre <-  (1-bargparm)/bargparm
 
 
 
-genMkts <- function(x,y,z,t,m,n, b,c,a, large=TRUE,preference=TRUE){
+genMkts <- function(x,y,z,t,m,n, b,c,a, large=FALSE){
 
 
 
@@ -171,14 +171,14 @@ thisres$hhidelta <- with(thisres, ifelse(merger == "up", hhidelta.up,
                                          ifelse(merger == "vertical", hhipost.vert - hhipre.down,hhidelta.down)))
 thisres$hhipre <- with(thisres, ifelse(merger != "up", hhipre.down,hhipre.up))
 thisres$hhipost <- with(thisres, ifelse(merger == "vertical", hhipost.vert, hhipre + hhidelta))
-thisres$hhipost.vert <-thisres$hhidelta.up <- thisres$hhidelta.down <- thisres$hhipre.up <- thisres$hhipre.down <- NULL
+#thisres$hhipost.vert <-thisres$hhidelta.up <- thisres$hhidelta.down <- thisres$hhipre.up <- thisres$hhipre.down <- NULL
 
 return(list(
   #mkt=thismkt,
   summary=thissum,
   res=unique(thisres)))}
 
-repMkts <- function(x,y,z,t,m,n,b,c,a,f,large=TRUE){replicate(samples*f, genMkts(x,y,z,t,m,n,b,c,a,large),simplify = "list")}
+repMkts <- function(x,y,z,t,m,n,b,c,a,large=TRUE){replicate(samples, genMkts(x,y,z,t,m,n,b,c,a,large),simplify = "list")}
 
 clusterExport(cl,varlist = setdiff(ls(),c("cl")))
 
@@ -198,7 +198,7 @@ res.nests_plan <- expand.grid(up=ndfirms,
                          mc=mc,
                          preset=assym)
 
-res.nests_plan <- inner_join(res.nests_plan,landfill_eff)
+#res.nests_plan <- inner_join(res.nests_plan,landfill_eff)
 #res.nests <- (filter(res.nests, down==1))
 res.nests_plan <- mutate(res.nests_plan, type=as.character(type),
                     merger=as.character(merger)) %>%
@@ -212,7 +212,7 @@ res.nests_plan <- mutate(res.nests_plan, type=as.character(type),
 mkts.nests <- with(res.nests_plan,
                    clusterMap(cl, repMkts,
                          up,down,vert, type,merger,nestParm,
-                         barg,mc,preset,Freq, SIMPLIFY = FALSE,
+                         barg,mc,preset, SIMPLIFY = FALSE,
                          .scheduling = "dynamic"
   )
 )
