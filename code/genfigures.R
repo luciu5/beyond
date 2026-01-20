@@ -20,11 +20,32 @@ res_mkt <- mutate(res_mkt,
                                           ))) %>%
   mutate(cvtrun=ifelse(cv/mktrev.pre*100 > 200,200,cv/mktrev.pre*100),
          cvtrun=ifelse(cv/mktrev.pre*100 < -200,-200,cvtrun),
-         hhipostcut=cut(hhipost,seq(1000,10000,200),right=FALSE,dig.lab=5),
+         hhipostcut=cut(hhipost,seq(1600,10000,200),right=FALSE,dig.lab=5),
          hhideltacut=cut(hhidelta,seq(0,2500,100),right=FALSE,dig.lab=5),
-         Cost=reorder(Cost,-cvtrun/mktrev.pre,median,na.rm=TRUE),
+         Cost=reorder(Cost,-cvtrun,median,na.rm=TRUE),
+         up=as.numeric(as.character(up)),
+         down=as.numeric(as.character(down)),
          vert=as.numeric(as.character(vert)),
+         up=factor(ifelse(merger=="both",up - 2,up)),
+         down=factor(ifelse(merger=="both",down - 2,down)),
          vert=factor(ifelse(merger=="both",vert - 2,vert)))
+
+
+
+with(res_mkt,prop.table(table(hhipost>1800 & hhidelta>100)))
+with(res_mkt,table(hhipostcut,hhideltacut))
+with(res_mkt,table(hhipostcut,hhd))
+with(res_mkt,table(hhd,hhideltacut))
+with(res_mkt,table(up,down,vert))
+
+
+res_mkt <- filter(res_mkt,hhipost>1800 & hhidelta>=100) %>% mutate(hhipostcut=droplevels(hhipostcut),
+                                                                   hhideltacut=droplevels(hhideltacut))
+
+
+
+
+
 
 seq_palette <- RColorBrewer::brewer.pal(name="YlGnBu",n=8)[c(4,6,8)]
 
@@ -42,16 +63,18 @@ boxfun <- function(x,probs=c(.05,.25,.5,.75,.95)){
 
 
 psummary_deltahhi.bw <- ggplot(
-  filter(res_mkt, hhidelta <=2500 & Cost=="Constant" &  nestParm == "0" &
+  filter(res_mkt, #hhidelta <=2500 &
+           Cost=="Constant" &  nestParm == "0" &
            !is.na(hhipostcut) &
-           !is.na(hhideltacut) &
-           (vert %in% c("0","1","4")))
-  ,aes(y=cvtrun,x=hhideltacut
+           #!is.na(hhideltacut) &
+           (vert %in% c("0","1","3")) ) %>% mutate(hhd=factor(hhd))
+  ,aes(y=cvtrun,x=hhd
        )
        ) +
     stat_summary(fun.data=boxfun, geom="boxplot",position="dodge")+
-    coord_cartesian(ylim=c(-15,20))+
-    scale_y_continuous(breaks=seq(-15,20,5))+ scale_x_discrete(labels=omit_label)+
+    #coord_cartesian(ylim=c(-20,25))+
+    #scale_y_continuous(breaks=seq(-20,25,5))+
+  scale_x_discrete(labels=omit_label)+
   scale_color_manual(values = seq_palette)+
   facet_grid(vert~Merger,scale="free_y") +
     theme_bw() + xlab("Change in HHI") + ylab("Consumer Harm (%)") + geom_hline(yintercept=0,color="goldenrod",linetype="dashed") +
@@ -62,10 +85,11 @@ psummary_deltahhi.bw <- ggplot(
 
 
 psummary_hhi.bw <- ggplot(
-  filter(res_mkt, hhipost <=5000 & Cost=="Constant" &  nestParm == "0" &
+  filter(res_mkt, #hhipost <=5000 &
+         Cost=="Constant" &  nestParm == "0" &
            !is.na(hhipostcut) &
            !is.na(hhideltacut) &
-           vert %in% c("0","1","4"))
+           vert %in% c("0","1","2"))
   ,aes(y=cvtrun,x=hhipostcut
        #,color=vert
        )) +
@@ -107,7 +131,39 @@ psummary_heat <- ggplot(filter(res_mkt,#abs(cv/mktrev.pre*100)<=80 &
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+delast <- ggplot(filter(
+  res_mkt,
+  mktElast >- 3 &
+                          vert==0),
+                 aes(x=mktElast))+geom_histogram(bins=100) +
+  facet_grid(~Merger,scale="free_y") +theme_bw()
 
+tapply(res_mkt$mktElast,res_mkt$Merger,quantile,probs=c(.01,0.25,0.5,0.75,.99))
+
+pfreq <- ggplot( res_mkt %>% filter(hhidelta < 1e3 & hhipost<1e4),
+                 aes(x=hhidelta,y=hhipost)) +
+facet_grid(~Merger,scale="free_x") + geom_point(shape = ".") +geom_hline(yintercept=1800,color="goldenrod")+
+  geom_vline(xintercept = 100,color="goldenrod") +theme_bw()
+
+pfreq_heat <- ggplot( res_mkt %>%
+                          group_by(Merger,hhipostcut, hhideltacut) %>%
+                          summarise(freq = n(), .groups = "drop"),
+                        aes(x = hhideltacut, y = hhipostcut, fill = freq)) +
+  scale_x_discrete(labels=omit_label)+
+  scale_y_discrete(labels=omit_label)+
+  facet_grid(~Merger,scale="free_y") +
+  geom_tile(color = "grey80") +
+  scale_fill_gradient(
+    low = "white",  high = "red",
+    name = "Frequency"
+  ) +
+  labs(
+    x = "HHI Change",
+    y = "Post-merger HH",
+    title = "Median Consumer Harm by HHI Change, Post-merger HHI"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
 #
@@ -202,7 +258,11 @@ pprofits_barg <- pprofits_barg + geom_segment(
 
 
 
-pbargincumbent.bw <- ggplot(res_mkt,
+pbargincumbent.bw <- ggplot(res_mkt %>%
+                              filter(
+                              !is.na(hhipostcut) &
+                              !is.na(hhideltacut) &
+                              vert %in% c("0","1","2")),
                             aes(y=cvtrun,
                                 x=factor(barg,labels=MASS::fractions(relleverage)),color=vert)) +
   #geom_boxplot(outlier.alpha = 0.1) +
@@ -250,8 +310,13 @@ png("output/surplussum.png",width = 10, height = 7, units = "in", res=300)
 print(psummary.bw)
 dev.off()
 
-png("output/CVvertincumbBW.png",width = 10, height = 7, units = "in", res=300)
-print(pvertincumb.bw)
+png("output/hhidist.png",width = 13, height = 13, units = "in", res=300)
+print(pfreq)
+dev.off()
+
+
+png("output/CVbargincumbentBW.png",width = 10, height = 7, units = "in", res=300)
+print(pbargincumbent.bw)
 dev.off()
 
 png("output/pprofits.png",width = 7, height = 7, units = "in", res=300)

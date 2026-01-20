@@ -30,7 +30,7 @@ simpath <- "~/Projects/bargaining_convex/data/batch"
 set.seed(3141*100 + as.numeric(thisrun$syseed))
 
 
-genMkts <- function(x,y,z,t,m,n, b,c,a, large=FALSE){
+genMkts <- function(x,y,z,h,t,m,n, b,c,a, large=FALSE){
 
 
 
@@ -40,6 +40,7 @@ genMkts <- function(x,y,z,t,m,n, b,c,a, large=FALSE){
                         nfirms.down = y,
                         nfirms.up = x,
                         nfirms.vert = as.numeric(as.character(z)),
+                        hhidelta=h,
                         outMargin = runif(1,2,20),
                         #outMargin=5,
                         nestParm = n,
@@ -97,6 +98,7 @@ genMkts <- function(x,y,z,t,m,n, b,c,a, large=FALSE){
     down=y,
     up=x,
     vert=z,
+    hhd=h,
     nestParm=n,
     merger=m,
     barg=b,
@@ -150,11 +152,11 @@ genMkts <- function(x,y,z,t,m,n, b,c,a, large=FALSE){
     summary=thissum,
     res=unique(thisres)))}
 
-repMkts <- function(x,y,z,t,m,n,b,c,a,large=FALSE){replicate(thisrun$samples, genMkts(x,y,z,t,m,n,b,c,a,large),simplify = "list")}
+repMkts <- function(x,y,z,h,t,m,n,b,c,a,large=FALSE){replicate(thisrun$samples, genMkts(x,y,z,h,t,m,n,b,c,a,large),simplify = "list")}
 
 
 
-results <-repMkts(        thisrun$up,thisrun$down,thisrun$vert, thisrun$type,thisrun$merger,thisrun$nestParm,
+results <-repMkts(        thisrun$up,thisrun$down,thisrun$vert, thisrun$hhidelta,thisrun$type,thisrun$merger,thisrun$nestParm,
                              thisrun$barg,thisrun$mc,thisrun$preset
                    )
 
@@ -181,6 +183,7 @@ resMkt <- mutate(resMkt,
                     #vert=ifelse(merger=="vertical",vert+1,vert),
                     vert=ifelse(merger=="both",vert+2,vert),
                     vert=factor(vert),nestParm=factor(nestParm),
+                    hhd=factor(hhd),
                     preset=factor(preset),
                     relleveragePre = (1- barg)/barg,barg=factor(barg),
                     type= ifelse(type == "1st", "Bertrand","2nd"),type=factor(type, levels=c("Bertrand","2nd")),

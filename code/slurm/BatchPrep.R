@@ -23,10 +23,10 @@ file.remove(file.path(batchdir, files_to_delete))
 
 
 samples <- 5e2 #1e3
-ndfirms <- seq(1,19,3)
+ndfirms <- seq(1,15,2)
 nufirms <- ndfirms
 #nvfirms <- unique(c(0,ndfirms-1))
-nvfirms <- c(0,1,4)
+nvfirms <- c(0,1,2,3)
 nestParm <- c(0)
 type=c("1st")
 merger=c("up","down", "vertical","both")
@@ -54,7 +54,8 @@ res.nests_plan <- mutate(res.nests_plan, type=as.character(type),
   filter(!(merger %in% c("up") & (up ==1))) %>%
   filter(!(merger %in% c("down") & (down ==1))) %>%
   filter(vert < up & vert<down) %>%
-  filter(!(merger %in% c("vertical") & (down == 1 & up ==1))) %>%
+  filter(7 >= up | 7 >= down) %>%
+  filter(!((down == 1 & up ==1))) %>%
   filter(!(preset %in% c("diag1","diag0") & mc !="constant"))
 
 res.nests_plan <- mutate(res.nests_plan,syseed=replicate(n(),gen_seed()))

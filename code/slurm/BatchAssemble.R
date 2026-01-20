@@ -15,7 +15,7 @@ mktlevel <- list.files(path=batchdir ,pattern="ResMkt.*\\d.csv",full.names = TRU
 
 mkts_flat <- lapply(mktlevel,fread,verbose=FALSE)
 names(mkts_flat) <- gsub("./data/batch/|.csv","",mktlevel)
-res_mkt <- bind_rows(mkts_flat,.id="file")
+res_mkt <- rbindlist(mkts_flat,idcol="file")
 
 
 
@@ -48,9 +48,9 @@ res_mkt <- filter(as.data.frame(res_mkt),hhipre>0 & as.logical(isMarket)
 firmlevel <- list.files(path=batchdir ,pattern="ResFirm.*\\d.csv",full.names = TRUE)
 
 
-firms_flat <- lapply(firmlevel,read_csv,progress=FALSE,show_col_types = FALSE)
+firms_flat <- lapply(firmlevel,fread,verbose=FALSE)
 names(firms_flat) <- gsub("./data/batch/|.csv","",firmlevel)
-res_firms <- bind_rows(firms_flat,.id="file")
+res_firms <- rbindlist(firms_flat,idcol="file")
 
 
 save(res_mkt,file="./data/resultsMkt.RData")

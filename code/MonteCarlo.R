@@ -2,6 +2,38 @@
 ## load classes and methods from bargaining_calibrate
 source("~m1cst00/Projects/bargaining_calibrate/code/MonteCarlo.R")
 
+# Function to sample from Dirichlet with minimum value for ith element
+rdirichlet_constrained <- function(alpha, cons,firmid,partyInd=1:2) {
+
+  firmid=as.numeric(factor(firmid))
+  alphafirm=as.numeric(tapply(alpha,firmid,sum))
+  # Parameters
+  alpha_1 <- alphafirm[partyInd[1]]
+  alpha_rest <- alphafirm[-partyInd]
+
+  # Sample first element from truncated Beta
+  # Using inverse CDF method for efficiency
+  cdf_t <- pbeta(cons, alpha_1, sum(alpha[-partyInd[1]]))
+  if (cdf_t >= 1) {
+    stop("Minimum threshold is too high given the alpha parameters")
+  }
+  u <- runif(1, cdf_t, 1)
+  sFirm_1 <- qbeta(u, alpha_1, sum(alpha[-partyInd[1]]))
+  sFirm_2 <- cons/sFirm_1
+
+  # Sample remaining elements proportionally from Dirichlet
+  sFirm_rest <- as.vector(rdirichlet(alpha_rest))
+  sFirm_rest <- (1 - sFirm_1 -sFirm_2) * sFirm_rest
+  sFirm <- rep(0,length(alphafirm))
+  sFirm[partyInd] <- c(sFirm_1,sFirm_2)
+  sFirm[-partyInd] <- sFirm_rest
+
+  sProd <- as.vector(rdirichlet(alpha))
+  sProd <- sProd/as.vector(tapply(sProd,firmid,sum)[firmid])
+  sProd <- sProd*sFirm[firmid]
+  return(sProd)
+}
+
 
 
 
@@ -14,6 +46,7 @@ market<-function(nfirms.down=3, # # of downstream firms
                  M=1, # market size
                  nfirms.up=nfirms.down, # # of upstream firms
                  nprods.up=nprods.down, # # of upstream products
+                 hhidelta=NULL, # force a merging parties' share to conform to specified HHI delta
                  nfirms.vert=0, # number of integrated firms pre-merger
                  bargparm=runif(nfirms.down*nfirms.up, .25,.75), # bargaining parameters for each upstream/downstream firm pair
                  bargpreset=c("none","party","rival","diag1","diag0"), # fix some bargaining parameters
@@ -45,6 +78,8 @@ market<-function(nfirms.down=3, # # of downstream firms
   bargpreset <- match.arg(bargpreset)
   isNestedTogether <- match.arg(isNestedTogether)
 
+
+  if(!is.null(hhidelta) && largeMerger){stop("non-null hhidelta is not compatible with largeMerger")}
 
   if(any(is.na(nestParm) | nestParm >=1 | nestParm<0)){stop("nestParm must be >=0 and <1")}
   if(length(nestParm) > 2){stop("nestParm must be length less than or equal to 2")}
@@ -179,7 +214,24 @@ if(missing(nests) && max(nestParm,na.rm=TRUE)>0){
 
     }
 
-  sharesDown  <- as.vector(rdirichlet(shareParm)) # generate inside shares
+  if(is.null(hhidelta) || ownerPost %in% "vertical"){
+       sharesDown  <- as.vector(rdirichlet(shareParm)) # generate inside shares
+  }
+
+  else{
+       thisowner <- switch(ownerPost,
+                         up=ids$up.firm,
+                        down=ids$down.firm,
+                        vertical=ids$down.firm,
+                        both=ids$down.firm
+       )
+
+    sharesDown <- rdirichlet_constrained(alpha = shareParm,firmid = thisowner, cons = hhidelta/(2*100^2))
+
+
+
+  }
+
 
   if(largeMerger){
     sharesDown <- sort(sharesDown, decreasing = TRUE)
@@ -201,6 +253,35 @@ if(missing(nests) && max(nestParm,na.rm=TRUE)>0){
 
     }  #assign first two upstream products largest share
   }
+
+  # if(!is.null(hhidelta)){
+  #
+  #   share2Ind=switch(ownerPost,
+  #                 up=ids$up.firm == 2,
+  #                 down=ids$down.firm == 2,
+  #                 vertical=ids$down.firm == 1,
+  #                 both=ids$down.firm == 2
+  #   )
+  #   share1Ind=switch(ownerPost,
+  #                    up=ids$up.firm == 1,
+  #                    down=ids$down.firm == 1,
+  #                    vertical=ids$up.firm == 1,
+  #                    both=ids$down.firm == 1
+  #   )
+  #
+  #   ## find the firm 1 share that rationalizes hhidelta
+  #   share1Tot <- hhidelta/(2*sum(sharesDown[share2Ind])*100^2)
+  #
+  #
+  #
+  #
+  #   #use existing firm1 shares as weights to distribute across 1's products
+  #   share1new=sharesDown[share1Ind]/sum(sharesDown[share1Ind]) * share1Tot
+  #
+  #   sharesDown[share1Ind] <- share1new
+  #   rewgt <- 1 + (1-sum(sharesDown))/sum(sharesDown[!(share1Ind|share2Ind)])
+  #   sharesDown[!(share1Ind|share2Ind)] <- rewgt * sharesDown[!(share1Ind|share2Ind)]
+  # }
   sharesDown <- sharesDown * (1-shareOutDown)
 
   if(nlevels(ids$up.firm)>1){
@@ -446,6 +527,7 @@ if(missing(nests) && max(nestParm,na.rm=TRUE)>0){
             down=list(nfirms=nfirms.down,nproducts=nprods.down,shares=sharesDown,
                       shareOut=shareOutDown,M=M,outMargin=outMargin,ids=ids,isParty=isParty.down,mcshare=mcshare.down,
                       ownerPre=ownerPre.down,ownerPost=ownerPost.down, nests=nests,nestParm=nestParm, nestMat=nestMat),
+            hhidelta=hhidelta,
             vertical = vertical)
 
 
@@ -682,6 +764,7 @@ simMarket.1st <- function(mkt,cost_type=c("constant","linprod","quadprod","linqu
   mkt<-list(up=c(mkt$up,list(price=upPrices,margin=1-upMC/upPrices,mc=upMC, mcParm = mcParm$up)),
             down=c(mkt$down,list(alpha=alpha,price=downPrices,
                                  margin=1-(upPrices + downMC)/downPrices, mc=downMC,mcParm =mcParm$down, meanval=meanvalDown)),
+            hhidelta=mkt$hhidelta,
             vertical = mkt$vertical
   )
 

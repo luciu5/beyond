@@ -1,44 +1,48 @@
 
+> print(kable(sumtable,format="latex",digits=0) %>% collapse_rows(columns = 1:3, latex_hline = "major", valign = "middle"))
+
 \begin{tabular}{l|l|l|l|l|l|l|l}
 \hline
 Variable & Merger & Markets & Min & 25th & 50th & 75th & Max\\
 \hline
-\# Wholesalers &  &  & 2 & 3 & 4 & 5 & 7\\
+\# Wholesalers &  &  & 2 & 4 & 5 & 6 & 8\\
 
-\# Retailers &  &  & 2 & 3 & 4 & 5 & 7\\
+\# Retailers &  &  & 2 & 4 & 5 & 6 & 8\\
 
-\# Integrated &  &  & 0 & 1 & 1 & 3 & 6\\
+\# Integrated &  &  & 0 & 1 & 2 & 3 & 5\\
 
-Bargaining Power &  &  & 0.1 & 0.3 & 0.6 & 0.8 & 0.9\\
+Bargaining Power &  &  & 0.1 & 0.3 & 0.5 & 0.7 & 0.9\\
 
-Avg. Upstream Price (\$) &  &  & 0.59 & 2.6 & 5.8 & 14 & 305\\
+Avg. Upstream Price (\$) &  &  & 0.02 & 5.3 & 13 & 32 & 5,519\\
 
-Avg. Downstream Price (\$) &  &  & 6.4 & 11 & 15 & 24 & 314\\
+Avg. Downstream Price (\$) &  &  & 2.8 & 19 & 33 & 57 & 6,583\\
 
-Market Elasticity & \multirow{-7}{*}{\raggedright\arraybackslash All} & \multirow{-7}{*}{\raggedright\arraybackslash 1,560,433} & -11 & -0.85 & -0.54 & -0.39 & -0.23\\
+Market Elasticity & \multirow{-7}{*}{\raggedright\arraybackslash All} & \multirow{-7}{*}{\raggedright\arraybackslash 3,321,651} & -70 & -0.94 & -0.56 & -0.39 & -0.24\\
 \cline{1-8}
- & Vertical & 411,311 & 2,134 & 3,646 & 4,375 & 5,552 & 9,961\\
+ & Vertical & 906,806 & 1,667 & 2,218 & 2,794 & 3,781 & 9,914\\
 
- & Upstream & 371,612 & 2,011 & 2,407 & 2,877 & 3,751 & 9,528\\
+ & Upstream & 589,938 & 1,669 & 2,264 & 2,798 & 3,845 & 9,662\\
 
- & Downstream & 398,747 & 2,011 & 2,568 & 3,130 & 4,135 & 9,744\\
+ & Downstream & 761,591 & 1,669 & 2,271 & 2,820 & 3,901 & 9,599\\
 
-\multirow{-4}{*}{\raggedright\arraybackslash Pre-Merger HHI} & Integrated & 378,763 & 2,104 & 3,495 & 4,061 & 4,939 & 9,870\\
+\multirow{-4}{*}[1.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash Pre-Merger HHI} & Integrated & 1,063,316 & 1,669 & 2,320 & 2,966 & 4,399 & 9,897\\
 \cline{1-8}
- & Vertical & 411,311 & 3,112 & 5,122 & 6,047 & 7,249 & 10,000\\
+ & Vertical & 906,806 & 1,668 & 2,618 & 3,391 & 4,665 & 10,000\\
 
- & Upstream & 371,612 & 2,936 & 4,031 & 4,963 & 6,712 & 10,000\\
+ & Upstream & 589,938 & 2,001 & 2,931 & 3,562 & 5,000 & 10,000\\
 
- & Downstream & 398,747 & 2,945 & 4,130 & 5,150 & 7,247 & 10,000\\
+ & Downstream & 761,591 & 2,002 & 2,963 & 3,594 & 5,002 & 10,000\\
 
-\multirow{-4}{*}{\raggedright\arraybackslash Post-Merger HHI} & Integrated & 378,763 & 3,283 & 6,091 & 6,998 & 8,207 & 10,000\\
+\multirow{-4}{*}[1.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash Post-Merger HHI} & Integrated & 1,063,316 & 2,001 & 3,069 & 3,747 & 5,147 & 10,000\\
 \cline{1-8}
- & Vertical & 411,311 & 27 & 1,067 & 1,329 & 1,811 & 4,384\\
+ & Vertical & 906,806 & -4,832 & 26 & 296 & 807 & 6,865\\
 
- & Upstream & 371,612 & 472 & 1,574 & 2,068 & 2,933 & 5,000\\
+ & Upstream & 589,938 & 100 & 400 & 700 & 1,000 & 1,300\\
 
- & Downstream & 398,747 & 89 & 1,480 & 2,127 & 3,086 & 5,000\\
+ & Downstream & 761,591 & 100 & 400 & 700 & 1,000 & 1,300\\
 
-\multirow{-4}{*}{\raggedright\arraybackslash Delta HHI} & Integrated & 378,763 & 130 & 2,472 & 2,803 & 3,183 & 4,944\\
+\multirow{-4}{*}[1.5\dimexpr\aboverulesep+\belowrulesep+\cmidrulewidth]{\raggedright\arraybackslash Delta HHI} & Integrated & 1,063,316 & 100 & 450 & 800 & 1,150 & 5,000\\
 \hline
 \end{tabular}
+
+> sink()
